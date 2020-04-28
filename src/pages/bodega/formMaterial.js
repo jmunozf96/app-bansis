@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {Alert, Button, ButtonGroup, Card, Col, Container, Row} from "react-bootstrap";
-import {API_LINK, API_XASS_PRIMO, _saveApi, _configStoreApi} from "../../utils/constants";
+import {API_LINK, API_XASS_PRIMO, _saveApi, _configStoreApi, API_XASS_SOFCA} from "../../utils/constants";
 
 import {useDispatch, useSelector} from "react-redux";
 import {progressActions} from "../../actions/progressActions";
@@ -20,15 +20,19 @@ import WarningIcon from '@material-ui/icons/Warning';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 
 import qs from 'qs';
-import {Link} from "react-router-dom";
+import {Link, useHistory} from "react-router-dom";
 
 export default function FormMaterial() {
+    const [haciendaOrigen, setHaciendaOrigen] = useState('');
+    const [openDialogHaciendaOrigenDatos, setOpenDialogHaciendaOrigenDatos] = useState(true);
+    const [dataApiHaciendaOrigen, setDataApiHaciendaOrigen] = useState(false);
+
     const [search, setSearch] = useState('');
     const [cellar, setCellar] = useState(0);
     const [group, setGroup] = useState(0);
 
-    const api_busquedaPrincipal = `${API_XASS_PRIMO}/productos`;
-    const [api_url, setApi_Url] = useState(api_busquedaPrincipal);
+    const [api_busquedaPrincipal, setApi_busquedaPrincipal] = useState('');
+    const [api_url, setApi_Url] = useState('');
 
     const [grupoPadre, setGrupoPadre] = useState(null);
     const [grupo, setGrupo] = useState(null);
@@ -52,14 +56,30 @@ export default function FormMaterial() {
         message: ''
     });
 
+    const history = useHistory();
     const dispatch = useDispatch();
     const progressbarStatus = (state) => dispatch(progressActions(state));
     const authentication = useSelector(state => state.auth._token);
 
+    useEffect(() => {
+        if (dataApiHaciendaOrigen) {
+            if (haciendaOrigen[0].id === 1) {
+                //En caso de ser primobanano
+                setApi_busquedaPrincipal(`${API_XASS_PRIMO}`);
+                setApi_Url(`${API_XASS_PRIMO}/productos`);
+            } else {
+                //En caso de ser Sofca
+                setApi_busquedaPrincipal(`${API_XASS_SOFCA}`);
+                setApi_Url(`${API_XASS_SOFCA}/productos`);
+            }
+            setDataApiHaciendaOrigen(false);
+        }
+    }, [dataApiHaciendaOrigen, api_busquedaPrincipal, haciendaOrigen, setApi_Url]);
+
     //Cada que se cambie un valor en los select se actualiza la api de consulta para el articulo
     useEffect(() => {
         if (changeSelect || search !== '') {
-            setApi_Url(`${api_busquedaPrincipal}?search=${search}&cellar=${cellar}&group=${group}&size=5`);
+            setApi_Url(`${api_busquedaPrincipal}/productos?search=${search}&cellar=${cellar}&group=${group}&size=5`);
             setChangeSelect(false);
         }
     }, [api_busquedaPrincipal, changeSelect, search, cellar, group]);
@@ -74,6 +94,41 @@ export default function FormMaterial() {
             setNewArticulo(null);
         }
     }, [setArrayArticulosNew, newArticulo, setNewArticulo, arrayArticulosNew]);
+
+    const cancelOrigenDatos = () => {
+        if (openDialogHaciendaOrigenDatos) {
+            setOpenDialogHaciendaOrigenDatos(true);
+        }
+        history.goBack();
+    };
+
+    const onCloseDialogHaciendaOrigenDatos = () => {
+        if (haciendaOrigen === '') {
+            setNotificacion({open: true, message: 'Debe seleccionar un origen de datos'});
+        } else {
+            setOpenDialogHaciendaOrigenDatos(false);
+            setDataApiHaciendaOrigen(true);
+        }
+    };
+
+    if (openDialogHaciendaOrigenDatos || haciendaOrigen === '') {
+        return (
+            <>
+                <SnackbarComponent
+                    notificacion={notificacion}
+                    setNotificacion={setNotificacion}
+                />
+                <ConfirmationDialog
+                    title="Seleccione origen de Datos"
+                    api={`${API_LINK}/bansis-app/custom.php/haciendas/option`}
+                    setValue={setHaciendaOrigen}
+                    open={openDialogHaciendaOrigenDatos}
+                    onClose={onCloseDialogHaciendaOrigenDatos}
+                    cancelDialog={cancelOrigenDatos}
+                />
+            </>
+        );
+    }
 
     const onChangeValueArticulo = (e, value) => {
         if (value) {
@@ -105,11 +160,18 @@ export default function FormMaterial() {
     };
 
     const onCloseDialogBodega = () => {
-        if (articuloBodega) {
-            setOpenDialogBodega(false);
-            setOpenDialogGrupo(true);
+        if (articuloBodega[0].hacienda.id === haciendaOrigen[0].id) {
+            if (articuloBodega) {
+                setOpenDialogBodega(false);
+                setOpenDialogGrupo(true);
+            } else {
+                setNotificacion({open: true, message: "Seleccione una opcion para continuar."});
+            }
         } else {
-            setNotificacion({open: true, message: "Seleccione una opcion para continuar."});
+            setNotificacion({
+                open: true,
+                message: "La bodega pertenece a una hacienda diferente a la del origen de datos.."
+            });
         }
     };
 
@@ -241,6 +303,7 @@ export default function FormMaterial() {
                                         setGrupo={setGrupo} setGroup={setGroup} setArticulo={setArticulo}
                                         setApi_GrupoChildren={setApi_GrupoChildren}
                                         setDisabledSelectGrupoChildren={setDisabledSelectGrupoChildren}
+                                        api_busquedaPrincipal={api_busquedaPrincipal}
                                     />
                                 </Col>
                                 <Col className="mb-3" md={3}>
@@ -258,6 +321,7 @@ export default function FormMaterial() {
                                         setBodega={setBodega}
                                         setCellar={setCellar}
                                         setChangeSelect={setChangeSelect}
+                                        api_busquedaPrincipal={api_busquedaPrincipal}
                                     />
                                 </Col>
                             </Row>
@@ -349,8 +413,8 @@ export default function FormMaterial() {
 }
 
 function BodegaAutocomplete(props) {
-    const {setChangeSelect, bodega, setBodega, setCellar, setArticulo} = props;
-    const api_bodega = `${API_XASS_PRIMO}/bodegas`;
+    const {setChangeSelect, bodega, setBodega, setCellar, setArticulo, api_busquedaPrincipal} = props;
+    const api_bodega = `${api_busquedaPrincipal}/bodegas`;
 
     const onChangeValueBodega = (e, value) => {
         if (value) {
@@ -381,14 +445,15 @@ function GrupoPadre(props) {
     const {
         setChangeSelect, grupoPadre,
         setGrupoPadre, setGrupo, setGroup, setArticulo,
-        setApi_GrupoChildren, setDisabledSelectGrupoChildren
+        setApi_GrupoChildren, setDisabledSelectGrupoChildren,
+        api_busquedaPrincipal
     } = props;
-    const api_grupo = `${API_XASS_PRIMO}/grupo/padre`;
+    const api_grupo = `${api_busquedaPrincipal}/grupo/padre`;
 
     const onChangeValueGrupo = (e, value) => {
         if (value) {
             setGrupoPadre(value);
-            setApi_GrupoChildren(`${API_XASS_PRIMO}/grupo/hijo/${value.Codigo}`);
+            setApi_GrupoChildren(`${api_busquedaPrincipal}/grupo/hijo/${value.Codigo}`);
             setDisabledSelectGrupoChildren(false);
         } else {
             setApi_GrupoChildren('');

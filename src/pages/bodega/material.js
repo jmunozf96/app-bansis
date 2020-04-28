@@ -81,7 +81,6 @@ export default function Material() {
             </Backdrop>
         );
     }
-    ;
 
     const updateStockMaterial = (codigo) => {
         (async () => {
