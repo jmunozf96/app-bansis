@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import TableForm from "../../components/Table";
-import {_configStoreApi, API_LINK} from "../../utils/constants";
+import {API_LINK} from "../../utils/constants";
 import {Link} from "react-router-dom";
 import {Badge, Button, ButtonGroup, Col, Container, Row} from "react-bootstrap";
 import {Breadcrumbs, Typography, Backdrop, CircularProgress} from "@material-ui/core";
@@ -17,6 +17,7 @@ import moment from "moment";
 import 'moment/locale/es';
 import SnackbarComponent from "../../components/Snackbar/Snackbar";
 import AlertDialog from "../../components/AlertDialog/AlertDialog";
+import qs from "qs";
 
 export default function Material() {
     const [materialsList, setMaterialsList] = useState([]);
@@ -84,10 +85,11 @@ export default function Material() {
 
     const updateStockMaterial = (codigo) => {
         (async () => {
-            const url = `${API_LINK}/bansis-app/custom.php/materiales/updateStock/${codigo}`;
+            const url = `${API_LINK}/bansis-app/custom.php/materiales/updateStock`;
             const config = {
                 method: 'PUT',
                 url: url,
+                data: qs.stringify({cod_material: codigo}),
                 onDownloadProgress: () => progressbarStatus(true),
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

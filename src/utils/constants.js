@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const APP_TITLE = 'Bansis - WEB';
-export const API_LINK = 'http://bansis-app.test:8082/api';
+export const API_LINK = 'http://api-rest-bansis:8084/api';
 export const API_XASS_PRIMO = `${API_LINK}/bansis-app/XassInventario.php/primo`;
 export const API_XASS_SOFCA = `${API_LINK}/bansis-app/XassInventario.php/sofca`;
 
