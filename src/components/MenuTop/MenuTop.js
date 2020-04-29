@@ -61,6 +61,9 @@ export default function MenuTop() {
                                     <NavDropdown.Item as={Link} to="/bodega/grupo">Grupos</NavDropdown.Item>
                                     <NavDropdown.Item as={Link} to="/bodega/material">Materiales</NavDropdown.Item>
                                     <NavDropdown.Divider/>
+                                    <NavDropdown.Item disabled>Transaccion</NavDropdown.Item>
+                                    <NavDropdown.Item as={Link} to="/bodega/egreso-material">Egreso Bodega</NavDropdown.Item>
+                                    <NavDropdown.Divider/>
                                     <NavDropdown.Item>Separated link</NavDropdown.Item>
                                 </NavDropdown>
                             </Nav>
