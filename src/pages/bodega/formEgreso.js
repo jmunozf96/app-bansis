@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Card, Container} from "react-bootstrap";
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import moment from "moment";
@@ -17,6 +17,9 @@ export default function FormEgreso() {
         empleado: null
     });
 
+    const [detalleEgreso, setDetalleEgreso] = useState([]);
+    const [reload, setReload] = useState(false);
+
     return (
         <Container className="mt-3" fluid>
             <Card>
@@ -27,8 +30,16 @@ export default function FormEgreso() {
                     <EgresoCabecera
                         cabeceraEgreso={cabeceraEgreso}
                         setCabeceraEgreso={setCabeceraEgreso}
+                        detalleEgreso={detalleEgreso}
+                        setDetalleEgreso={setDetalleEgreso}
+                        setReload={setReload}
                     >
-                        <EgresoDetalle/>
+                        <EgresoDetalle
+                            reload={reload}
+                            setReload={setReload}
+                            detalleEgreso={detalleEgreso}
+                            setDetalleEgreso={setDetalleEgreso}
+                        />
                     </EgresoCabecera>
                 </Card.Body>
                 <Card.Footer>

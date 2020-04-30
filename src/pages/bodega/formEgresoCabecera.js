@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {Button, Card, Col, Form, FormGroup, Row} from "react-bootstrap";
-import {API_LINK} from "../../utils/constants";
+import {API_LINK, focuselement} from "../../utils/constants";
 import CustomSelect from "../../components/CustomSelect";
 import InputSearch from "../../components/InputSearch/InputSearch";
 import {FormHelperText} from "@material-ui/core";
@@ -10,7 +10,7 @@ import 'moment/locale/es';
 import {v4 as uuidv4} from 'uuid';
 
 export default function EgresoCabecera(props) {
-    const {cabeceraEgreso, setCabeceraEgreso, children} = props;
+    const {cabeceraEgreso, setCabeceraEgreso, detalleEgreso, setDetalleEgreso, setReload, children} = props;
     const [searchEmpleado, setSearchEmpleado] = useState('');
     const [searchMaterial, setSearchMaterial] = useState('');
 
@@ -25,6 +25,7 @@ export default function EgresoCabecera(props) {
 
     const [item, setItem] = useState(null);
     const [cantidad, setCantidad] = useState(0);
+    const [enabledCantidad, setEnabledCantidad] = useState(true);
 
     useEffect(() => {
         if (changeURL) {
@@ -49,12 +50,10 @@ export default function EgresoCabecera(props) {
                 setItem({
                     ...item,
                     cantidad: +e.target.value
-                })
+                });
             } else {
                 setCantidad(0);
             }
-        } else {
-            alert("Debe seleccionar un material");
         }
     };
 
@@ -65,49 +64,97 @@ export default function EgresoCabecera(props) {
         });
     };
 
+    const existsMaterial = (material) => {
+        if (material)
+            return detalleEgreso.filter((item) =>
+                material.id === item.id);
+
+        return [];
+    };
+
+    const editCantidadMaterial = (id, cantidad) => {
+        if (cantidad > 0) {
+            detalleEgreso.map((data) => {
+                if (data.id === id) {
+                    if (cantidad <= data.stock) {
+                        data.cantidad += cantidad;
+                        data.stock -= cantidad;
+                        return true;
+                    }
+                }
+
+                return false;
+            });
+        }
+    };
+
     const onChangeValueMaterialSearch = (e, value) => {
+        let material = null;
         if (value) {
-            const material = {
+            material = {
                 shortid: uuidv4(),
                 id: value.id,
                 descripcion: value.descripcion,
                 cantidad: 0,
                 stock: value.stock,
-                time: moment().format("DD/MM/YY H:m:s")
+                time: moment().format("DD/MM/YY")
             };
+
             setItem(material);
+            setEnabledCantidad(false);
+            focuselement('id-cantidad');
+        } else {
+            setEnabledCantidad(true);
         }
     };
 
+    const onSubmitInputItemAdd = (e) => {
+        e.preventDefault();
+        const {bodega, grupo, empleado} = cabeceraEgreso;
+
+        if (!empleado) {
+            alert("Debe seleccionar un empleado");
+            return;
+        }
+
+        if (bodega === "") {
+            alert("Debe seleccionar una bodega");
+            return;
+        }
+
+        if (grupo === "") {
+            alert("Debe seleccionar un grupo");
+            return;
+        }
+
+        if (item.stock < item.cantidad) {
+            alert("Excede el stock");
+            return;
+        }
+
+        if (existsMaterial(item).length > 0) {
+            editCantidadMaterial(item.id, item.cantidad);
+            setReload(true);
+        } else {
+            item.stock = item.stock - item.cantidad;
+            setDetalleEgreso([
+                ...detalleEgreso,
+                item
+            ]);
+        }
+
+        setItem(null);
+        setCantidad(0);
+        document.getElementById('id-cantidad').value = 0;
+        setEnabledCantidad(true);
+    };
+
     return (
-        <Form onChange={onChange}>
-            <Row>
-                <Col md={12}>
-                    <Row>
-                        <Col md={4}>
-                            <FormGroup>
-                                <label>Fecha</label>
-                                <input className="form-control bg-white" name="fecha"
-                                       defaultValue={cabeceraEgreso.fecha}
-                                       readOnly/>
-                            </FormGroup>
-                        </Col>
-                        <Col md={8}>
-                            <FormGroup>
-                                <label>Hacienda</label>
-                                <CustomSelect
-                                    name="hacienda"
-                                    defaultValue={cabeceraEgreso.hacienda}
-                                    placeholder="SELECCIONE UNA HACIENDA..."
-                                    api_url={api_haciendas}
-                                />
-                            </FormGroup>
-                        </Col>
-                    </Row>
-                </Col>
-                <Col md={4}>
-                    <Row>
-                        <Col md={12}>
+        <Row>
+            <Col md={4}>
+                <Row>
+                    <Col md={12}>
+                        <Form onChange={onChange}>
                             <Card>
                                 <Card.Header className="pb-3 pt-1 pl-3">
                                     <Row>
@@ -143,11 +190,13 @@ export default function EgresoCabecera(props) {
                                     </Row>
                                 </Card.Body>
                             </Card>
-                            <hr/>
-                        </Col>
-                        <Col md={12}>
-                            <Card>
-                                <Card.Header className="pb-3 pt-1 pl-3">
+                        </Form>
+                        <hr/>
+                    </Col>
+                    <Col md={12}>
+                        <Card>
+                            <Card.Header className="pb-3 pt-1 pl-3">
+                                <Form onChange={onChange}>
                                     <Row>
                                         <Col md={6} className="pb-0">
                                             <FormHelperText id="outlined-weight-helper-text">
@@ -172,12 +221,14 @@ export default function EgresoCabecera(props) {
                                             />
                                         </Col>
                                     </Row>
-                                </Card.Header>
-                                <Card.Body className="p-3">
+                                </Form>
+                            </Card.Header>
+                            <Card.Body className="p-3">
+                                <form id="id-input-add" onSubmit={onSubmitInputItemAdd}>
                                     <Row className="pb-0 mb-0">
                                         <Col md={12}>
                                             <InputSearch
-                                                id="asynchronous-empleado"
+                                                id="asynchronous-material"
                                                 label="Listado de Materiales"
                                                 api_url={api_materiales}
                                                 setSearch={setSearchMaterial}
@@ -194,31 +245,57 @@ export default function EgresoCabecera(props) {
                                                 <input
                                                     className="form-control"
                                                     type="number"
+                                                    id="id-cantidad"
+                                                    name="cantidad"
                                                     defaultValue={cantidad}
                                                     onChange={onChangeCantidadItem}
                                                     onFocus={(e) => e.target.select()}
+                                                    disabled={enabledCantidad}
                                                 />
                                                 <FormHelperText id="outlined-weight-helper-text">Ingrese la
                                                     cantidad....</FormHelperText>
                                             </FormGroup>
                                         </Col>
                                         <Col className="pl-0 pb-0">
-                                            <Button type="button" className="mt-1">
+                                            <Button type="submit" className="mt-1">
                                                 Agregar
                                             </Button>
                                         </Col>
                                     </Row>
-                                </Card.Body>
-                            </Card>
+                                </form>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+            </Col>
+            <Col md={8}>
+                <Form onChange={onChange}>
+                    <Row>
+                        <Col md={4}>
+                            <FormGroup>
+                                <label>Fecha</label>
+                                <input className="form-control bg-white" name="fecha"
+                                       defaultValue={cabeceraEgreso.fecha}
+                                       readOnly/>
+                            </FormGroup>
+                        </Col>
+                        <Col md={8}>
+                            <FormGroup>
+                                <label>Hacienda</label>
+                                <CustomSelect
+                                    name="hacienda"
+                                    defaultValue={cabeceraEgreso.hacienda}
+                                    placeholder="SELECCIONE UNA HACIENDA..."
+                                    api_url={api_haciendas}
+                                />
+                            </FormGroup>
                         </Col>
                     </Row>
-                </Col>
-                <Col md={8}>
-                    <Row>
-                        {children}
-                    </Row>
-                </Col>
-            </Row>
-        </Form>
+                </Form>
+                <Row>
+                    {children}
+                </Row>
+            </Col>
+        </Row>
     );
 }

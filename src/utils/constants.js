@@ -34,3 +34,9 @@ export const _configStoreApi = (metodo, url, datos, ...funciones) => {
         }
     };
 };
+
+export const focuselement = (id) => {
+    window.setTimeout(() => {
+        document.getElementById(id).focus();
+    }, 0);
+};
