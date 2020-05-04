@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Button, ButtonGroup, Col} from "react-bootstrap";
+import {Badge, Button, ButtonGroup, Col} from "react-bootstrap";
 import SimpleTableUI from "../../components/TableUI";
 import {TableCell, TableRow} from "@material-ui/core";
 
@@ -37,7 +37,7 @@ export default function EgresoDetalle(props) {
         if (itemEdit) {
             if (cantidad > 0) {
                 detalleEgreso.map((data) => {
-                    if (data.id === itemEdit) {
+                    if (data.idmaterial === itemEdit) {
                         if (cantidad <= (data.stock + data.cantidad)) {
                             data.stock = (+data.stock + +data.cantidad) - +cantidad;
                             data.cantidad = +cantidad;
@@ -62,14 +62,19 @@ export default function EgresoDetalle(props) {
         <>
             <Col md={12}>
                 <SimpleTableUI
-                    columns={['Material', 'Cantidad', 'Stock', 'Fech.Salida', 'Accion']}
+                    columns={['Material', 'Movimiento', 'Cantidad', 'Stock', 'Fech.Salida', 'Accion']}
                 >
                     {detalleEgreso.length > 0 &&
                     detalleEgreso.map((material, index) => (
                         <TableRow key={index} hover={true} className="table-sm table-responsive-sm">
                             <TableCell>{material.descripcion}</TableCell>
                             <TableCell align={"center"}>
-                                {!edit ? material.cantidad : (
+                                <Badge variant="warning">
+                                    {material.movimiento}
+                                </Badge>
+                            </TableCell>
+                            <TableCell align={"center"}>
+                                {edit && itemEdit === material.idmaterial ? (
                                     <input
                                         type="number"
                                         className="form-control text-center"
@@ -79,17 +84,18 @@ export default function EgresoDetalle(props) {
                                         onBlur={(e) => onEditMaterial(e)}
                                         onFocus={(e) => e.target.select()}
                                     />
-                                )}
+                                ) : material.cantidad}
                             </TableCell>
                             <TableCell align={"center"}>{material.stock}</TableCell>
                             <TableCell align={"center"}>{material.time}</TableCell>
                             <TableCell align={"center"}>
                                 <ButtonGroup>
-                                    {edit ?
+                                    {edit && itemEdit === material.idmaterial ?
                                         <Button variant="success" size="sm" onClick={(e) => onClickSave(e)}>
                                             <SaveIcon/>
                                         </Button> :
-                                        <Button variant="primary" size="sm" onClick={() => onClickEdit(material.id)}>
+                                        <Button variant="primary" size="sm"
+                                                onClick={() => onClickEdit(material.idmaterial)}>
                                             <EditIcon/>
                                         </Button>
                                     }

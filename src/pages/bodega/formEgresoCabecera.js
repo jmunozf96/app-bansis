@@ -8,9 +8,11 @@ import {FormHelperText} from "@material-ui/core";
 import moment from "moment";
 import 'moment/locale/es';
 import {v4 as uuidv4} from 'uuid';
+import useFetch from "../../hooks/useFetch";
 
 export default function EgresoCabecera(props) {
     const {cabeceraEgreso, setCabeceraEgreso, detalleEgreso, setDetalleEgreso, setReload, children} = props;
+    const [searchTransaccionSemana, setSearchTransaccionSemana] = useState(false);
     const [searchEmpleado, setSearchEmpleado] = useState('');
     const [searchMaterial, setSearchMaterial] = useState('');
 
@@ -30,10 +32,42 @@ export default function EgresoCabecera(props) {
     useEffect(() => {
         if (changeURL) {
             setApiEmpleados(`${API_LINK}/bansis-app/index.php/search/empleados?params=${searchEmpleado}&hacienda=${cabeceraEgreso.hacienda}&labor=${cabeceraEgreso.labor}`);
-            setApiMateriales(`${API_LINK}/bansis-app/index.php/search/materiales?params=${searchMaterial}&hacienda=${cabeceraEgreso.hacienda}&bodega=${cabeceraEgreso.bodega}&grupo=${cabeceraEgreso.grupo}`);
+            setApiMateriales(`${API_LINK}/bansis-app/index.php/search/materiales?params=${searchMaterial}&bodega=${cabeceraEgreso.bodega}&grupo=${cabeceraEgreso.grupo}`);
             setChangeURL(false);
         }
     }, [changeURL, setApiEmpleados, setApiMateriales, searchEmpleado, searchMaterial, cabeceraEgreso]);
+
+    useEffect(() => {
+        if (searchTransaccionSemana) {
+            (async () => {
+                const url = `${API_LINK}/bansis-app/index.php/search-egreso?empleado=${cabeceraEgreso.empleado.id}&fecha=${cabeceraEgreso.fecha}`;
+                const request = await fetch(url).then((response) => {
+                    return response.json();
+                });
+
+                if(request){
+                    const {egreso_detalle} = request;
+                    egreso_detalle.map((egreso, index) => {
+                        let material = {
+                            id: egreso.id,
+                            shortid: uuidv4(),
+                            idmaterial: egreso.idmaterial,
+                            descripcion: egreso.descripcion,
+                            movimiento: 'EGRE-ART',
+                            cantidad: 0,
+                            stock: egreso.stock,
+                            time: moment().format("DD/MM/YY")
+                        };
+                    })
+                }
+
+                //const detalleEgresos =
+
+                console.log(request);
+            })();
+            setSearchTransaccionSemana(false);
+        }
+    }, [searchTransaccionSemana, cabeceraEgreso]);
 
     const onChange = (e) => {
         setCabeceraEgreso({
@@ -41,6 +75,9 @@ export default function EgresoCabecera(props) {
             [e.target.name]: e.target.value
         });
         setChangeURL(true);
+        setItem(null);
+        document.getElementById('id-cantidad').value = 0;
+        setEnabledCantidad(true);
     };
 
     const onChangeCantidadItem = (e) => {
@@ -62,12 +99,14 @@ export default function EgresoCabecera(props) {
             ...cabeceraEgreso,
             empleado: value
         });
+        if (value)
+            setSearchTransaccionSemana(true);
     };
 
     const existsMaterial = (material) => {
         if (material)
             return detalleEgreso.filter((item) =>
-                material.id === item.id);
+                material.idmaterial === item.idmaterial);
 
         return [];
     };
@@ -75,7 +114,7 @@ export default function EgresoCabecera(props) {
     const editCantidadMaterial = (id, cantidad) => {
         if (cantidad > 0) {
             detalleEgreso.map((data) => {
-                if (data.id === id) {
+                if (data.idmaterial === id) {
                     if (cantidad <= data.stock) {
                         data.cantidad += cantidad;
                         data.stock -= cantidad;
@@ -89,12 +128,12 @@ export default function EgresoCabecera(props) {
     };
 
     const onChangeValueMaterialSearch = (e, value) => {
-        let material = null;
         if (value) {
-            material = {
+            let material = {
                 shortid: uuidv4(),
-                id: value.id,
+                idmaterial: value.id,
                 descripcion: value.descripcion,
+                movimiento: 'EGRE-ART',
                 cantidad: 0,
                 stock: value.stock,
                 time: moment().format("DD/MM/YY")
@@ -105,6 +144,8 @@ export default function EgresoCabecera(props) {
             focuselement('id-cantidad');
         } else {
             setEnabledCantidad(true);
+            setItem(null);
+            document.getElementById('id-cantidad').value = 0;
         }
     };
 
@@ -132,8 +173,13 @@ export default function EgresoCabecera(props) {
             return;
         }
 
+        if (item.cantidad <= 0) {
+            alert("Ingrese una cantidad mayor a 0");
+            return;
+        }
+
         if (existsMaterial(item).length > 0) {
-            editCantidadMaterial(item.id, item.cantidad);
+            editCantidadMaterial(item.idmaterial, item.cantidad);
             setReload(true);
         } else {
             item.stock = item.stock - item.cantidad;
@@ -241,7 +287,7 @@ export default function EgresoCabecera(props) {
                                             </FormHelperText>
                                         </Col>
                                         <Col md={8}>
-                                            <FormGroup className="mb-0 mt-1">
+                                            <FormGroup className="mb-0 mt-1 mr-0">
                                                 <input
                                                     className="form-control"
                                                     type="number"
@@ -256,9 +302,9 @@ export default function EgresoCabecera(props) {
                                                     cantidad....</FormHelperText>
                                             </FormGroup>
                                         </Col>
-                                        <Col className="pl-0 pb-0">
-                                            <Button type="submit" className="mt-1">
-                                                Agregar
+                                        <Col className="pb-0">
+                                            <Button type="submit" className="mt-1" variant="primary">
+                                                <i className="fas fa-plus-circle"/>
                                             </Button>
                                         </Col>
                                     </Row>
