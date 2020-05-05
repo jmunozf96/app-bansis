@@ -8,11 +8,25 @@ import {FormHelperText} from "@material-ui/core";
 import moment from "moment";
 import 'moment/locale/es';
 import {v4 as uuidv4} from 'uuid';
-import useFetch from "../../hooks/useFetch";
+import {progressActions} from "../../actions/progressActions";
+import {useDispatch} from "react-redux";
 
 export default function EgresoCabecera(props) {
-    const {cabeceraEgreso, setCabeceraEgreso, detalleEgreso, setDetalleEgreso, setReload, children} = props;
-    const [searchTransaccionSemana, setSearchTransaccionSemana] = useState(false);
+    const {
+        cabeceraEgreso,
+        setCabeceraEgreso,
+        detalleEgreso,
+        setDetalleEgreso,
+        setReload,
+        disabledElements,
+        setDisabledElements,
+        searchTransaccionSemana,
+        setSearchTransaccionSemana,
+        item,
+        setItem,
+        children
+    } = props;
+
     const [searchEmpleado, setSearchEmpleado] = useState('');
     const [searchMaterial, setSearchMaterial] = useState('');
 
@@ -25,9 +39,12 @@ export default function EgresoCabecera(props) {
     const [api_materiales, setApiMateriales] = useState(`${API_LINK}/bansis-app/index.php/search/materiales`);
     const [changeURL, setChangeURL] = useState(false);
 
-    const [item, setItem] = useState(null);
     const [cantidad, setCantidad] = useState(0);
+    const [stock, setStock] = useState(0);
     const [enabledCantidad, setEnabledCantidad] = useState(true);
+
+    const dispatch = useDispatch();
+    //const progressbarStatus = (state) => dispatch(progressActions(state));
 
     useEffect(() => {
         if (changeURL) {
@@ -38,42 +55,82 @@ export default function EgresoCabecera(props) {
     }, [changeURL, setApiEmpleados, setApiMateriales, searchEmpleado, searchMaterial, cabeceraEgreso]);
 
     useEffect(() => {
+        if (disabledElements.change) {
+            return setDisabledElements({
+                ...disabledElements,
+                change: false
+            });
+        }
+    }, [disabledElements, setDisabledElements]);
+
+    useEffect(() => {
         if (searchTransaccionSemana) {
+            const progressbarStatus = (state) => dispatch(progressActions(state));
+            progressbarStatus(true);
+            const detalles = [];
             (async () => {
                 const url = `${API_LINK}/bansis-app/index.php/search-egreso?empleado=${cabeceraEgreso.empleado.id}&fecha=${cabeceraEgreso.fecha}`;
-                const request = await fetch(url).then((response) => {
-                    return response.json();
-                });
-
-                if(request){
+                const request = await fetch(url).then(
+                    (response) => response.json(),
+                    (error) => error.response
+                );
+                if (Object.entries(request).length > 0) {
                     const {egreso_detalle} = request;
                     egreso_detalle.map((egreso, index) => {
                         let material = {
                             id: egreso.id,
                             shortid: uuidv4(),
-                            idmaterial: egreso.idmaterial,
-                            descripcion: egreso.descripcion,
+                            idmaterial: egreso.materialdetalle.id,
+                            descripcion: egreso.materialdetalle.descripcion,
                             movimiento: 'EGRE-ART',
-                            cantidad: 0,
-                            stock: egreso.stock,
-                            time: moment().format("DD/MM/YY")
+                            cantidad: parseInt(egreso.cantidad),
+                            stock: parseFloat(egreso.materialdetalle.stock),
+                            time: moment(egreso.fecha_salida).format('DD/MM/YY'),
+                            edit: false
                         };
-                    })
+                        return detalles.push(material);
+                    });
+                    await setDisabledElements({...disabledElements, btnsave: false});
                 }
-
-                //const detalleEgresos =
-
-                console.log(request);
+                await progressbarStatus(false);
             })();
+            setDetalleEgreso(detalles);
             setSearchTransaccionSemana(false);
         }
-    }, [searchTransaccionSemana, cabeceraEgreso]);
+    }, [
+        searchTransaccionSemana,
+        setSearchTransaccionSemana,
+        cabeceraEgreso,
+        setDetalleEgreso,
+        dispatch,
+        setDisabledElements,
+        disabledElements
+    ]);
 
     const onChange = (e) => {
         setCabeceraEgreso({
             ...cabeceraEgreso,
             [e.target.name]: e.target.value
         });
+
+        //Habilitar componentes segun cambio
+        switch (e.target.name) {
+            case 'hacienda':
+                setDisabledElements({...disabledElements, change: true, labor: false, hacienda: true});
+                break;
+            case 'labor':
+                setDisabledElements({...disabledElements, change: true, empleado: false});
+                break;
+            case 'bodega':
+                setDisabledElements({...disabledElements, change: true, grupo: false});
+                break;
+            case 'grupo':
+                setDisabledElements({...disabledElements, change: true, material: false, btnnuevo: false});
+                break;
+            default:
+                setDisabledElements({...disabledElements, change: true})
+        }
+
         setChangeURL(true);
         setItem(null);
         document.getElementById('id-cantidad').value = 0;
@@ -82,15 +139,23 @@ export default function EgresoCabecera(props) {
 
     const onChangeCantidadItem = (e) => {
         if (item) {
-            if (e.target.value !== undefined && e.target.value > 0) {
+            if (e.target.value !== undefined || e.target.value > 0 || e.target.value !== '') {
                 setCantidad(+e.target.value);
-                setItem({
-                    ...item,
-                    cantidad: +e.target.value
-                });
-            } else {
-                setCantidad(0);
             }
+
+            setStock(item.stock - +e.target.value);
+
+            if (+e.target.value > item.stock) {
+                setStock(parseInt(item.stock));
+                setCantidad(0);
+                document.getElementById('id-cantidad').value = 0;
+                alert("La cantidad sobrepasa el stock");
+            }
+
+            setItem({
+                ...item,
+                cantidad: +e.target.value
+            });
         }
     };
 
@@ -99,25 +164,31 @@ export default function EgresoCabecera(props) {
             ...cabeceraEgreso,
             empleado: value
         });
-        if (value)
+        if (value) {
+            setDisabledElements({...disabledElements, change: true, bodega: false});
             setSearchTransaccionSemana(true);
+        }
+        setDetalleEgreso([]);
     };
 
     const existsMaterial = (material) => {
         if (material)
             return detalleEgreso.filter((item) =>
-                material.idmaterial === item.idmaterial);
+                material.idmaterial === item.idmaterial && material.time === item.time);
 
         return [];
     };
 
-    const editCantidadMaterial = (id, cantidad) => {
-        if (cantidad > 0) {
+    const editCantidadMaterial = (material) => {
+        if (material.cantidad > 0) {
             detalleEgreso.map((data) => {
-                if (data.idmaterial === id) {
-                    if (cantidad <= data.stock) {
-                        data.cantidad += cantidad;
-                        data.stock -= cantidad;
+                if (data.idmaterial === material.idmaterial && data.time === material.time) {
+                    if (material.cantidad <= data.stock) {
+                        data.cantidad += material.cantidad;
+                        data.stock -= material.cantidad;
+                        if (data.hasOwnProperty('id')) {
+                            data.edit = true;
+                        }
                         return true;
                     }
                 }
@@ -135,16 +206,18 @@ export default function EgresoCabecera(props) {
                 descripcion: value.descripcion,
                 movimiento: 'EGRE-ART',
                 cantidad: 0,
-                stock: value.stock,
+                stock: parseFloat(value.stock),
                 time: moment().format("DD/MM/YY")
             };
 
             setItem(material);
             setEnabledCantidad(false);
             focuselement('id-cantidad');
+            setStock(parseInt(value.stock));
         } else {
             setEnabledCantidad(true);
             setItem(null);
+            setStock(0);
             document.getElementById('id-cantidad').value = 0;
         }
     };
@@ -168,6 +241,11 @@ export default function EgresoCabecera(props) {
             return;
         }
 
+        if (!item) {
+            alert("No se ha seleccionado un material");
+            return;
+        }
+
         if (item.stock < item.cantidad) {
             alert("Excede el stock");
             return;
@@ -179,7 +257,7 @@ export default function EgresoCabecera(props) {
         }
 
         if (existsMaterial(item).length > 0) {
-            editCantidadMaterial(item.idmaterial, item.cantidad);
+            editCantidadMaterial(item);
             setReload(true);
         } else {
             item.stock = item.stock - item.cantidad;
@@ -189,10 +267,13 @@ export default function EgresoCabecera(props) {
             ]);
         }
 
-        setItem(null);
+        setDisabledElements({...disabledElements, change: true, btnsave: false});
+
+        //setItem(null);
         setCantidad(0);
-        document.getElementById('id-cantidad').value = 0;
-        setEnabledCantidad(true);
+        //setStock(0);
+        document.getElementById('id-cantidad').value = '';
+        //setEnabledCantidad(true);
     };
 
     return (
@@ -213,6 +294,7 @@ export default function EgresoCabecera(props) {
                                                 defaultValue={cabeceraEgreso.labor}
                                                 placeholder="SELECCIONE..."
                                                 api_url={api_labores}
+                                                disabled={disabledElements.labor}
                                             />
                                         </Col>
                                     </Row>
@@ -226,7 +308,7 @@ export default function EgresoCabecera(props) {
                                                 api_url={api_empleados}
                                                 setSearch={setSearchEmpleado}
                                                 onChangeValue={onChangeValueEmpleadoSearch}
-                                                disabled={false}
+                                                disabled={disabledElements.empleado}
                                                 value={cabeceraEgreso.empleado}
                                             />
                                             <FormHelperText id="outlined-weight-helper-text">
@@ -253,6 +335,7 @@ export default function EgresoCabecera(props) {
                                                 defaultValue={cabeceraEgreso.bodega}
                                                 placeholder="SELECCIONE..."
                                                 api_url={api_bodegas}
+                                                disabled={disabledElements.bodega}
                                             />
                                         </Col>
                                         <Col md={6} className="pb-0">
@@ -264,6 +347,7 @@ export default function EgresoCabecera(props) {
                                                 defaultValue={cabeceraEgreso.grupo}
                                                 placeholder="SELECCIONE..."
                                                 api_url={api_bodegas_grupos}
+                                                disabled={disabledElements.grupo}
                                             />
                                         </Col>
                                     </Row>
@@ -279,14 +363,14 @@ export default function EgresoCabecera(props) {
                                                 api_url={api_materiales}
                                                 setSearch={setSearchMaterial}
                                                 onChangeValue={onChangeValueMaterialSearch}
-                                                disabled={false}
+                                                disabled={disabledElements.material}
                                                 value={item}
                                             />
                                             <FormHelperText id="outlined-weight-helper-text">
                                                 Puede filtrar los empleados por nombre o numero de cedula
                                             </FormHelperText>
                                         </Col>
-                                        <Col md={8}>
+                                        <Col md={5} className="pr-0">
                                             <FormGroup className="mb-0 mt-1 mr-0">
                                                 <input
                                                     className="form-control"
@@ -299,10 +383,25 @@ export default function EgresoCabecera(props) {
                                                     disabled={enabledCantidad}
                                                 />
                                                 <FormHelperText id="outlined-weight-helper-text">Ingrese la
-                                                    cantidad....</FormHelperText>
+                                                    cantidad...</FormHelperText>
                                             </FormGroup>
                                         </Col>
-                                        <Col className="pb-0">
+                                        <Col md={4} className="pl-2 pr-0">
+                                            <FormGroup className="mb-0 mt-1 mr-0">
+                                                <input
+                                                    className="form-control bg-white"
+                                                    type="number"
+                                                    id="id-stock"
+                                                    name="stock"
+                                                    value={stock}
+                                                    disabled={true}
+                                                />
+                                                <FormHelperText id="outlined-weight-helper-text">
+                                                    Stock
+                                                </FormHelperText>
+                                            </FormGroup>
+                                        </Col>
+                                        <Col className="pl-1 pr-0 pb-0">
                                             <Button type="submit" className="mt-1" variant="primary">
                                                 <i className="fas fa-plus-circle"/>
                                             </Button>
@@ -333,6 +432,7 @@ export default function EgresoCabecera(props) {
                                     defaultValue={cabeceraEgreso.hacienda}
                                     placeholder="SELECCIONE UNA HACIENDA..."
                                     api_url={api_haciendas}
+                                    disabled={disabledElements.hacienda}
                                 />
                             </FormGroup>
                         </Col>

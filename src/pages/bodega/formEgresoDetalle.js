@@ -20,9 +20,12 @@ export default function EgresoDetalle(props) {
         }
     }, [reload, setReload]);
 
-    const onClickEdit = (id) => {
+    const onClickEdit = (material) => {
         setEdit(true);
-        setItemEdit(id);
+        setItemEdit({
+            id: material.id,
+            shortid: material.shortid
+        });
         focuselement('id-edit-cantidad');
     };
 
@@ -37,11 +40,16 @@ export default function EgresoDetalle(props) {
         if (itemEdit) {
             if (cantidad > 0) {
                 detalleEgreso.map((data) => {
-                    if (data.idmaterial === itemEdit) {
-                        if (cantidad <= (data.stock + data.cantidad)) {
-                            data.stock = (+data.stock + +data.cantidad) - +cantidad;
-                            data.cantidad = +cantidad;
-                            return true;
+                    if (data.shortid === itemEdit.shortid) {
+                        if (data.cantidad !== +cantidad) {
+                            if (cantidad <= (data.stock + data.cantidad)) {
+                                data.stock = (+data.stock + +data.cantidad) - +cantidad;
+                                data.cantidad = +cantidad;
+                                if (data.hasOwnProperty('id')) {
+                                    data.edit = true;
+                                }
+                                return true;
+                            }
                         }
                     }
                     return false;
@@ -62,11 +70,15 @@ export default function EgresoDetalle(props) {
         <>
             <Col md={12}>
                 <SimpleTableUI
-                    columns={['Material', 'Movimiento', 'Cantidad', 'Stock', 'Fech.Salida', 'Accion']}
+                    columns={['...', 'Material', 'Movimiento', 'Cantidad', 'Stock', 'Fech.Salida', 'Accion']}
                 >
                     {detalleEgreso.length > 0 &&
                     detalleEgreso.map((material, index) => (
                         <TableRow key={index} hover={true} className="table-sm table-responsive-sm">
+                            <TableCell align={"center"}>
+                                {material.id && !material.edit ? <i className="fas fa-cloud-upload-alt"/> :
+                                    <i className="fas fa-spinner fa-spin"/>}
+                            </TableCell>
                             <TableCell>{material.descripcion}</TableCell>
                             <TableCell align={"center"}>
                                 <Badge variant="warning">
@@ -74,7 +86,7 @@ export default function EgresoDetalle(props) {
                                 </Badge>
                             </TableCell>
                             <TableCell align={"center"}>
-                                {edit && itemEdit === material.idmaterial ? (
+                                {edit && itemEdit.shortid === material.shortid ? (
                                     <input
                                         type="number"
                                         className="form-control text-center"
@@ -90,12 +102,12 @@ export default function EgresoDetalle(props) {
                             <TableCell align={"center"}>{material.time}</TableCell>
                             <TableCell align={"center"}>
                                 <ButtonGroup>
-                                    {edit && itemEdit === material.idmaterial ?
+                                    {edit && itemEdit.shortid === material.shortid ?
                                         <Button variant="success" size="sm" onClick={(e) => onClickSave(e)}>
                                             <SaveIcon/>
                                         </Button> :
                                         <Button variant="primary" size="sm"
-                                                onClick={() => onClickEdit(material.idmaterial)}>
+                                                onClick={() => onClickEdit(material)}>
                                             <EditIcon/>
                                         </Button>
                                     }

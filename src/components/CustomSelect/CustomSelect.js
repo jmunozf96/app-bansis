@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import useFetch from "../../hooks/useFetch";
 
 export default function CustomSelect(props) {
-    const {name, defaultValue, placeholder, api_url} = props;
+    const {name, defaultValue, placeholder, api_url, disabled = false} = props;
     const [dataSelect, setDataSelect] = useState([]);
     const [update, setUpdate] = useState(true);
 
@@ -28,8 +28,13 @@ export default function CustomSelect(props) {
     }
 
     return (
-        <select className="form-control custom-select" name={name}
-                defaultValue={defaultValue}>
+        <select
+            className="form-control custom-select"
+            name={name}
+            value={defaultValue}
+            onChange={(e) => e.preventDefault()}
+            disabled={disabled}
+        >
             <option disabled={true} hidden={true} value="">{placeholder}</option>
             {dataSelect.length > 0 && dataSelect.map((data, index) => (
                 <option key={data.id} value={data.id}>
