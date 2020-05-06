@@ -7,12 +7,21 @@ import {
     DialogContentText,
     DialogTitle
 } from '@material-ui/core';
+import {useDispatch, useSelector} from "react-redux";
+import {progressActions} from "../../actions/progressActions";
 
 export default function AlertDialog(props) {
     const {title, content, open, setOpen, actionDestroy, id} = props;
 
+    const progressStatus = useSelector(state => state.progressbar.loading);
+    const dispatch = useDispatch();
+    const setProgressStatus = (state) => dispatch(progressActions(state));
+
     const handleClose = () => {
         setOpen(false);
+        if (progressStatus) {
+            setProgressStatus(false);
+        }
     };
 
     return (

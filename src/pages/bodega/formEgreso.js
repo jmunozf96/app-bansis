@@ -8,10 +8,13 @@ import qs from 'qs';
 
 import EgresoCabecera from "./formEgresoCabecera";
 import EgresoDetalle from "./formEgresoDetalle";
+import EgresoTransferencia from "./formEgresoTransferencia";
+
 import {_configStoreApi, _saveApi, API_LINK} from "../../utils/constants";
 import {useDispatch, useSelector} from "react-redux";
 import {progressActions} from "../../actions/progressActions";
 import SnackbarComponent from "../../components/Snackbar/Snackbar";
+import FullScreen from "../../components/FullScreen";
 
 export default function FormEgreso() {
     const [searchTransaccionSemana, setSearchTransaccionSemana] = useState(false);
@@ -32,11 +35,15 @@ export default function FormEgreso() {
         bodega: true,
         grupo: true,
         material: true,
+        cantidad: true,
         btnnuevo: true,
-        btnsave: true
+        btnsave: true,
+        transfer: true
     });
 
-    const [material, serMaterial] = useState(null);
+    const [material, setMaterial] = useState(null);
+    const [stock, setStock] = useState(0);
+
     const [detalleEgreso, setDetalleEgreso] = useState([]);
     const [reload, setReload] = useState(false);
     const [notificacion, setNotificacion] = useState({
@@ -49,6 +56,9 @@ export default function FormEgreso() {
     const dispatch = useDispatch();
     const progressbarStatus = (state) => dispatch(progressActions(state));
     const authentication = useSelector(state => state.auth._token);
+
+    //Estados de transferencia de saldo
+    const [openFullScreen, setOpenFullScreen] = useState(false);
 
     useEffect(() => {
         if (disabledElements.change) {
@@ -83,6 +93,11 @@ export default function FormEgreso() {
                 setNotificacion({open: true, message, errors, variant: 'danger'});
             } else {
                 setNotificacion({open: true, message, errors: [], variant: 'success'});
+                setDisabledElements({
+                    change: true, btnnuevo: false, btnsave: true, material: false, cantidad: true
+                });
+                setMaterial(null);
+                setStock(0);
             }
             setSearchTransaccionSemana(true);
         })();
@@ -92,12 +107,17 @@ export default function FormEgreso() {
         setCabeceraEgreso({...cabeceraEgreso, empleado: null});
         setReload(true);
         setDisabledElements({
-            change: true, hacienda: true, btnnuevo: false, btnsave: true
+            change: true, hacienda: true, btnnuevo: false, btnsave: true, material: false, cantidad: true, transfer: true
         });
         setAlert(null);
         setDetalleEgreso([]);
-        serMaterial(null);
+        setMaterial(null);
+        setStock(0);
         setAlert(false);
+    };
+
+    const onClickOpenFullScreen = () => {
+        setOpenFullScreen(true);
     };
 
     return (
@@ -122,7 +142,9 @@ export default function FormEgreso() {
                         searchTransaccionSemana={searchTransaccionSemana}
                         setSearchTransaccionSemana={setSearchTransaccionSemana}
                         item={material}
-                        setItem={serMaterial}
+                        setItem={setMaterial}
+                        stock={stock}
+                        setStock={setStock}
                     >
                         <Col>
                             {alert &&
@@ -130,7 +152,7 @@ export default function FormEgreso() {
                                    onClose={() => setAlert(false)} dismissible>
                                 {notificacion.variant === 'danger' ? <i className="fas fa-times-circle"/> :
                                     <i className="fas fa-check-circle"/>} {notificacion.message}
-                                {notificacion.open && notificacion.errors.length > 0 &&
+                                {notificacion.open && (notificacion.hasOwnProperty('errors') && notificacion.errors.length > 0) &&
                                 <>
                                     <hr/>
                                     <ul>
@@ -149,12 +171,35 @@ export default function FormEgreso() {
                             setReload={setReload}
                             detalleEgreso={detalleEgreso}
                             setDetalleEgreso={setDetalleEgreso}
+                            setNotificacion={setNotificacion}
+                            setSearchTransaccionSemana={setSearchTransaccionSemana}
                         />
+                        <Col>
+
+                            <FullScreen
+                                open={openFullScreen}
+                                setOpen={setOpenFullScreen}
+                            >
+                                <EgresoTransferencia
+                                    hacienda={cabeceraEgreso.hacienda}
+                                    recibe={cabeceraEgreso.empleado}
+                                    setOpen={setOpenFullScreen}
+                                />
+                            </FullScreen>
+
+                            <Button
+                                variant="primary mt-3"
+                                disabled={disabledElements.transfer}
+                                onClick={() => !disabledElements.transfer && onClickOpenFullScreen()}
+                            >
+                                <i className="fas fa-exchange-alt"/> Traspaso de Saldo
+                            </Button>
+                        </Col>
                     </EgresoCabecera>
                     <hr/>
                     <Row>
                         <Col>
-                            <ButtonGroup size="lg" className="col-md-4 p-0">
+                            <ButtonGroup className="col-md-4 pl-0">
                                 <Button
                                     variant="primary"
                                     onClick={() => onClickNuevo()}
@@ -164,7 +209,7 @@ export default function FormEgreso() {
                                 </Button>
                                 <Button
                                     variant="success"
-                                    onClick={() => !disabledElements.btnsave ? onSaveTransaction() : null}
+                                    onClick={() => !disabledElements.btnsave && onSaveTransaction()}
                                     disabled={disabledElements.btnsave}
                                 >
                                     <i className="fas fa-save"/> Guardar

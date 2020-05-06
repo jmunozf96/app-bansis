@@ -7,12 +7,26 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 
-import {focuselement} from "../../utils/constants";
+import {API_LINK, focuselement} from "../../utils/constants";
+import {useDispatch, useSelector} from "react-redux";
+import AlertDialog from "../../components/AlertDialog/AlertDialog";
+import {progressActions} from "../../actions/progressActions";
 
 export default function EgresoDetalle(props) {
-    const {detalleEgreso, setDetalleEgreso, reload, setReload} = props;
+    const {detalleEgreso, setDetalleEgreso, reload, setReload, setNotificacion, setSearchTransaccionSemana} = props;
     const [edit, setEdit] = useState(false);
     const [itemEdit, setItemEdit] = useState(null);
+
+    const [dataModal, setDataModal] = useState({
+        title: '',
+        content: '',
+        material: null
+    });
+    const [openModal, setOpenModal] = useState(false);
+
+    const dispatch = useDispatch();
+    const progressbarStatus = (state) => dispatch(progressActions(state));
+    const authentication = useSelector(state => state.auth._token);
 
     useEffect(() => {
         if (reload) {
@@ -60,10 +74,52 @@ export default function EgresoDetalle(props) {
     };
 
     const deleteMaterial = material => {
+        setOpenModal(true);
+        progressbarStatus(true);
+        setDataModal({
+            title: 'Movimiento con fecha: ' + material.time,
+            content: 'Esta seguro de eliminar este despacho de ' + material.cantidad + ' ' + material.descripcion,
+            material: material
+        });
+        //destroyData(material);
+    };
+
+    const destroyData = (material) => {
         if (material) {
             const nuevosItems = detalleEgreso.filter((item) => material.shortid !== item.shortid);
             setDetalleEgreso(nuevosItems);
+
+            //Eliminar registro de la base de datos.
+            if (material.hasOwnProperty('id')) {
+                (async () => {
+                    try {
+                        const url = `${API_LINK}/bansis-app/index.php/egreso-bodega/${material.id}`;
+                        const response = await fetch(url, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': authentication
+                            }
+                        }).then(
+                            (response) => response.json()
+                        );
+                        const {code, message} = response;
+
+                        if (code === 200) {
+                            setSearchTransaccionSemana(true);
+                        }
+                        setNotificacion({
+                            open: true,
+                            message
+                        });
+                        console.log(response);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                })();
+            }
         }
+        setOpenModal(false);
+        progressbarStatus(false);
     };
 
     return (
@@ -120,6 +176,14 @@ export default function EgresoDetalle(props) {
                     ))
                     }
                 </SimpleTableUI>
+                <AlertDialog
+                    title={dataModal.title}
+                    content={dataModal.content}
+                    open={openModal}
+                    setOpen={setOpenModal}
+                    actionDestroy={destroyData}
+                    id={dataModal.material}
+                />
             </Col>
         </>
     );

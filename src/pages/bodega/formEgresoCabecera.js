@@ -24,6 +24,8 @@ export default function EgresoCabecera(props) {
         setSearchTransaccionSemana,
         item,
         setItem,
+        stock,
+        setStock,
         children
     } = props;
 
@@ -40,8 +42,6 @@ export default function EgresoCabecera(props) {
     const [changeURL, setChangeURL] = useState(false);
 
     const [cantidad, setCantidad] = useState(0);
-    const [stock, setStock] = useState(0);
-    const [enabledCantidad, setEnabledCantidad] = useState(true);
 
     const dispatch = useDispatch();
     //const progressbarStatus = (state) => dispatch(progressActions(state));
@@ -134,7 +134,6 @@ export default function EgresoCabecera(props) {
         setChangeURL(true);
         setItem(null);
         document.getElementById('id-cantidad').value = 0;
-        setEnabledCantidad(true);
     };
 
     const onChangeCantidadItem = (e) => {
@@ -165,9 +164,11 @@ export default function EgresoCabecera(props) {
             empleado: value
         });
         if (value) {
-            setDisabledElements({...disabledElements, change: true, bodega: false});
+            setDisabledElements({...disabledElements, change: true, bodega: false, transfer: false});
             setSearchTransaccionSemana(true);
+            return;
         }
+        setDisabledElements({...disabledElements, change: true, transfer: true});
         setDetalleEgreso([]);
     };
 
@@ -184,8 +185,8 @@ export default function EgresoCabecera(props) {
             detalleEgreso.map((data) => {
                 if (data.idmaterial === material.idmaterial && data.time === material.time) {
                     if (material.cantidad <= data.stock) {
-                        data.cantidad += material.cantidad;
                         data.stock -= material.cantidad;
+                        data.cantidad += material.cantidad;
                         if (data.hasOwnProperty('id')) {
                             data.edit = true;
                         }
@@ -211,11 +212,11 @@ export default function EgresoCabecera(props) {
             };
 
             setItem(material);
-            setEnabledCantidad(false);
+            setDisabledElements({...disabledElements, change: true, cantidad: false});
             focuselement('id-cantidad');
             setStock(parseInt(value.stock));
         } else {
-            setEnabledCantidad(true);
+            setDisabledElements({...disabledElements, change: true, cantidad: true});
             setItem(null);
             setStock(0);
             document.getElementById('id-cantidad').value = 0;
@@ -243,6 +244,8 @@ export default function EgresoCabecera(props) {
 
         if (!item) {
             alert("No se ha seleccionado un material");
+            setCantidad(0);
+            document.getElementById('id-cantidad').value = 0;
             return;
         }
 
@@ -256,6 +259,7 @@ export default function EgresoCabecera(props) {
             return;
         }
 
+
         if (existsMaterial(item).length > 0) {
             editCantidadMaterial(item);
             setReload(true);
@@ -267,13 +271,12 @@ export default function EgresoCabecera(props) {
             ]);
         }
 
-        setDisabledElements({...disabledElements, change: true, btnsave: false});
-
-        //setItem(null);
+        //setStock(item.stock - cantidad);
+        setItem({...item, cantidad: 0, stock});
         setCantidad(0);
-        //setStock(0);
+
+        setDisabledElements({...disabledElements, change: true, btnsave: false});
         document.getElementById('id-cantidad').value = '';
-        //setEnabledCantidad(true);
     };
 
     return (
@@ -285,7 +288,7 @@ export default function EgresoCabecera(props) {
                             <Card>
                                 <Card.Header className="pb-3 pt-1 pl-3">
                                     <Row>
-                                        <Col md={8} className="pb-0">
+                                        <Col md={12} className="pb-0">
                                             <FormHelperText id="outlined-weight-helper-text">
                                                 Seleccione una labor...
                                             </FormHelperText>
@@ -370,7 +373,7 @@ export default function EgresoCabecera(props) {
                                                 Puede filtrar los empleados por nombre o numero de cedula
                                             </FormHelperText>
                                         </Col>
-                                        <Col md={5} className="pr-0">
+                                        <Col md={5} className="">
                                             <FormGroup className="mb-0 mt-1 mr-0">
                                                 <input
                                                     className="form-control"
@@ -380,13 +383,13 @@ export default function EgresoCabecera(props) {
                                                     defaultValue={cantidad}
                                                     onChange={onChangeCantidadItem}
                                                     onFocus={(e) => e.target.select()}
-                                                    disabled={enabledCantidad}
+                                                    disabled={disabledElements.cantidad}
                                                 />
                                                 <FormHelperText id="outlined-weight-helper-text">Ingrese la
                                                     cantidad...</FormHelperText>
                                             </FormGroup>
                                         </Col>
-                                        <Col md={4} className="pl-2 pr-0">
+                                        <Col md={4} className="">
                                             <FormGroup className="mb-0 mt-1 mr-0">
                                                 <input
                                                     className="form-control bg-white"
@@ -401,7 +404,7 @@ export default function EgresoCabecera(props) {
                                                 </FormHelperText>
                                             </FormGroup>
                                         </Col>
-                                        <Col className="pl-1 pr-0 pb-0">
+                                        <Col className="pb-0">
                                             <Button type="submit" className="mt-1" variant="primary">
                                                 <i className="fas fa-plus-circle"/>
                                             </Button>
@@ -416,7 +419,7 @@ export default function EgresoCabecera(props) {
             <Col md={8}>
                 <Form onChange={onChange}>
                     <Row>
-                        <Col md={4}>
+                        <Col md={4} className="">
                             <FormGroup>
                                 <label>Fecha</label>
                                 <input className="form-control bg-white" name="fecha"
@@ -424,7 +427,7 @@ export default function EgresoCabecera(props) {
                                        readOnly/>
                             </FormGroup>
                         </Col>
-                        <Col md={8}>
+                        <Col md={8} className="">
                             <FormGroup>
                                 <label>Hacienda</label>
                                 <CustomSelect
