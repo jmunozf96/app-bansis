@@ -82,11 +82,12 @@ export default function EgresoCabecera(props) {
                             shortid: uuidv4(),
                             idmaterial: egreso.materialdetalle.id,
                             descripcion: egreso.materialdetalle.descripcion,
-                            movimiento: 'EGRE-ART',
+                            movimiento: egreso.movimiento,
                             cantidad: parseInt(egreso.cantidad),
                             stock: parseFloat(egreso.materialdetalle.stock),
                             time: moment(egreso.fecha_salida).format('DD/MM/YY'),
-                            edit: false
+                            edit: false,
+                            transferencia: egreso.movimiento !== 'EGRE-ART'
                         };
                         return detalles.push(material);
                     });

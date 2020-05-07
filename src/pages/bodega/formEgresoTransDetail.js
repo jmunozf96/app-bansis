@@ -1,13 +1,16 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Badge, Button, Col} from "react-bootstrap";
 import {FormHelperText} from "@material-ui/core";
 
 import moment from "moment";
 import 'moment/locale/es';
-//import qs from 'qs';
+import qs from 'qs';
+import {_configStoreApi, _saveApi, API_LINK} from "../../utils/constants";
+import {useDispatch, useSelector} from "react-redux";
+import {progressActions} from "../../actions/progressActions";
 
 export default function EgresoTransDetail(props) {
-    const {data: {id, tot_egreso, material}, hacienda, recibe, solicita} = props;
+    const {data: {id, tot_egreso, material}, hacienda, recibe, solicita, setSearchTransaccionSemana, setNotificacion} = props;
     const [dataTransfer, setDataTransfer] = useState({
         hacienda: hacienda,
         emp_recibe: recibe,
@@ -18,10 +21,22 @@ export default function EgresoTransDetail(props) {
         time: moment().format("DD/MM/YYYY")
     });
 
+    const [reload, setReload] = useState(false);
+
+    useEffect(() => {
+        if (reload) {
+            setReload(true);
+        }
+    }, [reload]);
+
+    const dispatch = useDispatch();
+    const progressbarStatus = (state) => dispatch(progressActions(state));
+    const authentication = useSelector(state => state.auth._token);
+
     const onChangeCantidad = (e) => {
-        const cantidad = e.target.value;
+        const cantidad = parseInt(e.target.value);
         if (cantidad !== undefined && cantidad > 0 && cantidad !== '') {
-            if (parseInt(cantidad) <= parseInt(tot_egreso)) {
+            if (parseInt(cantidad) <= parseInt(dataTransfer.tot_egreso)) {
                 setDataTransfer({
                     ...dataTransfer,
                     cantidad
@@ -39,7 +54,29 @@ export default function EgresoTransDetail(props) {
     };
 
     const onclickTransfer = () => {
-        console.log(dataTransfer);
+        (async () => {
+            const datos = qs.stringify({json: JSON.stringify(dataTransfer)});
+            const url = `${API_LINK}/bansis-app/index.php/egreso-bodega/saldos/transfer`;
+            const configuracion = _configStoreApi('POST', url, datos, progressbarStatus, authentication);
+            const request = await _saveApi(configuracion);
+            const {code, message} = request;
+            if (code === 200) {
+                setNotificacion({
+                    open: true,
+                    message
+                });
+                setSearchTransaccionSemana(true);
+            }
+        })();
+
+        setDataTransfer({
+            ...dataTransfer,
+            tot_egreso: (dataTransfer.tot_egreso - dataTransfer.cantidad),
+            cantidad: 0
+        });
+
+        document.getElementById(`'id-cantidad-inv'${id}`).value = '';
+        setReload(true);
     };
 
     return (
@@ -58,7 +95,7 @@ export default function EgresoTransDetail(props) {
                 <input
                     name="tot_egreso"
                     className="form-control text-center"
-                    defaultValue={dataTransfer.tot_egreso}
+                    value={dataTransfer.tot_egreso}
                     disabled
                 />
                 <FormHelperText id="outlined-weight-helper-text">

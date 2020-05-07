@@ -8,7 +8,7 @@ import {Backdrop, CircularProgress} from "@material-ui/core";
 import EgresoTransDetail from "./formEgresoTransDetail";
 
 export default function EgresoTransferencia(props) {
-    const {hacienda, recibe, setOpen} = props;
+    const {hacienda, recibe, setOpen, setSearchTransaccionSemana, setNotificacion} = props;
     const [empleados, setEmpleados] = useState([]);
     const [loadData, setLoadData] = useState(true);
 
@@ -56,6 +56,8 @@ export default function EgresoTransferencia(props) {
                                             hacienda={hacienda}
                                             recibe={recibe}
                                             solicita={empleado}
+                                            setSearchTransaccionSemana={setSearchTransaccionSemana}
+                                            setNotificacion={setNotificacion}
                                         />
                                     </Row>
                                 )}

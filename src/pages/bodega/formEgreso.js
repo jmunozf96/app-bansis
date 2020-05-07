@@ -107,7 +107,13 @@ export default function FormEgreso() {
         setCabeceraEgreso({...cabeceraEgreso, empleado: null});
         setReload(true);
         setDisabledElements({
-            change: true, hacienda: true, btnnuevo: false, btnsave: true, material: false, cantidad: true, transfer: true
+            change: true,
+            hacienda: true,
+            btnnuevo: false,
+            btnsave: true,
+            material: false,
+            cantidad: true,
+            transfer: true
         });
         setAlert(null);
         setDetalleEgreso([]);
@@ -184,6 +190,8 @@ export default function FormEgreso() {
                                     hacienda={cabeceraEgreso.hacienda}
                                     recibe={cabeceraEgreso.empleado}
                                     setOpen={setOpenFullScreen}
+                                    setSearchTransaccionSemana={setSearchTransaccionSemana}
+                                    setNotificacion={setNotificacion}
                                 />
                             </FullScreen>
 

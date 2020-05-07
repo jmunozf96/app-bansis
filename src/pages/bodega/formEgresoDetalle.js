@@ -6,23 +6,31 @@ import {TableCell, TableRow} from "@material-ui/core";
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import BlockIcon from '@material-ui/icons/Block';
 
 import {API_LINK, focuselement} from "../../utils/constants";
 import {useDispatch, useSelector} from "react-redux";
 import AlertDialog from "../../components/AlertDialog/AlertDialog";
 import {progressActions} from "../../actions/progressActions";
+import FormDialog from "../../components/FormDialog";
+import EgresoShowTransferencia from "./formEgresoShowTransferencia";
 
 export default function EgresoDetalle(props) {
     const {detalleEgreso, setDetalleEgreso, reload, setReload, setNotificacion, setSearchTransaccionSemana} = props;
     const [edit, setEdit] = useState(false);
     const [itemEdit, setItemEdit] = useState(null);
-
     const [dataModal, setDataModal] = useState({
         title: '',
         content: '',
         material: null
     });
     const [openModal, setOpenModal] = useState(false);
+
+    const [showDetailTransferencia, setShowDetailTransferencia] = useState({
+        transfer: null
+    });
+    const [openModalDetailTransferencia, setOpenModalDetailTransferencia] = useState(false);
 
     const dispatch = useDispatch();
     const progressbarStatus = (state) => dispatch(progressActions(state));
@@ -86,8 +94,10 @@ export default function EgresoDetalle(props) {
 
     const destroyData = (material) => {
         if (material) {
-            const nuevosItems = detalleEgreso.filter((item) => material.shortid !== item.shortid);
-            setDetalleEgreso(nuevosItems);
+            if (!material.hasOwnProperty('id')) {
+                const nuevosItems = detalleEgreso.filter((item) => material.shortid !== item.shortid);
+                setDetalleEgreso(nuevosItems);
+            }
 
             //Eliminar registro de la base de datos.
             if (material.hasOwnProperty('id')) {
@@ -106,6 +116,8 @@ export default function EgresoDetalle(props) {
 
                         if (code === 200) {
                             setSearchTransaccionSemana(true);
+                            const nuevosItems = detalleEgreso.filter((item) => material.shortid !== item.shortid);
+                            setDetalleEgreso(nuevosItems);
                         }
                         setNotificacion({
                             open: true,
@@ -120,6 +132,24 @@ export default function EgresoDetalle(props) {
         }
         setOpenModal(false);
         progressbarStatus(false);
+    };
+
+    const showTransferencia = (id) => {
+        (async () => {
+            const url = `${API_LINK}/bansis-app/index.php/show-transaction?id=${id}`;
+            const request = await fetch(url).then(
+                (response) => response.json()
+            );
+            if (Object.entries(request).length > 0) {
+                setShowDetailTransferencia({
+                    transfer: request.destino ? request.destino : request.compartido,
+                    entra: request.compartido,
+                    sale: request.destino
+                });
+                setOpenModalDetailTransferencia(true);
+            }
+            console.log(showDetailTransferencia)
+        })()
     };
 
     return (
@@ -137,7 +167,8 @@ export default function EgresoDetalle(props) {
                             </TableCell>
                             <TableCell>{material.descripcion}</TableCell>
                             <TableCell align={"center"}>
-                                <Badge variant="warning">
+                                <Badge
+                                    variant={material.movimiento === 'EGRE-ART' ? "warning" : material.cantidad < 0 ? "danger" : "success"}>
                                     {material.movimiento}
                                 </Badge>
                             </TableCell>
@@ -157,25 +188,49 @@ export default function EgresoDetalle(props) {
                             <TableCell align={"center"}>{material.stock}</TableCell>
                             <TableCell align={"center"}>{material.time}</TableCell>
                             <TableCell align={"center"}>
-                                <ButtonGroup>
-                                    {edit && itemEdit.shortid === material.shortid ?
-                                        <Button variant="success" size="sm" onClick={(e) => onClickSave(e)}>
-                                            <SaveIcon/>
-                                        </Button> :
-                                        <Button variant="primary" size="sm"
-                                                onClick={() => onClickEdit(material)}>
-                                            <EditIcon/>
+                                {(material.hasOwnProperty('transferencia') && material.transferencia) ?
+                                    <ButtonGroup>
+                                        <Button size="sm" variant="info" onClick={() => showTransferencia(material.id)}>
+                                            <VisibilityIcon/>
                                         </Button>
-                                    }
-                                    <Button variant="danger" size="sm" onClick={() => deleteMaterial(material)}>
-                                        <DeleteIcon/>
-                                    </Button>
-                                </ButtonGroup>
+                                        <Button size="sm" variant="dark">
+                                            <BlockIcon/>
+                                        </Button>
+                                    </ButtonGroup>
+                                    :
+                                    <ButtonGroup>
+                                        {edit && itemEdit.shortid === material.shortid ?
+                                            <Button variant="success" size="sm" onClick={(e) => onClickSave(e)}>
+                                                <SaveIcon/>
+                                            </Button> :
+                                            <Button variant="primary" size="sm"
+                                                    onClick={() => onClickEdit(material)}>
+                                                <EditIcon/>
+                                            </Button>
+                                        }
+                                        <Button variant="danger" size="sm" onClick={() => deleteMaterial(material)}>
+                                            <DeleteIcon/>
+                                        </Button>
+                                    </ButtonGroup>
+                                }
+
                             </TableCell>
                         </TableRow>
                     ))
                     }
                 </SimpleTableUI>
+                <FormDialog
+                    title="Detalle de transferencia de saldo:"
+                    open={openModalDetailTransferencia}
+                    setOpen={setOpenModalDetailTransferencia}
+                >
+                    <EgresoShowTransferencia
+                        data={showDetailTransferencia}
+                        setOpen={setOpenModalDetailTransferencia}
+                        setNotificacion={setNotificacion}
+                        setSearchTransaccionSemana={setSearchTransaccionSemana}
+                    />
+                </FormDialog>
                 <AlertDialog
                     title={dataModal.title}
                     content={dataModal.content}
