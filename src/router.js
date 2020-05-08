@@ -17,6 +17,7 @@ import FormMaterial from "./pages/bodega/formMaterial";
 import Material from "./pages/bodega/material";
 import Maps from "./pages/hacienda/maps";
 import FormEgreso from "./pages/bodega/formEgreso";
+import Egreso from "./pages/bodega/egreso";
 
 export const routes = [
     {
@@ -77,6 +78,10 @@ export const routes = [
     },
     {
         path: "/bodega/egreso-material",
+        component: Egreso
+    },
+    {
+        path: "/bodega/egreso-material/formulario",
         component: FormEgreso
     },
     {

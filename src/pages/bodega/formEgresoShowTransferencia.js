@@ -6,11 +6,11 @@ import {useDispatch, useSelector} from "react-redux";
 import {progressActions} from "../../actions/progressActions";
 
 export default function EgresoShowTransferencia(props) {
-    const {data: {transfer, entra, sale}, setOpen, setNotificacion, setSearchTransaccionSemana} = props;
+    const {data: {transfer, entra}, setOpen, setNotificacion, setSearchTransaccionSemana} = props;
     console.log(transfer);
 
     const {
-        movimiento, cantidad, id,
+        cantidad, id,
         materialdetalle: {descripcion},
         cabecera_egreso: {egreso_empleado: {nombres}}
     } = transfer;
@@ -39,6 +39,7 @@ export default function EgresoShowTransferencia(props) {
                 setOpen(false);
             }
 
+            await progressbarStatus(false);
             setNotificacion({
                 open: true,
                 message
@@ -51,12 +52,12 @@ export default function EgresoShowTransferencia(props) {
             <Row>
                 <Col className="ml-0 mr-0 col-12">
                     <input type="text"
-                           className={`form-control ${cantidad < 0 ? 'bg-danger' : 'bg-success'} text-white`}
+                           className={`form-control bg-white`}
                            defaultValue={entra ? `EMPLEADO SOLICITADO: ${nombres}` : `EMPLEADO SOLICITANTE: ${nombres}`}
                            disabled/>
                 </Col>
                 <Col className="text-center col-12 mt-3">
-                    <SwapHorizIcon/>
+                    <SwapHorizIcon fontSize={"large"}/>
                 </Col>
                 <Col className="ml-0 mr-0 col-12 mt-3" md={10}>
                     <input type="text" className={`form-control bg-white`}
@@ -67,8 +68,8 @@ export default function EgresoShowTransferencia(props) {
                 </Col>
                 {cantidad < 0 &&
                 <Col className="mt-3">
-                    <Button block variant="dark" onClick={() => cantidad < 0 ? destroyTransaction() : null}>
-                        Eliminar movimiento
+                    <Button block variant="danger" onClick={() => cantidad < 0 ? destroyTransaction() : null}>
+                        <i className="fas fa-eraser"/> Eliminar movimiento
                     </Button>
                 </Col>
                 }
