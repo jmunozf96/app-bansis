@@ -10,13 +10,19 @@ import EgresoCabecera from "./formEgresoCabecera";
 import EgresoDetalle from "./formEgresoDetalle";
 import EgresoTransferencia from "./formEgresoTransferencia";
 
-import {_configStoreApi, _saveApi, API_LINK} from "../../utils/constants";
+import {_configStoreApi, _saveApi, API_LINK} from "../../../../utils/constants";
 import {useDispatch, useSelector} from "react-redux";
-import {progressActions} from "../../actions/progressActions";
-import SnackbarComponent from "../../components/Snackbar/Snackbar";
-import FullScreen from "../../components/FullScreen";
+import {progressActions} from "../../../../actions/progressActions";
+import SnackbarComponent from "../../../../components/Snackbar/Snackbar";
+import FullScreen from "../../../../components/FullScreen";
+import {useHistory, useParams} from "react-router-dom";
 
-export default function FormEgreso() {
+export default function FormEgreso(props) {
+    const {id} = useParams();
+    const [loadTransacionEdit, setLoadTransaccionEdit] = useState({
+        load: id !== undefined,
+        id
+    });
     const [searchTransaccionSemana, setSearchTransaccionSemana] = useState(false);
     const [cabeceraEgreso, setCabeceraEgreso] = useState({
         fecha: moment().format("DD/MM/YYYY"),
@@ -53,6 +59,7 @@ export default function FormEgreso() {
     });
     const [alert, setAlert] = useState(false);
 
+    const history = useHistory();
     const dispatch = useDispatch();
     const progressbarStatus = (state) => dispatch(progressActions(state));
     const authentication = useSelector(state => state.auth._token);
@@ -61,13 +68,43 @@ export default function FormEgreso() {
     const [openFullScreen, setOpenFullScreen] = useState(false);
 
     useEffect(() => {
-        if (disabledElements.change) {
-            return setDisabledElements({
+        if (loadTransacionEdit.load) {
+            (async () => {
+                const api = `${API_LINK}/bansis-app/index.php/egreso-bodega/${loadTransacionEdit.id}`;
+                const request = await fetch(api).then(
+                    (response) => response.json()
+                );
+                const {code} = request;
+                if (code === 200) {
+                    const {egreso: {id, fecha, egreso_empleado}} = request;
+                    await setCabeceraEgreso({
+                        ...cabeceraEgreso,
+                        hacienda: egreso_empleado.idhacienda,
+                        fecha: moment(fecha).format('DD/MM/YYYY'),
+                        empleado: egreso_empleado,
+                        labor: egreso_empleado.labor
+                    });
+                    await setSearchTransaccionSemana(true);
+                }
+                /*setNotificacion({
+                    ...notificacion,
+                    open: true,
+                    message
+                });*/
+            })();
+            setDisabledElements({
                 ...disabledElements,
-                change: false
+                change: false,
+                hacienda: true,
+                bodega: false,
+                btnnuevo: true,
+                btnsave: false
             });
+            setLoadTransaccionEdit({...loadTransacionEdit, load: false});
         }
-    }, [disabledElements, setDisabledElements]);
+    }, [loadTransacionEdit, notificacion,
+        cabeceraEgreso, disabledElements,
+        setDisabledElements, setSearchTransaccionSemana,]);
 
     const onSaveTransaction = () => {
         const transaction = {
@@ -222,7 +259,9 @@ export default function FormEgreso() {
                                 >
                                     <i className="fas fa-save"/> Guardar
                                 </Button>
-                                <Button variant="danger">
+                                <Button variant="danger"
+                                        onClick={() => history.push("/bodega/egreso-material")}
+                                >
                                     <i className="fas fa-home"/> Regresar
                                 </Button>
                             </ButtonGroup>

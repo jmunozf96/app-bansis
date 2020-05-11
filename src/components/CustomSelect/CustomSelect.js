@@ -38,7 +38,6 @@ export default function CustomSelect(props) {
             <option disabled={true} hidden={true} value="">{placeholder}</option>
             {dataSelect.length > 0 && dataSelect.map((data, index) => (
                 <option key={data.id} value={data.id}>
-                    {data.hasOwnProperty('detalle') && data.detalle}
                     {data.hasOwnProperty('descripcion') && data.descripcion}
                 </option>
             ))}

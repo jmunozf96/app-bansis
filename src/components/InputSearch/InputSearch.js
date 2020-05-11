@@ -78,7 +78,7 @@ export default function InputSearch(props) {
             options={options}
             loading={loading}
             value={value}
-            loadingText="Cargando xass..."
+            loadingText="Cargando datos..."
             noOptionsText="No se encontraron datos para la busqueda..."
             onChange={(e, value) => onChangeValue(e, value)}
             renderInput={(params) => (

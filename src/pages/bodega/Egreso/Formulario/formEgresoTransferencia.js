@@ -1,8 +1,8 @@
 import React, {useState} from "react";
 import {Col, Container, Row} from "react-bootstrap";
-import PanelExpansion from "../../components/PanelExpansion";
-import {API_LINK} from "../../utils/constants";
-import useFetch from "../../hooks/useFetch";
+import PanelExpansion from "../../../../components/PanelExpansion";
+import {API_LINK} from "../../../../utils/constants";
+import useFetch from "../../../../hooks/useFetch";
 import {Backdrop, CircularProgress} from "@material-ui/core";
 
 import EgresoTransDetail from "./formEgresoTransDetail";

@@ -87,6 +87,6 @@ export default function ApexChart() {
             options={data.options}
             series={data.series}
             type="bar"
-            height={500}/>
+            height={600}/>
     );
 }

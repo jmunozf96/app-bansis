@@ -1,9 +1,9 @@
 import React from "react";
 import {Button, Col, Container, Row} from "react-bootstrap";
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
-import {API_LINK} from "../../utils/constants";
+import {API_LINK} from "../../../../utils/constants";
 import {useDispatch, useSelector} from "react-redux";
-import {progressActions} from "../../actions/progressActions";
+import {progressActions} from "../../../../actions/progressActions";
 
 export default function EgresoShowTransferencia(props) {
     const {data: {transfer, entra}, setOpen, setNotificacion, setSearchTransaccionSemana} = props;

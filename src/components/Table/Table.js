@@ -3,7 +3,7 @@ import {Col, Row, Table} from "react-bootstrap";
 import PaginationForm from "../Pagination/Pagination";
 
 export default function TableForm(props) {
-    const {children, columns, dataAPI: {code, dataArray}, onChangePage} = props;
+    const {children, columns, dataAPI: {code, dataArray}, onChangePage, pageSize = 7} = props;
     return (
         <>
             <Row>
@@ -28,6 +28,7 @@ export default function TableForm(props) {
                     <PaginationForm
                         current_page={dataArray.current_page}
                         total={dataArray.total}
+                        pageSize={pageSize}
                         onChangePage={onChangePage}
                     />}
                 </Col>

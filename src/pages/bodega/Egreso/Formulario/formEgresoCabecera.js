@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from "react";
 import {Button, Card, Col, Form, FormGroup, Row} from "react-bootstrap";
-import {API_LINK, focuselement} from "../../utils/constants";
-import CustomSelect from "../../components/CustomSelect";
-import InputSearch from "../../components/InputSearch/InputSearch";
+import {API_LINK, focuselement} from "../../../../utils/constants";
+import CustomSelect from "../../../../components/CustomSelect";
+import InputSearch from "../../../../components/InputSearch/InputSearch";
 import {FormHelperText} from "@material-ui/core";
 
 import moment from "moment";
 import 'moment/locale/es';
 import {v4 as uuidv4} from 'uuid';
-import {progressActions} from "../../actions/progressActions";
+import {progressActions} from "../../../../actions/progressActions";
 import {useDispatch} from "react-redux";
 
 export default function EgresoCabecera(props) {
@@ -424,7 +424,7 @@ export default function EgresoCabecera(props) {
                             <FormGroup>
                                 <label>Fecha</label>
                                 <input className="form-control bg-white" name="fecha"
-                                       defaultValue={cabeceraEgreso.fecha}
+                                       value={cabeceraEgreso.fecha}
                                        readOnly/>
                             </FormGroup>
                         </Col>

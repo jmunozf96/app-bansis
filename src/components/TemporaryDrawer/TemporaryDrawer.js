@@ -11,6 +11,8 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import EventAvailableIcon from '@material-ui/icons/EventAvailable';
 import BubbleChartSharpIcon from '@material-ui/icons/BubbleChartSharp';
+import {useDispatch} from "react-redux";
+import {progressActions} from "../../actions/progressActions";
 
 const useStyles = makeStyles({
     list: {
@@ -22,7 +24,7 @@ const useStyles = makeStyles({
 });
 
 export default function TemporaryDrawer(props) {
-    const {openDrawer, setOpenDrawer} = props;
+    const {openDrawer, setOpenDrawer, setFilterCalendar, setReload} = props;
     const classes = useStyles();
     const [state, setState] = React.useState({
         top: false,
@@ -33,12 +35,15 @@ export default function TemporaryDrawer(props) {
     const [periodos, setPeriodos] = useState([]);
     const [open, setOpen] = React.useState(null);
     const [load, setLoad] = useState(true);
+    const [selectItem, setSelectItem] = useState(false);
+    const dispatch = useDispatch();
+    const progessbarStatus = (state) => dispatch(progressActions(state));
 
     useEffect(() => {
         if (openDrawer) {
             setState({
                 ...state,
-                right: true
+                left: true
             });
             setOpenDrawer(false);
         }
@@ -55,7 +60,7 @@ export default function TemporaryDrawer(props) {
                     array_sem.push({['Semana' + contador_semana]: 'Semana ' + contador_semana, value: contador_semana});
                     contador_semana++;
                 }
-                array_per.push({['Periodo' + x]: 'Periodo ' + x, open: false, value: x, semanas: array_sem});
+                array_per.push({['Periodo' + x]: 'Periodo ' + x, open: false, value: x, semanas: array_sem, select: false});
                 array_open['Periodo' + x] = false;
                 array_sem = [];
             }
@@ -78,11 +83,19 @@ export default function TemporaryDrawer(props) {
                 [periodo]: true
             });
         }
-
+        //setReload(true);
     };
 
     const toggleDrawer = (anchor, open) => () => {
         setState({...state, [anchor]: open});
+    };
+
+    const searchSemana = (data, periodo, semana) => {
+        setFilterCalendar(`$periodo${periodo}&semana=${semana}`);
+        setReload(true);
+        setState({...state, left: false});
+        progessbarStatus(true);
+        setSelectItem(true);
     };
 
     const list = () => (
@@ -93,7 +106,7 @@ export default function TemporaryDrawer(props) {
             <List>
                 {periodos.map((periodo, index) => (
                     <React.Fragment key={`Periodo${index}`}>
-                        <ListItem button onClick={() => handleClick(['Periodo' + periodo.value])}>
+                        <ListItem button onClick={() => handleClick(['Periodo' + periodo.value], periodo.value)}>
                             <ListItemIcon>
                                 <EventAvailableIcon/>
                             </ListItemIcon>
@@ -110,7 +123,8 @@ export default function TemporaryDrawer(props) {
                                 onKeyDown={toggleDrawer(anchor, false)}*/
                             >
                                 <List component="div" disablePadding>
-                                    <ListItem button className={classes.nested}>
+                                    <ListItem button className={classes.nested} selected={semana.select}
+                                              onClick={() => searchSemana(periodo, periodo.value, semana.value)}>
                                         <ListItemIcon>
                                             <BubbleChartSharpIcon/>
                                         </ListItemIcon>
@@ -128,7 +142,7 @@ export default function TemporaryDrawer(props) {
 
     return (
         <div>
-            <Drawer anchor={'right'} open={state['right']} onClose={toggleDrawer('right', false)}>
+            <Drawer anchor={'left'} open={state['left']} onClose={toggleDrawer('left', false)}>
                 {list()}
             </Drawer>
         </div>

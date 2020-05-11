@@ -49,7 +49,7 @@ export default function DataDetail(props) {
                 progessbarStatus(false);
             })();
         }
-    }, [page, setPage, dispatch, url, setData, reload, setReload, notificacion]);
+    }, [page, setPage, dispatch, url, setData, reload, setReload]);
 
     const destroyData = (id) => {
         progessbarStatus(true);

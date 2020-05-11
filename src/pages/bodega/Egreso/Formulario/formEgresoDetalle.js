@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {Badge, Button, ButtonGroup, Col} from "react-bootstrap";
-import SimpleTableUI from "../../components/TableUI";
+import SimpleTableUI from "../../../../components/TableUI";
 import {TableCell, TableRow} from "@material-ui/core";
 
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -9,11 +9,11 @@ import SaveIcon from '@material-ui/icons/Save';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import BlockIcon from '@material-ui/icons/Block';
 
-import {API_LINK, focuselement} from "../../utils/constants";
+import {API_LINK, focuselement} from "../../../../utils/constants";
 import {useDispatch, useSelector} from "react-redux";
-import AlertDialog from "../../components/AlertDialog/AlertDialog";
-import {progressActions} from "../../actions/progressActions";
-import FormDialog from "../../components/FormDialog";
+import AlertDialog from "../../../../components/AlertDialog/AlertDialog";
+import {progressActions} from "../../../../actions/progressActions";
+import FormDialog from "../../../../components/FormDialog";
 import EgresoShowTransferencia from "./formEgresoShowTransferencia";
 
 export default function EgresoDetalle(props) {

@@ -5,9 +5,9 @@ import {FormHelperText} from "@material-ui/core";
 import moment from "moment";
 import 'moment/locale/es';
 import qs from 'qs';
-import {_configStoreApi, _saveApi, API_LINK} from "../../utils/constants";
+import {_configStoreApi, _saveApi, API_LINK} from "../../../../utils/constants";
 import {useDispatch, useSelector} from "react-redux";
-import {progressActions} from "../../actions/progressActions";
+import {progressActions} from "../../../../actions/progressActions";
 
 export default function EgresoTransDetail(props) {
     const {data: {id, tot_egreso, material}, hacienda, recibe, solicita, setSearchTransaccionSemana, setNotificacion} = props;

@@ -17,11 +17,13 @@ export default function TableDetail(props) {
                     switch (prop) {
                         case 'estado':
                             return (
-                                <td key={i}>{data[prop] ?
-                                    (<Badge variant="success">A</Badge>)
-                                    :
-                                    (<Badge variant="danger">I</Badge>)
-                                }</td>
+                                <td key={i}>
+                                    {data[prop] ?
+                                        (<Badge variant="success">A</Badge>)
+                                        :
+                                        (<Badge variant="danger">I</Badge>)
+                                    }
+                                </td>
                             );
                         case 'updated_at':
                             return (

@@ -16,8 +16,8 @@ import Error404 from "./components/Error/404/404";
 import FormMaterial from "./pages/bodega/formMaterial";
 import Material from "./pages/bodega/material";
 import Maps from "./pages/hacienda/maps";
-import FormEgreso from "./pages/bodega/formEgreso";
-import Egreso from "./pages/bodega/egreso";
+import FormEgreso from "./pages/bodega/Egreso/Formulario/formEgreso";
+import Egreso from "./pages/bodega/Egreso";
 
 export const routes = [
     {
@@ -81,7 +81,7 @@ export const routes = [
         component: Egreso
     },
     {
-        path: "/bodega/egreso-material/formulario",
+        path: "/bodega/egreso-material/formulario/:id?",
         component: FormEgreso
     },
     {
