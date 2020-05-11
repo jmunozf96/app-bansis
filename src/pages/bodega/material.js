@@ -82,13 +82,13 @@ export default function Material() {
         );
     }
 
-    const updateStockMaterial = (codigo) => {
+    const updateStockMaterial = (codigo, bodega, hacienda) => {
         (async () => {
             const url = `${API_LINK}/bansis-app/custom.php/materiales/updateStock`;
             const config = {
                 method: 'PUT',
                 url: url,
-                data: qs.stringify({cod_material: codigo}),
+                data: qs.stringify({cod_material: codigo, bodega, hacienda}),
                 onDownloadProgress: () => progressbarStatus(true),
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -218,7 +218,7 @@ export default function Material() {
                             <td className="text-center">
                                 <ButtonGroup>
                                     <Button variant="primary" size="sm"
-                                            onClick={() => updateStockMaterial(material.codigo)}>
+                                            onClick={() => updateStockMaterial(material.codigo, material.get_bodega.id, material.get_bodega.idhacienda)}>
                                         <SyncIcon/> Stock
                                     </Button>
                                     <Button variant="danger" size="sm" onClick={() => openModalDestroy(material)}>
