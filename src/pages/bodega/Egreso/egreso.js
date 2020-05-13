@@ -5,11 +5,11 @@ import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Link from '@material-ui/core/Link';
 import Typography from '@material-ui/core/Typography';
 import AddCircleIcon from "@material-ui/icons/AddCircle";
-import ApexChart from "../../../components/ApexChart";
+//import ApexChart from "../../../components/ApexChart";
 import {API_LINK} from "../../../utils/constants";
 import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import {useDispatch, useSelector} from "react-redux";
+import {useDispatch} from "react-redux";
 import {progressActions} from "../../../actions/progressActions";
 import TableForm from "../../../components/Table";
 import moment from "moment";
@@ -17,13 +17,11 @@ import UpdateIcon from "@material-ui/icons/Update";
 
 import SyncIcon from '@material-ui/icons/Sync';
 import DeleteIcon from '@material-ui/icons/Delete';
-import YoutubeSearchedForIcon from '@material-ui/icons/YoutubeSearchedFor';
 
 import {useHistory} from "react-router-dom";
 import SnackbarComponent from "../../../components/Snackbar/Snackbar";
 import InputSearch from "../../../components/InputSearch/InputSearch";
 import {FormHelperText} from "@material-ui/core";
-import CustomSelect from "../../../components/CustomSelect/CustomSelect";
 
 export default function Egreso() {
     const [openDrawer, setOpenDrawer] = useState(false);
@@ -47,7 +45,7 @@ export default function Egreso() {
     const history = useHistory();
     const dispatch = useDispatch();
     const progessbarStatus = (state) => dispatch(progressActions(state));
-    const authentication = useSelector((state) => state.auth._token);
+    //const authentication = useSelector((state) => state.auth._token);
 
     useEffect(() => {
         if (reload) {
@@ -60,6 +58,10 @@ export default function Egreso() {
                 if (response.code === 200) {
                     setEgresos(response);
                 } else {
+                    if (Object.entries(egresos).length === 0) {
+                        const {code} = response;
+                        setEgresos({code});
+                    }
                     setNotificacion({open: true, message: response.message})
                 }
                 progessbarStatus(false);
@@ -94,9 +96,17 @@ export default function Egreso() {
         progessbarStatus(true);
         setEmpleado(value);
         if (value) {
-            setFilter(`&empleado=${value.id}`);
+            if (hacienda) {
+                setFilter(`&hacienda=${hacienda.id}&empleado=${value.id}`);
+            } else {
+                setFilter(`&empleado=${value.id}`);
+            }
         } else {
-            setFilter("");
+            if (hacienda) {
+                setFilter(`&hacienda=${hacienda.id}`);
+            } else {
+                setFilter('');
+            }
         }
         setReload(true);
     };
@@ -155,11 +165,11 @@ export default function Egreso() {
             <Row className="mb-0 pb-0">
                 <Col className="col-12 col-md-3 mb-3 p-0">
                     <ButtonGroup className="col-12">
-                        <Button className="col-2" variant="danger" onClick={() => unFilter()}>
-                            <YoutubeSearchedForIcon/>
+                        <Button className="" variant="danger" onClick={() => unFilter()}>
+                            <i className="fas fa-sync fa-1x"/>
                         </Button>
                         <Button onClick={() => setOpenDrawer(true)} size="">
-                            <i className="fas fa-search"/> Filtrar
+                            <i className="fas fa-filter fa-1x"/>
                         </Button>
                         <Button
                             variant="success"
@@ -167,7 +177,7 @@ export default function Egreso() {
                             type="button"
                             onClick={() => history.push("/bodega/egreso-material/formulario")}
                         >
-                            <AddCircleIcon/> Nuevo
+                            <AddCircleIcon/> Nuevo despacho
                         </Button>
                     </ButtonGroup>
                     <TemporaryDrawer
@@ -177,7 +187,10 @@ export default function Egreso() {
                         setReload={setReload}
                     />
                 </Col>
-                <Col className="col-12 col-md-9">
+            </Row>
+            <hr className="mt-0 pt-0"/>
+            <Row>
+                <Col className="col-12 col-md-12">
                     <form>
                         <Row>
                             <Col md={5} className="">
@@ -226,7 +239,6 @@ export default function Egreso() {
                     />
                 </Col>*/}
             </Row>
-            <hr className="mt-0 pt-0"/>
             <TablaCabecera
                 egresos={egresos}
                 onChangePage={onChangePage}

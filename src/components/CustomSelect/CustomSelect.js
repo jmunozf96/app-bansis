@@ -7,6 +7,7 @@ export default function CustomSelect(props) {
     const [update, setUpdate] = useState(true);
 
     const datos = useFetch(api_url);
+
     const {loading, result} = datos;
 
     useEffect(() => {

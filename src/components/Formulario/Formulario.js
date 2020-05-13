@@ -4,6 +4,7 @@ import SnackbarComponent from "../Snackbar/Snackbar";
 import Card from "../Card/Card";
 import AssignmentReturnIcon from "@material-ui/icons/AssignmentReturn";
 import SaveIcon from "@material-ui/icons/Save";
+import CreateIcon from '@material-ui/icons/Create';
 import {Link} from "react-router-dom";
 
 export default function Formulario(props) {
@@ -26,7 +27,7 @@ export default function Formulario(props) {
                                     onClick={() => onNuevo()}
                                     type="button"
                                 >
-                                    <AssignmentReturnIcon/> Nuevo
+                                    <CreateIcon/> Nuevo
                                 </Button>
                                 <Button
                                     className=""

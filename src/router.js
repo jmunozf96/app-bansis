@@ -15,9 +15,11 @@ import FormGrupo from "./pages/bodega/formGrupo";
 import Error404 from "./components/Error/404/404";
 import FormMaterial from "./pages/bodega/formMaterial";
 import Material from "./pages/bodega/material";
-import Maps from "./pages/hacienda/maps";
+import Maps from "./pages/hacienda/Mapa/maps";
 import FormEgreso from "./pages/bodega/Egreso/Formulario/formEgreso";
 import Egreso from "./pages/bodega/Egreso";
+import FormularioLote from "./pages/hacienda/Lote/Formulario/formLote";
+import Lote from "./pages/hacienda/Lote";
 
 export const routes = [
     {
@@ -51,6 +53,14 @@ export const routes = [
     {
         path: "/hacienda/mapa",
         component: Maps
+    },
+    {
+        path: "/hacienda/lote",
+        component: Lote
+    },
+    {
+        path: "/hacienda/lote/formulario/:id?",
+        component: FormularioLote
     },
     {
         path: "/bodega",

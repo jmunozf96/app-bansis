@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import {GoogleMap, withScriptjs, withGoogleMap, Marker, InfoWindow} from "react-google-maps"
 import {MarkerWithLabel} from "react-google-maps/lib/components/addons/MarkerWithLabel"
 import {Container} from "react-bootstrap";
-import * as parksData from "../../data/skateboard-parks";
+import * as parksData from "../../../data/skateboard-parks";
 import mapStyle from "./mapStyle"
 
 function Map() {

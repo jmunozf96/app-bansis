@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Alert, Button, ButtonGroup, Card, Col, Container, Row} from "react-bootstrap";
+import {Button, ButtonGroup, Card, Col, Container, Row} from "react-bootstrap";
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 import moment from "moment";
@@ -17,12 +17,13 @@ import SnackbarComponent from "../../../../components/Snackbar/Snackbar";
 import FullScreen from "../../../../components/FullScreen";
 import {useHistory, useParams} from "react-router-dom";
 
-export default function FormEgreso(props) {
+export default function FormEgreso() {
     const {id} = useParams();
     const [loadTransacionEdit, setLoadTransaccionEdit] = useState({
         load: id !== undefined,
         id
     });
+
     const [searchTransaccionSemana, setSearchTransaccionSemana] = useState(false);
     const [cabeceraEgreso, setCabeceraEgreso] = useState({
         fecha: moment().format("DD/MM/YYYY"),
@@ -67,6 +68,7 @@ export default function FormEgreso(props) {
     //Estados de transferencia de saldo
     const [openFullScreen, setOpenFullScreen] = useState(false);
 
+
     useEffect(() => {
         if (loadTransacionEdit.load) {
             (async () => {
@@ -79,6 +81,7 @@ export default function FormEgreso(props) {
                     const {egreso: {id, fecha, egreso_empleado}} = request;
                     await setCabeceraEgreso({
                         ...cabeceraEgreso,
+                        id,
                         hacienda: egreso_empleado.idhacienda,
                         fecha: moment(fecha).format('DD/MM/YYYY'),
                         empleado: egreso_empleado,
@@ -98,7 +101,8 @@ export default function FormEgreso(props) {
                 hacienda: true,
                 bodega: false,
                 btnnuevo: true,
-                btnsave: false
+                btnsave: false,
+                transfer: false
             });
             setLoadTransaccionEdit({...loadTransacionEdit, load: false});
         }
@@ -121,7 +125,6 @@ export default function FormEgreso(props) {
             const url = `${API_LINK}/bansis-app/index.php/egreso-bodega`;
             const config = _configStoreApi('POST', url, data, progressbarStatus, authentication);
             const request = await _saveApi(config);
-            console.log(request);
             const {code, message} = request;
 
             setAlert(true);
@@ -130,9 +133,16 @@ export default function FormEgreso(props) {
                 setNotificacion({open: true, message, errors, variant: 'danger'});
             } else {
                 setNotificacion({open: true, message, errors: [], variant: 'success'});
-                setDisabledElements({
-                    change: true, btnnuevo: false, btnsave: true, material: false, cantidad: true
-                });
+                if (!loadTransacionEdit.load) {
+                    setDisabledElements({
+                        ...disabledElements,
+                        change: true,
+                        btnnuevo: false,
+                        btnsave: true,
+                        material: false,
+                        cantidad: true
+                    });
+                }
                 setMaterial(null);
                 setStock(0);
             }
@@ -141,22 +151,39 @@ export default function FormEgreso(props) {
     };
 
     const onClickNuevo = () => {
-        setCabeceraEgreso({...cabeceraEgreso, empleado: null});
-        setReload(true);
-        setDisabledElements({
-            change: true,
-            hacienda: true,
-            btnnuevo: false,
-            btnsave: true,
-            material: false,
-            cantidad: true,
-            transfer: true
-        });
-        setAlert(null);
-        setDetalleEgreso([]);
-        setMaterial(null);
-        setStock(0);
-        setAlert(false);
+        if (!loadTransacionEdit.load && loadTransacionEdit.id === undefined) {
+            setCabeceraEgreso({
+                ...cabeceraEgreso,
+                empleado: null
+            });
+            setReload(true);
+            setDisabledElements({
+                ...disabledElements,
+                change: true,
+                hacienda: true,
+                btnnuevo: false,
+                btnsave: true,
+                material: false,
+                cantidad: true,
+                transfer: true
+            });
+            setAlert(null);
+            setDetalleEgreso([]);
+            setMaterial(null);
+            setStock(0);
+            setAlert(false);
+        } else {
+            setMaterial(null);
+            setStock(0);
+            setDisabledElements({
+                ...disabledElements,
+                change: true,
+                btnnuevo: false,
+                btnsave: true,
+                material: false,
+                cantidad: true
+            });
+        }
     };
 
     const onClickOpenFullScreen = () => {
@@ -189,7 +216,7 @@ export default function FormEgreso(props) {
                         stock={stock}
                         setStock={setStock}
                     >
-                        <Col>
+                        {/*<Col>
                             {alert &&
                             <Alert variant={notificacion.variant}
                                    onClose={() => setAlert(false)} dismissible>
@@ -208,7 +235,7 @@ export default function FormEgreso(props) {
                                 }
                             </Alert>
                             }
-                        </Col>
+                        </Col>*/}
                         <EgresoDetalle
                             reload={reload}
                             setReload={setReload}

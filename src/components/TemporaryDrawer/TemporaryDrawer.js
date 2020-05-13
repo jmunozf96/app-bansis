@@ -35,7 +35,7 @@ export default function TemporaryDrawer(props) {
     const [periodos, setPeriodos] = useState([]);
     const [open, setOpen] = React.useState(null);
     const [load, setLoad] = useState(true);
-    const [selectItem, setSelectItem] = useState(false);
+    //const [selectItem, setSelectItem] = useState(false);
     const dispatch = useDispatch();
     const progessbarStatus = (state) => dispatch(progressActions(state));
 
@@ -95,7 +95,7 @@ export default function TemporaryDrawer(props) {
         setReload(true);
         setState({...state, left: false});
         progessbarStatus(true);
-        setSelectItem(true);
+        //setSelectItem(true);
     };
 
     const list = () => (

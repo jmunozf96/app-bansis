@@ -55,15 +55,6 @@ export default function EgresoCabecera(props) {
     }, [changeURL, setApiEmpleados, setApiMateriales, searchEmpleado, searchMaterial, cabeceraEgreso]);
 
     useEffect(() => {
-        if (disabledElements.change) {
-            return setDisabledElements({
-                ...disabledElements,
-                change: false
-            });
-        }
-    }, [disabledElements, setDisabledElements]);
-
-    useEffect(() => {
         if (searchTransaccionSemana) {
             const progressbarStatus = (state) => dispatch(progressActions(state));
             progressbarStatus(true);
@@ -75,7 +66,11 @@ export default function EgresoCabecera(props) {
                     (error) => error.response
                 );
                 if (Object.entries(request).length > 0) {
-                    const {egreso_detalle} = request;
+                    const {fecha, egreso_detalle} = request;
+                    setCabeceraEgreso({
+                        ...cabeceraEgreso,
+                        fecha: moment(fecha).format("DD/MM/YYYY")
+                    });
                     egreso_detalle.map((egreso, index) => {
                         let material = {
                             id: egreso.id,
@@ -102,10 +97,11 @@ export default function EgresoCabecera(props) {
         searchTransaccionSemana,
         setSearchTransaccionSemana,
         cabeceraEgreso,
+        setCabeceraEgreso,
         setDetalleEgreso,
         dispatch,
         setDisabledElements,
-        disabledElements
+        disabledElements,
     ]);
 
     const onChange = (e) => {
