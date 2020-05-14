@@ -33,6 +33,7 @@
     "react-virtualized": "^9.21.2",
     "redux": "^4.0.5",
     "sass": "^1.26.3",
+    "shortid": "^2.2.15",
     "uuid": "^7.0.3"
   },
   "scripts": {

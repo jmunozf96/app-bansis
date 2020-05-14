@@ -33,7 +33,6 @@ export default function InputSearch(props) {
                         .then((response) => {
                             return response.data;
                         });
-                //await sleep(1e3); // For demo purposes.
                 if (active) {
                     if (response.dataArray)
                         setOptions(response.dataArray.map((data) => data));

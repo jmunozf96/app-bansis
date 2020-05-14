@@ -12,11 +12,11 @@ const myIcon = L.icon({
 });
 
 export default function MapaHacienda(props) {
-    const {size = 550, lote, setLote, reload, setReload} = props;
+    const {size = 550, lote, setLote, reload, setReload, maxZoom = 16} = props;
 
-    const [zoom, setZoom] = useState(16);
-    const [latitud, setLatitud] = useState(lote.latitud);
-    const [longitud, setLongitud] = useState(lote.longitud);
+    const [zoom, setZoom] = useState(maxZoom);
+    const [latitud, setLatitud] = useState(-2.2590146590619145);
+    const [longitud, setLongitud] = useState(-79.49522495269775);
     const [position, setPosition] = useState([latitud, longitud]);
     const [load, setLoad] = useState(true);
 

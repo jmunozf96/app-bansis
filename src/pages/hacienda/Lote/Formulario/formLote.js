@@ -26,8 +26,8 @@ export default function FormularioLote() {
         lote: '',
         has: 0,
         detalle: '',
-        latitud: -2.2590146590619145,
-        longitud: -79.49522495269775
+        latitud: 0,
+        longitud: 0
     });
     const [notificacion, setNotificacion] = useState({
         open: false,
