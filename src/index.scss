@@ -12,3 +12,10 @@ code {
     monospace;
 }
 
+.id-mapa-hacienda{
+  padding: 0;
+.leaflet-control-attribution{
+  display: none !important;
+}
+z-index: 0;
+}

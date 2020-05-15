@@ -4,7 +4,9 @@ import Buscador from "../../../../components/Buscador";
 import {API_LINK} from "../../../../utils/constants";
 import ExploreIcon from "@material-ui/icons/Explore";
 import shortid from "shortid";
-import MapaHacienda from "../../Mapa";
+import ModalForm from "../../../../components/ModalForm";
+import FormModalSeccion from "./FormModalSeccion";
+import MapaBase from "../../../../components/MapaBase";
 
 const FormSeccionLote = () => {
     const Regresar = '/hacienda/lote';
@@ -31,7 +33,9 @@ const FormSeccionLote = () => {
         latitud: 0,
         longitud: 0
     });
+    const [coordenadas, setCoordenadas] = useState(null);
     const [reload, setReload] = useState(false);
+    const [showModal, setShowModal] = useState(false);
     const [distribuciones, setDistribuciones] = useState([]);
 
     useEffect(() => {
@@ -100,6 +104,7 @@ const FormSeccionLote = () => {
                     ...distribuciones,
                     {id: shortid.generate(), ...distribucion}
                 ]);
+                setShowModal(true);
                 setDistribucion({descripcion: '', has: 0});
                 document.getElementById('id-descripcion-distribucion').focus();
             } else {
@@ -128,6 +133,7 @@ const FormSeccionLote = () => {
             volver={Regresar}
         >
             <div className="row">
+                <FormModalSeccion show={showModal} setShow={setShowModal}/>
                 <div className="col-md-8">
                     <div className="form-group">
                         <Buscador
@@ -178,13 +184,11 @@ const FormSeccionLote = () => {
                             </ul>
                         </div>
                         <div className="col-12 p-3">
-                            <MapaHacienda
-                                size={350}
-                                lote={distribucion}
-                                setLote={setDistribucion}
+                            <MapaBase
+                                size={450}
                                 reload={reload}
-                                setReload={setReload}
                                 maxZoom={16}
+                                setPositions={setCoordenadas}
                             />
                         </div>
                     </div>
