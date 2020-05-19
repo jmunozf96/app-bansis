@@ -9,44 +9,64 @@ const myIcon = L.icon({
     popupAnchor: [0, -41]
 });
 
+const myIcon_red = L.icon({
+    iconUrl: 'http://maps.google.com/mapfiles/ms/icons/red.png',
+    iconSize: [35, 41],
+    iconAnchor: [10, 30],
+    popupAnchor: [0, -41]
+});
+
 export default function MapaBase(props) {
-    const {size = 550, reload = false, maxZoom = 16, setPositions} = props;
+    const {size = 550, reload = false, setReload, maxZoom = 16, coordenadas, setCoordenadas, addCoordenadas, datos = []} = props;
 
     const [zoom, setZoom] = useState(maxZoom);
-    const [latitud, setLatitud] = useState(-2.2590146590619145);
-    const [longitud, setLongitud] = useState(-79.49522495269775);
+    const [latitud, setLatitud] = useState(coordenadas.latitud);
+    const [longitud, setLongitud] = useState(coordenadas.longitud);
     const [position, setPosition] = useState([latitud, longitud]);
-    const [load, setLoad] = useState(reload);
+    const [load, setLoad] = useState(true);
 
     useEffect(() => {
         if (load) {
-            setPosition([
-                latitud,
-                longitud
-            ]);
+            setPosition([latitud, longitud]);
             setLoad(false);
         }
-    }, [load, latitud, longitud, setLoad]);
+    }, [load, latitud, longitud]);
+
+    useEffect(() => {
+        if (reload) {
+            setPosition([coordenadas.latitud, coordenadas.longitud]);
+            setZoom(maxZoom);
+            setReload(false);
+        }
+    }, [coordenadas, maxZoom, reload, setReload]);
 
 
     const onChangeZoomMap = (e) => {
-        setZoom(e.target._zoom);
+        if (addCoordenadas) {
+            setZoom(e.target._zoom);
+        }
     };
 
     const onClickCoordenadas = (e) => {
-        setLatitud(e.latlng.lat);
-        setLongitud(e.latlng.lng);
-        setPositions({
-            latitud: e.latlng.lat,
-            longitud: e.latlng.lng
-        });
-        setLoad(true);
+        if (addCoordenadas) {
+            setLatitud(e.latlng.lat);
+            setLongitud(e.latlng.lng);
+            setCoordenadas({
+                latitud: e.latlng.lat,
+                longitud: e.latlng.lng
+            });
+            setLoad(true);
+        }
     };
 
     return (
         <Map
             center={position}
             zoom={zoom}
+            doubleClickZoom={addCoordenadas}
+            scrollWheelZoom={addCoordenadas}
+            touchZoom={addCoordenadas}
+            zoomControl={true}
             className="id-mapa-hacienda"
             style={{height: size}}
             onClick={(e) => onClickCoordenadas(e)}
@@ -56,11 +76,21 @@ export default function MapaBase(props) {
                 attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                 url="http://mt0.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
             />
-            <Marker position={position} icon={myIcon}>
-                <Popup>
-                    Coordenadas. <br/> {latitud}, {longitud}.
-                </Popup>
-            </Marker>
+            {addCoordenadas ?
+                <Marker position={position} icon={myIcon}>
+                    <Popup>
+                        Coordenadas. <br/> {latitud}, {longitud}.
+                    </Popup>
+                </Marker>
+                :
+                datos.length > 0 && datos.map((item, index) =>
+                    <Marker position={[item.latitud, item.longitud]} key={index} icon={myIcon_red}  attribution="dsssf">
+                        <Popup>
+                            Distribucion: {item.lote}{item.descripcion} - <b>has: {parseFloat(item.has).toFixed(2)}</b>. <br/> {item.latitud}, {item.longitud}.
+                        </Popup>
+                    </Marker>
+                )
+            }
         </Map>
     )
 }

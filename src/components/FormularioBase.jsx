@@ -21,6 +21,7 @@ const FormularioBase = (props) => {
                                 className="btn btn-primary"
                                 type="button"
                                 onClick={() => events.nuevo()}
+                                disabled={events.disabledElements.btnNuevo}
                             >
                                 <i className="fas fa-sticky-note"/> Nuevo
                             </button>
@@ -28,6 +29,7 @@ const FormularioBase = (props) => {
                                 className="btn btn-success"
                                 type="button"
                                 onClick={() => events.guardar()}
+                                disabled={events.disabledElements.btnSave}
                             >
                                 <i className="fas fa-save"/> Guardar
                             </button>

@@ -8,12 +8,11 @@ export const API_XASS_SOFCA = `${API_LINK}/bansis-app/XassInventario.php/sofca`;
 export const _saveApi = async (config) => {
     try {
         axios.defaults.headers.put['Content-Type'] = 'application/x-www-form-urlencoded';
-        const peticion = await axios(config).then((response) => {
+        return await axios(config).then((response) => {
             return response.data;
         }, (error) => {
             return error.response.data;
         });
-        return peticion;
     } catch (error) {
         console.error(error);
     }
