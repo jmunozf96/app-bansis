@@ -80,7 +80,7 @@ export default function EgresoCabecera(props) {
                             movimiento: egreso.movimiento,
                             cantidad: parseInt(egreso.cantidad),
                             stock: parseFloat(egreso.materialdetalle.stock),
-                            time: moment(egreso.fecha_salida).format('DD/MM/YY'),
+                            time: moment(egreso.fecha_salida).format('DD/MM/YYYY'),
                             edit: false,
                             transferencia: egreso.movimiento !== 'EGRE-ART'
                         };
@@ -205,7 +205,7 @@ export default function EgresoCabecera(props) {
                 movimiento: 'EGRE-ART',
                 cantidad: 0,
                 stock: parseFloat(value.stock),
-                time: moment().format("DD/MM/YY")
+                time: moment().format("DD/MM/YYYY")
             };
 
             setItem(material);
