@@ -5,17 +5,16 @@ import {API_LINK, focuselement} from "../../../../utils/constants";
 import ExploreIcon from "@material-ui/icons/Explore";
 
 import FormModalSeccion from "./FormModalSeccion";
-import MapaBase from "../../../../components/MapaBase";
-
 import shortid from "shortid";
 import moment from "moment";
 import 'moment/locale/es';
 import {useHistory} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {progressActions} from "../../../../actions/progressActions";
-import {addBodegaFormAction, clearBodegaFormAction} from "../../../../actions/bodega/bodegaActions";
-import {editFormAction} from "../../../../actions/statusFormAction";
-import InputDialog from "../../../../components/InputDialog";
+import FormDetallesDistribucion from "./FormDetallesDistribucion";
+import FormMapa from "./FormMapa";
+
+import qs from "qs";
 
 const FormSeccionLote = () => {
     const Regresar = '/hacienda/lote';
@@ -66,31 +65,23 @@ const FormSeccionLote = () => {
         status: false,
         id: ''
     });
-
     const latitud_base = -2.2590146590619145;
     const longitud_base = -79.49522495269775;
-
     const [coordenadas, setCoordenadas] = useState({
         latitud: latitud_base,
         longitud: longitud_base
     });
     const [zoom, setZoom] = useState(16);
     const [reload, setReload] = useState(false);
-
+    /*------------------------------------------------------------------------*/
     const [distribuciones, setDistribuciones] = useState([]);
     const [edit, setEdit] = useState(false);
-
-    //Estados para el dialogo
-    const [openDialog, setOpenDialog] = useState(false);
-    const [dialog, setDialog] = useState({
-        title: '',
-        message: ''
-    });
 
     const [disabledBtn, setDisabledBtn] = useState({
         btnSave: true,
         btnNuevo: false
     });
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (progressStatus.update) {
@@ -196,17 +187,18 @@ const FormSeccionLote = () => {
     };
 
     const addDatosDistribucion = () => {
-        if (parseFloat(distribucion.has) <= parseFloat(lote.has)) {
+        if (parseFloat(distribucion.has) <= has) {
             if (!disabledFormAdd && parseFloat(distribucion.has) > 0) {
                 progessbarStatus(true);
                 setShowModal(true);
+                setError(null);
             }
         } else {
-            alert("Se excede de las hectareas");
             setDistribucion({
                 ...distribucion,
-                has: (parseFloat(lote.has).toFixed(2)).toString()
+                has: (has.toFixed(2)).toString()
             });
+            setError({message: 'Se excede las hectareas.'})
         }
     };
 
@@ -245,38 +237,6 @@ const FormSeccionLote = () => {
                 }
             }
 
-        }
-    };
-
-    const addDistribucionCoordenadas = () => {
-        if (coordenadas.latitud !== 0 && coordenadas.longitud !== 0) {
-            let object_distribu = {
-                ...distribucion,
-                id: addCoordenadas.id,
-                latitud: coordenadas.latitud,
-                longitud: coordenadas.longitud
-            };
-            if (setEditDistribucion(object_distribu)) {
-                setCoordenadas({
-                    latitud: lote.latitud,
-                    longitud: lote.longitud
-                });
-                setZoom(17);
-                setReload(true);
-
-                setAddCoordenadas({
-                    status: false,
-                    id: ''
-                });
-
-                if (progressbar) {
-                    progessbarStatus(false);
-                }
-
-                clearDataDistribucion();
-                setDisabledFormAdd(false);
-                alert("Distribucion agregada con exito");
-            }
         }
     };
 
@@ -379,25 +339,29 @@ const FormSeccionLote = () => {
         return true;
     };
 
-    const functionDialog = (title, message, ...funcion) => {
-        setOpenDialog(true);
-        setDialog({
-            title,
-            message,
-            funcion: funcion
-        })
-    };
-
     const NuevaSeccion = () => {
         console.log('nuevo')
     };
 
     const InputGuardarSeccion = () => {
-        setOpenDialog(true);
-        setDialog({
-            title: 'Guardar Registro',
-            message: `Esta seguro de agregar esta distribucion al lote ${lote.identificacion}`
-        })
+
+    };
+
+    const saveDistribucionLote = async () => {
+        const data = qs.stringify({json: JSON.stringify(distribuciones)});
+        const api = `${API_LINK}/bansis-app/index.php/lote-seccion`;
+        console.log(data)
+        const config = {
+            method: 'POST',
+            body: data,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': authentication,
+            }
+        };
+        const request = await fetch(api, config);
+        const response = await request.json();
+        console.log(response)
     };
 
 
@@ -406,16 +370,10 @@ const FormSeccionLote = () => {
             icon='fas fa-location-arrow'
             title={'Formulario Secciones por Lote'}
             nuevo={NuevaSeccion}
-            guardar={InputGuardarSeccion}
+            guardar={saveDistribucionLote}
             volver={Regresar}
             disabledElements={disabledBtn}
         >
-            <InputDialog
-                open={openDialog}
-                setOpen={setOpenDialog}
-                title={dialog.title}
-                message={dialog.message}
-            />
             <div className="row">
                 {/*Formulario para añadir fecha de siembre, tipo de suelo, variedad, tipo de variedad.*/}
                 <FormModalSeccion
@@ -459,69 +417,25 @@ const FormSeccionLote = () => {
             <hr className="mt-0"/>
             <div className="row">
                 <div className="col-md-8">
-                    <div className="row">
-                        <div className="col-12">
-                            <ul className="list-group">
-                                <li className="list-group-item">
-                                <span className="lead">
-                                    Hectareas a distribuir: {has.toFixed(2)}
-                                </span>
-                                    <div className="progress mt-2">
-                                        <div className={`progress-bar ${progressStatus.color}`} role="progressbar"
-                                             id="id-lote-cupo"
-                                             aria-valuenow="0"
-                                             aria-valuemin="0"
-                                             aria-valuemax="100"/>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                        <div className="col-12 p-3">
-                            {addCoordenadas.status &&
-                            <div className="row">
-                                <div className="col-md-8">
-                                    <div className="alert alert-info" role="alert">
-                                        <i className="fas fa-cog fa-spin"/> Ubique la distribucion en el mapa...
-                                    </div>
-                                </div>
-                                <div className="col-md-4">
-                                    <button
-                                        type="button"
-                                        className="btn btn-primary btn-lg btn-block"
-                                        onClick={() => addDistribucionCoordenadas()}
-                                    >
-                                        <i className="fas fa-location-arrow"/> {!edit ? "Agregar" : "Editar"}
-                                    </button>
-                                </div>
-                                <div className="col-md-6">
-                                    <div className="form-group">
-                                        <label>Longitud - Coordenadas (X)</label>
-                                        <input type="text" className="form-control bg-white"
-                                               value={coordenadas.longitud}
-                                               disabled/>
-                                    </div>
-                                </div>
-                                <div className="col-md-6">
-                                    <div className="form-group">
-                                        <label>Latitud - Coordenadas (Y)</label>
-                                        <input type="text" className="form-control bg-white" value={coordenadas.latitud}
-                                               disabled/>
-                                    </div>
-                                </div>
-                            </div>
-                            }
-                            <MapaBase
-                                size={450}
-                                reload={reload}
-                                setReload={setReload}
-                                maxZoom={zoom}
-                                coordenadas={coordenadas}
-                                setCoordenadas={setCoordenadas}
-                                addCoordenadas={addCoordenadas.status}
-                                datos={distribuciones}
-                            />
-                        </div>
-                    </div>
+                    <FormMapa
+                        addCoordenadas={addCoordenadas}
+                        clearDataDistribucion={clearDataDistribucion}
+                        distribuciones={distribuciones}
+                        distribucion={distribucion}
+                        edit={edit}
+                        has={has}
+                        lote={lote}
+                        progressStatus={progressStatus}
+                        setAddCoordenadas={setAddCoordenadas}
+                        setDisabledFormAdd={setDisabledFormAdd}
+                        setEditDistribucion={setEditDistribucion}
+                        coordenadas={coordenadas}
+                        setCoordenadas={setCoordenadas}
+                        zoom={zoom}
+                        setZoom={setZoom}
+                        reload={reload}
+                        setReload={setReload}
+                    />
                 </div>
                 <div className="col-md-4">
                     <table className="table">
@@ -569,6 +483,7 @@ const FormSeccionLote = () => {
                                     placeholder="Has."
                                     disabled={disabledFormAdd}
                                 />
+                                {error && <small style={{color: "red"}}>{error.message}</small>}
                             </td>
                             <td>
                                 <button
@@ -580,29 +495,13 @@ const FormSeccionLote = () => {
                             </td>
                         </tr>
                         {distribuciones.length > 0 && distribuciones.map((data) =>
-                            <tr key={data.id} className="">
-                                <td className="text-center">{data.lote}{data.descripcion}</td>
-                                <td className="text-center">
-                                    <small><b>{data.has}</b></small>
-                                </td>
-                                <td className="text-center">
-                                    {!addCoordenadas.status ?
-                                        <div className="btn-group">
-                                            <button className="btn btn-primary" onClick={() => editDistribucion(data)}>
-                                                <i className="fas fa-edit fa-1x"/>
-                                            </button>
-                                            <button className="btn btn-danger"
-                                                    onClick={() => destroyDistribucion(data.id, data.has)}>
-                                                <i className="fas fa-minus fa-1x"/>
-                                            </button>
-                                        </div>
-                                        :
-                                        <>
-                                            <i className="fas fa-location-arrow fa-spin"/>
-                                        </>
-                                    }
-                                </td>
-                            </tr>
+                            <FormDetallesDistribucion
+                                key={data.id}
+                                data={data}
+                                addCoordenadas={addCoordenadas}
+                                edit={editDistribucion}
+                                destroy={destroyDistribucion}
+                            />
                         )}
                         </tbody>
                     </table>

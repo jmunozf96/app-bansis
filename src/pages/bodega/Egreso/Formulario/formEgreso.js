@@ -120,6 +120,7 @@ export default function FormEgreso() {
         const data = qs.stringify({
             json: JSON.stringify(transaction)
         });
+
         progressbarStatus(true);
         (async () => {
             const url = `${API_LINK}/bansis-app/index.php/egreso-bodega`;
