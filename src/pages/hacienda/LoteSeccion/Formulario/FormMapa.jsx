@@ -10,7 +10,7 @@ export default function FormMapa(props) {
         lote, distribucion, addCoordenadas,
         setAddCoordenadas, clearDataDistribucion,
         setDisabledFormAdd, setEditDistribucion,
-        distribuciones, edit,
+        distribuciones, edit, setEdit,
         coordenadas, setCoordenadas,
         zoom, setZoom,
         reload, setReload
@@ -30,10 +30,12 @@ export default function FormMapa(props) {
         if (coordenadas.latitud !== 0 && coordenadas.longitud !== 0) {
             let object_distribu = {
                 ...distribucion,
-                id: addCoordenadas.id,
                 latitud: coordenadas.latitud,
                 longitud: coordenadas.longitud
             };
+
+            console.log(object_distribu);
+
             if (setEditDistribucion(object_distribu)) {
                 setCoordenadas({
                     latitud: lote.latitud,
@@ -54,6 +56,7 @@ export default function FormMapa(props) {
                 clearDataDistribucion();
                 setDisabledFormAdd(false);
                 setOpenDialog(false);
+                setEdit(false);
             }
         }
     };

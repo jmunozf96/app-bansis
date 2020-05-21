@@ -83,12 +83,19 @@ export default function MapaBase(props) {
                     </Popup>
                 </Marker>
                 :
-                datos.length > 0 && datos.map((item, index) =>
-                    <Marker position={[item.latitud, item.longitud]} key={index} icon={myIcon_red}  attribution="dsssf">
-                        <Popup>
-                            Distribucion: {item.lote}{item.descripcion} - <b>has: {parseFloat(item.has).toFixed(2)}</b>. <br/> {item.latitud}, {item.longitud}.
-                        </Popup>
-                    </Marker>
+                datos.length > 0 && datos.map((item, index) => {
+                    if (item.activo) {
+                        return (
+                            <Marker position={[item.latitud, item.longitud]} key={index} icon={myIcon_red}
+                                    attribution="dsssf">
+                                <Popup>
+                                    Distribucion: {item.lote}{item.descripcion} - <b>has: {parseFloat(item.has).toFixed(2)}</b>. <br/> {item.latitud}, {item.longitud}.
+                                </Popup>
+                            </Marker>
+                        )
+                    }
+                    return false;
+                }
                 )
             }
         </Map>

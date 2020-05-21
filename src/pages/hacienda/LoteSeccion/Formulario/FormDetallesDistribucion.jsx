@@ -6,7 +6,14 @@ export default function FormDetallesDistribucion({data, edit, destroy, addCoorde
     return (
         <>
             <tr key={data.id} className="">
-                <td className="text-center">{data.lote}{data.descripcion}</td>
+                <td className="text-center">
+                    <span className={`badge badge-pill badge-${data.activo ? 'primary' : 'danger'}`}>
+                        <i className={`fas ${data.activo ? 'fa-check-circle' : 'fa-ban'}`}/>
+                    </span>
+                </td>
+                <td className="text-center">
+                    {data.lote}{data.descripcion}
+                </td>
                 <td className="text-center">
                     <small><b>{data.has}</b></small>
                 </td>
@@ -16,11 +23,17 @@ export default function FormDetallesDistribucion({data, edit, destroy, addCoorde
                             <button className="btn btn-primary" onClick={() => edit(data)}>
                                 <i className="fas fa-edit fa-1x"/>
                             </button>
-                            <DestroyDistribucion
-                                id={data.id}
-                                has={data.has}
-                                metodo={destroy}
-                            />
+                            {!data.hasOwnProperty('idDistribucion') ?
+                                <DestroyDistribucion
+                                    id={data.id}
+                                    has={data.has}
+                                    metodo={destroy}
+                                />
+                                :
+                                <button className="btn btn-info" type="button">
+                                    <i className="fas fa-lock"/>
+                                </button>
+                            }
                         </div>
                         :
                         <>

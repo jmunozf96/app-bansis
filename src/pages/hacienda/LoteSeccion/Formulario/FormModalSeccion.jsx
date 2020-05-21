@@ -32,7 +32,7 @@ const FormModalSeccion = ({show, setShow, data, setData, cancelar, guardar}) => 
 
         setData({
             ...data,
-            fechaSiembra: moment(data.fechaSiembra).format("DD/MM/YYYY"),
+            fechaSiembra: moment(data.fechaSiembra).format('YYYY-MM-DD'),
         });
 
         guardar();
@@ -110,6 +110,7 @@ const FormModalSeccion = ({show, setShow, data, setData, cancelar, guardar}) => 
                             setValue={setData}
                         />
                     </div>
+                    {data.hasOwnProperty('idDistribucion') &&
                     <div className="col-2">
                         <FormControlLabel
                             control={<Checkbox
@@ -121,6 +122,7 @@ const FormModalSeccion = ({show, setShow, data, setData, cancelar, guardar}) => 
                             label="Activo"
                         />
                     </div>
+                    }
                 </div>
             </div>
         </ModalForm>

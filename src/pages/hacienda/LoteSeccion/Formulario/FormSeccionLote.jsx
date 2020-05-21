@@ -55,6 +55,8 @@ const FormSeccionLote = () => {
         longitud: 0,
         activo: true
     });
+    const [recalculate, setRecalculate] = useState(false);
+    const [result, setResult] = useState(0);
 
     const [disabledFormAdd, setDisabledFormAdd] = useState(true);
     /*Muestra el modal para agregar los datos de la distribucion y a su vez guardar en array de distribuciones*/
@@ -89,6 +91,28 @@ const FormSeccionLote = () => {
         }
     }, [progressStatus]);
 
+    useEffect(() => {
+        if (recalculate) {
+            setHas(result);
+            const porcentaje = result.toFixed(2) / parseFloat(lote.has).toFixed(2);
+            const rango2 = lote.has * 0.25;
+            const rango3 = lote.has * 0.75;
+            let color;
+            if (result.toFixed(2) === parseFloat(lote.has).toFixed(2)) {
+                color = 'bg-success';
+            } else if (result > rango3 && result < parseFloat(lote.has).toFixed(2)) {
+                color = 'bg-info';
+            } else if (result > rango2 && result < rango3) {
+                color = 'bg-warning';
+            } else {
+                color = 'bg-danger';
+            }
+            document.getElementById('id-lote-cupo').style.width = `${porcentaje * 100}%`;
+            setProgressStatus({...progressStatus, update: true, color});
+            setRecalculate(false);
+        }
+    }, [recalculate, lote, progressStatus, result]);
+
     const changeHacienda = (e, value) => {
         setHacienda(value);
         if (value) {
@@ -114,9 +138,46 @@ const FormSeccionLote = () => {
             });
             setZoom(17);
             setReload(true);
-
-            setDistribucion({...distribucion, idlote: value.id, lote: value.identificacion});
             setHas(parseFloat(value.has));
+
+            const {secciones} = value;
+            if (secciones.length > 0) {
+                //Añadir las distribuciones
+                console.log(secciones);
+                let array_data = [];
+                let sumHas = 0;
+                secciones.map((seccion) => {
+                    const {idDistribucion, descripcion, has, fecha_siembra, tipo_variedad, variedad, tipo_suelo, latitud, longitud, estado} = seccion;
+                    if (idDistribucion) {
+                        const seccion_db = {
+                            idDistribucion,
+                            id: shortid.generate(),
+                            idlote: value.id,
+                            lote: value.identificacion,
+                            descripcion: descripcion,
+                            has: (parseFloat(has).toFixed(2)).toString(),
+                            fechaSiembra: moment(fecha_siembra).format('YYYY-MM-DD'),
+                            tipoVariedad: tipo_variedad,
+                            variedad: variedad,
+                            tipoSuelo: tipo_suelo,
+                            latitud,
+                            longitud,
+                            activo: estado === "1"
+                        };
+                        if (estado === "1") {
+                            sumHas += +has;
+                        }
+                        array_data.push(seccion_db);
+                        return true;
+                    }
+                    return false;
+                });
+
+                setResult(+value.has - +sumHas);
+                setRecalculate(true);
+                setDistribuciones(array_data);
+                setReload(true);
+            }
 
             setProgressStatus({...progressStatus, update: true, color: 'bg-success'});
             document.getElementById('id-lote-cupo').style.width = `100%`;
@@ -133,24 +194,10 @@ const FormSeccionLote = () => {
                 hacienda: true
             });
         } else {
-            setCoordenadas({
-                latitud: latitud_base,
-                longitud: longitud_base
-            });
-            setZoom(16);
-            setReload(true);
-
-            setHas(0);
-            setProgressStatus({...progressStatus, value: 0, update: true});
-            setDisabledFormAdd(true);
             setDisabledElements({
                 ...disabledElements,
                 hacienda: false
             });
-
-            if (progressbar)
-                progessbarStatus(false);
-
             clearFormulario();
         }
     };
@@ -158,28 +205,13 @@ const FormSeccionLote = () => {
     const calcularProgreso = (destroy = 0) => {
         let result;
         if (destroy === 0) {
-            result = has - parseFloat(distribucion.has).toFixed(2);
+            result = has.toFixed(2) - parseFloat(distribucion.has).toFixed(2);
         } else {
-            result = has + destroy;
+            result = +has.toFixed(2) + +destroy.toFixed(2);
         }
         if (result >= 0) {
-            const porcentaje = parseFloat(result).toFixed(2) / parseFloat(lote.has).toFixed(2);
-            setHas(result);
-
-            const rango2 = lote.has * 0.25;
-            const rango3 = lote.has * 0.75;
-            let color;
-            if (parseFloat(result).toFixed(2) === parseFloat(lote.has).toFixed(2)) {
-                color = 'bg-success';
-            } else if (result > rango3 && result < parseFloat(lote.has).toFixed(2)) {
-                color = 'bg-info';
-            } else if (result > rango2 && result < rango3) {
-                color = 'bg-warning';
-            } else {
-                color = 'bg-danger';
-            }
-            document.getElementById('id-lote-cupo').style.width = `${porcentaje * 100}%`;
-            setProgressStatus({...progressStatus, update: true, color});
+            setResult(result);
+            setRecalculate(true);
             return true;
         } else {
             return false;
@@ -187,18 +219,23 @@ const FormSeccionLote = () => {
     };
 
     const addDatosDistribucion = () => {
-        if (parseFloat(distribucion.has) <= has) {
-            if (!disabledFormAdd && parseFloat(distribucion.has) > 0) {
-                progessbarStatus(true);
-                setShowModal(true);
-                setError(null);
+        setDistribucion({...distribucion, id: shortid.generate(), idlote: lote.id, lote: lote.identificacion});
+        if (!existeDistribucion(distribucion)) {
+            if (parseFloat(distribucion.has) <= has.toFixed(2)) {
+                if (!disabledFormAdd && parseFloat(distribucion.has) > 0) {
+                    progessbarStatus(true);
+                    setShowModal(true);
+                    setError(null);
+                }
+            } else {
+                setDistribucion({
+                    ...distribucion,
+                    has: (has.toFixed(2)).toString()
+                });
+                setError({message: 'Se excede las hectareas.'})
             }
         } else {
-            setDistribucion({
-                ...distribucion,
-                has: (has.toFixed(2)).toString()
-            });
-            setError({message: 'Se excede las hectareas.'})
+            alert("ya existe");
         }
     };
 
@@ -206,17 +243,16 @@ const FormSeccionLote = () => {
         if (distribucion.descripcion.trim() && parseFloat(distribucion.has) > 0) {
             if (!edit) {
                 if (calcularProgreso()) {
-                    const id = shortid.generate();
+                    //Una vez agregadas se ingresan las coordenadas
                     setAddCoordenadas({
                         status: true,
-                        id
+                        id: distribucion.id
                     });
 
                     setDisabledFormAdd(true);
-
                     setDistribuciones([
                         ...distribuciones,
-                        {id, ...distribucion}
+                        distribucion
                     ]);
 
                     document.getElementById('id-descripcion-distribucion').focus();
@@ -230,14 +266,46 @@ const FormSeccionLote = () => {
                 }
             } else {
                 if (setEditDistribucion(distribucion)) {
-                    setAddCoordenadas({
-                        status: true,
-                        id: distribucion.id
-                    });
+                    if (distribucion.activo) {
+                        if (distribucion.hasOwnProperty('idDistribucion')) {
+                            if (+has >= +distribucion.has) {
+                                setHas(+has - +distribucion.has);
+                                calcularProgreso();
+                            } else {
+                                distribucion.activo = false;
+                                setEditDistribucion(distribucion);
+                                setAddCoordenadas({
+                                    status: false,
+                                    id: ''
+                                });
+                                setEdit(false);
+                            }
+                            progessbarStatus(false);
+                            clearDataDistribucion();
+                        } else {
+                            setAddCoordenadas({
+                                status: true,
+                                id: distribucion.id
+                            });
+                        }
+                    } else {
+                        progessbarStatus(false);
+                        setHas(+has + +distribucion.has);
+                        calcularProgreso(+distribucion.has);
+                        clearDataDistribucion();
+                        setDisabledFormAdd(false);
+                        setEdit(false);
+                        clearDataDistribucion();
+                    }
                 }
             }
 
         }
+    };
+
+    const existeDistribucion = (distribucion) => {
+        const existe = distribuciones.filter(item => item.descripcion.trim() === distribucion.descripcion.trim() && item.activo === true);
+        return existe.length > 0;
     };
 
     const destroyDistribucion = (id, has_destroy) => {
@@ -248,7 +316,7 @@ const FormSeccionLote = () => {
 
     const editDistribucion = (distribucion) => {
         progessbarStatus(true);
-        distribucion.fechaSiembra = moment(distribucion.fechaSiembra).format('YYYY-MM-DD');
+        //distribucion.fechaSiembra = moment(distribucion.fechaSiembra).format('0:yyyy-MM-dd');
         setDistribucion(distribucion);
         setCoordenadas({
             latitud: distribucion.latitud,
@@ -261,6 +329,23 @@ const FormSeccionLote = () => {
         setEdit(true);
         setDisabledFormAdd(true);
         setShowModal(true);
+    };
+
+    const setEditDistribucion = (distribucion_nw) => {
+        distribuciones.map(distribucion => {
+            if (distribucion.id === distribucion_nw.id) {
+                distribucion.tipoVariedad = distribucion_nw.tipoVariedad;
+                distribucion.tipoSuelo = distribucion_nw.tipoSuelo;
+                distribucion.variedad = distribucion_nw.variedad;
+                distribucion.fechaSiembra = distribucion_nw.fechaSiembra;
+                distribucion.latitud = distribucion_nw.latitud;
+                distribucion.longitud = distribucion_nw.longitud;
+                distribucion.activo = distribucion_nw.activo;
+                return true;
+            }
+            return false;
+        });
+        return true;
     };
 
     const cancelarTransaccion = () => {
@@ -282,7 +367,9 @@ const FormSeccionLote = () => {
 
     const clearDataDistribucion = () => {
         setDistribucion({
-            ...distribucion,
+            id: '',
+            idlote: '',
+            lote: '',
             descripcion: '',
             has: '',
             fechaSiembra: moment().format('YYYY-MM-DD'),
@@ -311,36 +398,33 @@ const FormSeccionLote = () => {
         setZoom(16);
         setReload(true);
         setEdit(false);
+        setHas(0);
+
+        if (progressbar)
+            progessbarStatus(false);
+
         setDisabledBtn({
             btnSave: true,
             btnNuevo: false
         });
         setProgressStatus({
             ...progressStatus,
+            value: 0,
             update: true,
             color: 'bg-success'
         });
-        document.getElementById('id-lote-cupo').style.width = `100%`;
-    };
 
-    const setEditDistribucion = (distribucion_nw) => {
-        distribuciones.map(distribucion => {
-            if (distribucion.id === distribucion_nw.id) {
-                distribucion.tipoVariedad = distribucion_nw.tipoVariedad;
-                distribucion.tipoSuelo = distribucion_nw.tipoSuelo;
-                distribucion.variedad = distribucion_nw.variedad;
-                distribucion.fechaSiembra = distribucion_nw.fechaSiembra;
-                distribucion.latitud = distribucion_nw.latitud;
-                distribucion.longitud = distribucion_nw.longitud;
-                return true;
-            }
-            return false;
+        setLote(null);
+        setDisabledElements({
+            hacienda: false,
+            lotes: false
         });
-        return true;
+
+        document.getElementById('id-lote-cupo').style.width = `0%`;
     };
 
     const NuevaSeccion = () => {
-        console.log('nuevo')
+        clearFormulario();
     };
 
     const InputGuardarSeccion = () => {
@@ -348,9 +432,16 @@ const FormSeccionLote = () => {
     };
 
     const saveDistribucionLote = async () => {
-        const data = qs.stringify({json: JSON.stringify(distribuciones)});
+        const data = qs.stringify({
+            json: JSON.stringify({
+                lote: {
+                    id: lote.id,
+                    identificacion: lote.identificacion
+                },
+                distribucion_lote: distribuciones
+            })
+        });
         const api = `${API_LINK}/bansis-app/index.php/lote-seccion`;
-        console.log(data)
         const config = {
             method: 'POST',
             body: data,
@@ -361,7 +452,14 @@ const FormSeccionLote = () => {
         };
         const request = await fetch(api, config);
         const response = await request.json();
-        console.log(response)
+
+        const {code, message} = response;
+
+        if (code === 200) {
+            clearFormulario();
+        }
+
+        alert(message);
     };
 
 
@@ -423,6 +521,7 @@ const FormSeccionLote = () => {
                         distribuciones={distribuciones}
                         distribucion={distribucion}
                         edit={edit}
+                        setEdit={setEdit}
                         has={has}
                         lote={lote}
                         progressStatus={progressStatus}
@@ -438,17 +537,24 @@ const FormSeccionLote = () => {
                     />
                 </div>
                 <div className="col-md-4">
+                    {lote &&
+                    <div className="alert alert-warning">
+                        Lote: {lote.identificacion}{distribucion.descripcion}
+                    </div>
+                    }
+                    {/*{error && <small style={{color: "red"}}>{error.message}</small>}*/}
                     <table className="table">
                         <thead>
-                        <tr>
+                        <tr className="text-center">
+                            <th>...</th>
                             <th>Descripcion</th>
                             <th>Has.</th>
                             <th>Accion</th>
                         </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="table-hover table-bordered table-sm">
                         <tr>
-                            <td>
+                            <td colSpan={2}>
                                 <input
                                     type="text"
                                     id="id-descripcion-distribucion"
@@ -462,34 +568,32 @@ const FormSeccionLote = () => {
                                     autoComplete="off"
                                     disabled={disabledFormAdd}
                                 />
-                                {lote && <small>Descripcion: {lote.identificacion}{distribucion.descripcion}</small>}
                             </td>
-                            <td>
+                            <td className="">
                                 <input
                                     type="number"
                                     id="id-has-distribucion"
                                     value={distribucion.has}
                                     className="form-control text-center"
+                                    autoComplete="off"
                                     onKeyPress={(e) => e.key === 'Enter' ? addDatosDistribucion() : null}
                                     onFocus={(e) => e.target.select()}
                                     onChange={(e) => {
-                                        if (e.target.value > 0) {
-                                            setDistribucion({
-                                                ...distribucion,
-                                                has: e.target.value
-                                            })
-                                        }
+                                        setDistribucion({
+                                            ...distribucion,
+                                            has: e.target.value
+                                        })
                                     }}
                                     placeholder="Has."
                                     disabled={disabledFormAdd}
                                 />
-                                {error && <small style={{color: "red"}}>{error.message}</small>}
                             </td>
-                            <td>
+                            <td className="justify-content-center align-items-center">
                                 <button
                                     className="btn btn-success btn-block"
                                     disabled={disabledFormAdd}
-                                    onClick={() => addDatosDistribucion()}>
+                                    onClick={() => addDatosDistribucion()}
+                                >
                                     <i className="fas fa-plus fa-1x"/>
                                 </button>
                             </td>
@@ -504,6 +608,8 @@ const FormSeccionLote = () => {
                             />
                         )}
                         </tbody>
+                        <tfoot>
+                        </tfoot>
                     </table>
                 </div>
             </div>
