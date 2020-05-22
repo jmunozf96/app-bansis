@@ -13,7 +13,8 @@ export default function FormMapa(props) {
         distribuciones, edit, setEdit,
         coordenadas, setCoordenadas,
         zoom, setZoom,
-        reload, setReload
+        reload, setReload,
+        setDisabledBtn, disabledBtn
     } = props;
 
     const dispatch = useDispatch();
@@ -33,8 +34,6 @@ export default function FormMapa(props) {
                 latitud: coordenadas.latitud,
                 longitud: coordenadas.longitud
             };
-
-            console.log(object_distribu);
 
             if (setEditDistribucion(object_distribu)) {
                 setCoordenadas({
@@ -57,6 +56,7 @@ export default function FormMapa(props) {
                 setDisabledFormAdd(false);
                 setOpenDialog(false);
                 setEdit(false);
+                setDisabledBtn({...disabledBtn, btnSave: false});
             }
         }
     };

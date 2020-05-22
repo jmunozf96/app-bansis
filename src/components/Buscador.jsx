@@ -5,7 +5,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import ExploreIcon from '@material-ui/icons/Explore';
 
 export default function Buscador(props) {
-    const {api, ...moreParams} = props;
+    const {api, value, ...moreParams} = props;
     const [open, setOpen] = useState(false);
     const [options, setOptions] = useState([]);
     const loading = open && options.length === 0;
@@ -52,6 +52,7 @@ export default function Buscador(props) {
             onClose={() => {
                 setOpen(false);
             }}
+            value={value}
             onChange={(e, value) => moreParams.change(e, value)}
             getOptionSelected={(option, value) => option.id === value.id}
             getOptionLabel={(option) => option.descripcion}

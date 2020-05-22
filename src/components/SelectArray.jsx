@@ -1,7 +1,7 @@
 import React from "react";
 import {FormControl, InputLabel, MenuItem, Select} from "@material-ui/core";
 
-export default function SelectArray({name, titulo, descripcion, datos, value, setValue, defaultValue}) {
+export default function SelectArray({name, titulo, descripcion, datos, value, setValue, defaultValue, disabled = false}) {
 
     const handleChange = (e) => {
         setValue({
@@ -11,7 +11,7 @@ export default function SelectArray({name, titulo, descripcion, datos, value, se
     };
 
     return (
-        <FormControl variant="outlined">
+        <FormControl variant="outlined" disabled={disabled}>
             <InputLabel id="demo-simple-select-outlined-label">{titulo}</InputLabel>
             <Select
                 labelId="demo-simple-select-outlined-label"

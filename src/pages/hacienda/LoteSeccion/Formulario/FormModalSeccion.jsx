@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import ModalForm from "../../../../components/ModalForm";
 
 import {Checkbox, FormControlLabel, TextField} from "@material-ui/core";
@@ -12,21 +12,22 @@ const tipo_variedad_data = ['NORMAL', 'MERISTEMA'];
 const variedad_data = ['CEPA', 'WILLIAM', 'CEP/WILLI', 'GRAN ENANO', 'CEP/G.EN'];
 const tipo_suelo_data = ['1', '1/2', '2', '2/3', '3'];
 
-const FormModalSeccion = ({show, setShow, data, setData, cancelar, guardar}) => {
+const FormModalSeccion = ({show, setShow, data, setData, cancelar, guardar, setNotificacion}) => {
 
     const saveData = () => {
+
         if (!data.tipoVariedad.trim()) {
-            alert("Seleccione un tipo de variedad");
+            setNotificacion({open: true, message: 'Seleccione un tipo de variedad'});
             return;
         }
 
         if (!data.variedad.trim()) {
-            alert("Seleccione una variedad");
+            setNotificacion({open: true, message: 'Seleccione una variedad'});
             return;
         }
 
         if (!data.tipoSuelo.trim()) {
-            alert("Seleccione un tipo de suelo");
+            setNotificacion({open: true, message: 'Seleccione un tipo de suelo'});
             return;
         }
 
@@ -50,7 +51,7 @@ const FormModalSeccion = ({show, setShow, data, setData, cancelar, guardar}) => 
         <ModalForm
             show={show}
             icon="fas fa-map-pin"
-            title="Detalles del lote"
+            title={`Detalles del lote ${data.lote}${data.descripcion}`}
             backdrop="static"
             size="xl"
             centered={false}
@@ -71,6 +72,7 @@ const FormModalSeccion = ({show, setShow, data, setData, cancelar, guardar}) => 
                                 shrink: true,
                             }}
                             variant="outlined"
+                            disabled={!data.activo}
                             onChange={(e) => setData({...data, fechaSiembra: e.target.value})}
                         />
                     </div>
@@ -83,6 +85,7 @@ const FormModalSeccion = ({show, setShow, data, setData, cancelar, guardar}) => 
                             datos={tipo_variedad_data}
                             value={data}
                             setValue={setData}
+                            disabled={!data.activo}
                         />
                     </div>
                     <div className="col-md-4">
@@ -94,6 +97,7 @@ const FormModalSeccion = ({show, setShow, data, setData, cancelar, guardar}) => 
                             datos={variedad_data}
                             value={data}
                             setValue={setData}
+                            disabled={!data.activo}
                         />
                     </div>
                 </div>
@@ -108,6 +112,7 @@ const FormModalSeccion = ({show, setShow, data, setData, cancelar, guardar}) => 
                             datos={tipo_suelo_data}
                             value={data}
                             setValue={setData}
+                            disabled={!data.activo}
                         />
                     </div>
                     {data.hasOwnProperty('idDistribucion') &&

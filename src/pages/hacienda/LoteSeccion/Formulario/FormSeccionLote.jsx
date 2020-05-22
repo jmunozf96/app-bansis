@@ -15,6 +15,7 @@ import FormDetallesDistribucion from "./FormDetallesDistribucion";
 import FormMapa from "./FormMapa";
 
 import qs from "qs";
+import SnackbarComponent from "../../../../components/Snackbar/Snackbar";
 
 const FormSeccionLote = () => {
     const Regresar = '/hacienda/lote';
@@ -84,6 +85,10 @@ const FormSeccionLote = () => {
         btnNuevo: false
     });
     const [error, setError] = useState(null);
+    const [notificacion, setNotificacion] = useState({
+        open: false,
+        message: ''
+    });
 
     useEffect(() => {
         if (progressStatus.update) {
@@ -142,45 +147,9 @@ const FormSeccionLote = () => {
 
             const {secciones} = value;
             if (secciones.length > 0) {
-                //Añadir las distribuciones
-                console.log(secciones);
-                let array_data = [];
-                let sumHas = 0;
-                secciones.map((seccion) => {
-                    const {idDistribucion, descripcion, has, fecha_siembra, tipo_variedad, variedad, tipo_suelo, latitud, longitud, estado} = seccion;
-                    if (idDistribucion) {
-                        const seccion_db = {
-                            idDistribucion,
-                            id: shortid.generate(),
-                            idlote: value.id,
-                            lote: value.identificacion,
-                            descripcion: descripcion,
-                            has: (parseFloat(has).toFixed(2)).toString(),
-                            fechaSiembra: moment(fecha_siembra).format('YYYY-MM-DD'),
-                            tipoVariedad: tipo_variedad,
-                            variedad: variedad,
-                            tipoSuelo: tipo_suelo,
-                            latitud,
-                            longitud,
-                            activo: estado === "1"
-                        };
-                        if (estado === "1") {
-                            sumHas += +has;
-                        }
-                        array_data.push(seccion_db);
-                        return true;
-                    }
-                    return false;
-                });
-
-                setResult(+value.has - +sumHas);
-                setRecalculate(true);
-                setDistribuciones(array_data);
-                setReload(true);
+                loadDataLote(value);
             }
 
-            setProgressStatus({...progressStatus, update: true, color: 'bg-success'});
-            document.getElementById('id-lote-cupo').style.width = `100%`;
             setDisabledFormAdd(false);
             focuselement('id-descripcion-distribucion');
 
@@ -200,6 +169,63 @@ const FormSeccionLote = () => {
             });
             clearFormulario();
         }
+    };
+
+    const loadDataLote = (lote) => {
+        if (lote) {
+            (async () => {
+                await progessbarStatus(true);
+                const url = `${API_LINK}/bansis-app/index.php/lote/${lote.id}`;
+                const request = await fetch(url);
+                const response = await request.json();
+                const {code} = response;
+                if (code === 200) {
+                    const {lote: {id, identificacion, secciones}} = response;
+                    if (secciones.length > 0) {
+                        //Añadir las distribuciones
+                        console.log(secciones);
+                        let array_data = [];
+                        let sumHas = 0;
+                        secciones.map((seccion) => {
+                            const {idDistribucion, descripcion, has, fecha_siembra, tipo_variedad, variedad, tipo_suelo, latitud, longitud, estado} = seccion;
+                            if (idDistribucion) {
+                                const seccion_db = {
+                                    idDistribucion,
+                                    id: shortid.generate(),
+                                    idlote: id,
+                                    lote: identificacion,
+                                    descripcion: descripcion,
+                                    has: (parseFloat(has).toFixed(2)).toString(),
+                                    fechaSiembra: moment(fecha_siembra).format('YYYY-MM-DD'),
+                                    tipoVariedad: tipo_variedad,
+                                    variedad: variedad,
+                                    tipoSuelo: tipo_suelo,
+                                    latitud,
+                                    longitud,
+                                    activo: estado === "1"
+                                };
+                                if (estado === "1") {
+                                    sumHas += +has;
+                                }
+                                array_data.push(seccion_db);
+                            }
+                            return true;
+                        });
+
+                        setResult(+lote.has - +sumHas);
+                        setRecalculate(true);
+                        setDistribuciones(array_data);
+                        setReload(true);
+                    } else {
+                        setProgressStatus({...progressStatus, update: true, color: 'bg-success'});
+                        document.getElementById('id-lote-cupo').style.width = `100%`;
+                        return true;
+                    }
+                }
+                await progessbarStatus(false);
+            })()
+        }
+        return false;
     };
 
     const calcularProgreso = (destroy = 0) => {
@@ -232,10 +258,16 @@ const FormSeccionLote = () => {
                     ...distribucion,
                     has: (has.toFixed(2)).toString()
                 });
-                setError({message: 'Se excede las hectareas.'})
+                setNotificacion({
+                    open: true,
+                    message: 'Se excede las hectareas'
+                });
             }
         } else {
-            alert("ya existe");
+            setNotificacion({
+                open: true,
+                message: 'Lote con la misma descripcion ya se encuentra registrado'
+            });
         }
     };
 
@@ -255,9 +287,14 @@ const FormSeccionLote = () => {
                         distribucion
                     ]);
 
+                    setDisabledBtn({...disabledBtn, btnSave: true});
+
                     document.getElementById('id-descripcion-distribucion').focus();
                 } else {
-                    alert("Se excede");
+                    setNotificacion({
+                        open: true,
+                        message: 'Se excede las hectareas.'
+                    });
                     setDistribucion({
                         ...distribucion,
                         has: has.toString()
@@ -265,41 +302,69 @@ const FormSeccionLote = () => {
                     document.getElementById('id-has-distribucion').focus();
                 }
             } else {
-                if (setEditDistribucion(distribucion)) {
-                    if (distribucion.activo) {
-                        if (distribucion.hasOwnProperty('idDistribucion')) {
-                            if (+has >= +distribucion.has) {
-                                setHas(+has - +distribucion.has);
-                                calcularProgreso();
-                            } else {
-                                distribucion.activo = false;
-                                setEditDistribucion(distribucion);
-                                setAddCoordenadas({
-                                    status: false,
-                                    id: ''
-                                });
-                                setEdit(false);
-                            }
-                            progessbarStatus(false);
-                            clearDataDistribucion();
-                        } else {
+                setDisabledFormAdd(false);
+                if (distribucion.hasOwnProperty('idDistribucion')) {
+                    //Buscar si ya tengo las hectareas completas
+                    const distribuciones_activas = distribuciones.filter((item) => item.idDistribucion !== distribucion.idDistribucion && item.activo);
+                    const has_disponibles = distribuciones_activas.reduce((total, item) => +total + +item.has, 0);
+                    if ((+distribucion.has + +has_disponibles) > +lote.has) {
+                        //No se puede editar
+                        setResult(+lote.has - +has_disponibles);
+                        setRecalculate(true);
+                        setEdit(false);
+                        clearDataDistribucion();
+                        setNotificacion({
+                            open: true,
+                            message: 'No se puede realizar estos cambios.'
+                        });
+                    } else {
+                        if (distribucion.activo) {
+                            //Se puede editar
+                            setResult(+lote.has - (+distribucion.has + +has_disponibles));
+                            setRecalculate(true);
+                            setEditDistribucion(distribucion);
+                            setDisabledFormAdd(true);
                             setAddCoordenadas({
                                 status: true,
                                 id: distribucion.id
                             });
+                            setNotificacion({
+                                open: true,
+                                message: 'Cambios registrados correctamente.'
+                            });
+                            setDisabledBtn({...disabledBtn, btnSave: true});
+                        } else {
+                            const distribuciones_activas_all = distribuciones.filter((item) => item.activo);
+                            const has_disponibles_all = distribuciones_activas_all.reduce((total, item) => +total + +item.has, 0);
+                            if (+has_disponibles < +has_disponibles_all) {
+                                setHas((+has_disponibles + +distribucion.has) - +lote.has);
+                                calcularProgreso(+distribucion.has);
+                                setEditDistribucion(distribucion);
+                                setNotificacion({
+                                    open: true,
+                                    message: 'Lote se ha dado de baja.'
+                                });
+                                setDisabledBtn({...disabledBtn, btnSave: false});
+                            } else {
+                                setNotificacion({
+                                    open: true,
+                                    message: 'No se realizo ningun cambio.'
+                                });
+                            }
+                            clearDataDistribucion();
+                            setEdit(false);
                         }
-                    } else {
-                        progessbarStatus(false);
-                        setHas(+has + +distribucion.has);
-                        calcularProgreso(+distribucion.has);
-                        clearDataDistribucion();
-                        setDisabledFormAdd(false);
-                        setEdit(false);
-                        clearDataDistribucion();
                     }
+                } else {
+                    setAddCoordenadas({
+                        status: true,
+                        id: distribucion.id
+                    });
+                    setEditDistribucion(distribucion);
+                    setDisabledBtn({...disabledBtn, btnSave: false});
                 }
+                progessbarStatus(false);
             }
-
         }
     };
 
@@ -432,34 +497,46 @@ const FormSeccionLote = () => {
     };
 
     const saveDistribucionLote = async () => {
-        const data = qs.stringify({
-            json: JSON.stringify({
-                lote: {
-                    id: lote.id,
-                    identificacion: lote.identificacion
-                },
-                distribucion_lote: distribuciones
-            })
-        });
-        const api = `${API_LINK}/bansis-app/index.php/lote-seccion`;
-        const config = {
-            method: 'POST',
-            body: data,
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': authentication,
+        if (distribuciones.length && lote && !disabledBtn.btnSave) {
+            progessbarStatus(true);
+            const data = qs.stringify({
+                json: JSON.stringify({
+                    lote: {
+                        id: lote.id,
+                        identificacion: lote.identificacion
+                    },
+                    distribucion_lote: distribuciones
+                })
+            });
+            const api = `${API_LINK}/bansis-app/index.php/lote-seccion`;
+            const config = {
+                method: 'POST',
+                body: data,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Authorization': authentication,
+                }
+            };
+            const request = await fetch(api, config);
+            const response = await request.json();
+
+            const {code, message} = response;
+
+            if (code === 200) {
+                loadDataLote(lote);
+                clearDataDistribucion();
             }
-        };
-        const request = await fetch(api, config);
-        const response = await request.json();
-
-        const {code, message} = response;
-
-        if (code === 200) {
-            clearFormulario();
+            await progessbarStatus(false);
+            setNotificacion({
+                open: true,
+                message
+            });
+        } else {
+            setNotificacion({
+                open: true,
+                message: 'No hay distribuciones por guardar.'
+            });
         }
-
-        alert(message);
     };
 
 
@@ -472,6 +549,10 @@ const FormSeccionLote = () => {
             volver={Regresar}
             disabledElements={disabledBtn}
         >
+            <SnackbarComponent
+                notificacion={notificacion}
+                setNotificacion={setNotificacion}
+            />
             <div className="row">
                 {/*Formulario para añadir fecha de siembre, tipo de suelo, variedad, tipo de variedad.*/}
                 <FormModalSeccion
@@ -481,6 +562,7 @@ const FormSeccionLote = () => {
                     setData={setDistribucion}
                     cancelar={cancelarTransaccion}
                     guardar={addDistribucion}
+                    setNotificacion={setNotificacion}
                 />
                 {/*-----------------------------------------------------------------------------------*/}
                 <div className="col-md-8">
@@ -493,6 +575,7 @@ const FormSeccionLote = () => {
                             label="Seleccione una Hacienda"
                             setData={setHacienda}
                             variant="outlined"
+                            value={hacienda}
                         />
                     </div>
                 </div>
@@ -508,6 +591,7 @@ const FormSeccionLote = () => {
                             label="Seleccione un Lote"
                             setData={setLote}
                             variant="outlined"
+                            value={lote}
                         />
                     </div>
                 </div>
@@ -534,6 +618,8 @@ const FormSeccionLote = () => {
                         setZoom={setZoom}
                         reload={reload}
                         setReload={setReload}
+                        disabledBtn={disabledBtn}
+                        setDisabledBtn={setDisabledBtn}
                     />
                 </div>
                 <div className="col-md-4">

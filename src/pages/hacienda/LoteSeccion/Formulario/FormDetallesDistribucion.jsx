@@ -37,7 +37,9 @@ export default function FormDetallesDistribucion({data, edit, destroy, addCoorde
                         </div>
                         :
                         <>
-                            <i className="fas fa-location-arrow fa-spin"/>
+                            <button className="btn btn-dark">
+                                <i className="fas fa-spinner fa-pulse"/>
+                            </button>
                         </>
                     }
                 </td>
