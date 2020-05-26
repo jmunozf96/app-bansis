@@ -20,6 +20,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import AlertDialog from "../../../components/AlertDialog/AlertDialog";
 import InputSearch from "../../../components/InputSearch/InputSearch";
 import ShareIcon from '@material-ui/icons/Share';
+import ModalForm from "../../../components/ModalForm";
 
 export default function Lote() {
     const [notificacion, setNotificacion] = useState({
@@ -38,6 +39,10 @@ export default function Lote() {
     const [openModal, setOpenModal] = useState(false);
     //Variable para enviar datos al modal
     const [dataModal, setDataModal] = useState(null);
+
+    //Variable para abrir y cerrar el modal para ver las distribuciones del lote
+    const [openDistribucion, setOpenDistribucion] = useState(false);
+    const [dataLote, setDataLote] = useState(null);
 
     const history = useHistory();
     const dispatch = useDispatch();
@@ -125,6 +130,11 @@ export default function Lote() {
         })()
     };
 
+    const showModalDistribuciones = (data) => {
+        setOpenDistribucion(true);
+        setDataLote(data);
+    };
+
     if (!lotes) {
         return (
             <Backdrop open={true}>
@@ -135,6 +145,12 @@ export default function Lote() {
 
     return (
         <Container fluid className="mb-5">
+            <DetailDistribucion
+                open={openDistribucion}
+                setOpen={setOpenDistribucion}
+                data={dataLote}
+                setData={setDataLote}
+            />
             {
                 openModal &&
                 <AlertDialog
@@ -200,6 +216,7 @@ export default function Lote() {
                     history={history}
                     data={lotes.dataArray.data}
                     onDelete={onDelete}
+                    showModalDistribuciones={showModalDistribuciones}
                 />
             </TableCabecera>
             }
@@ -213,7 +230,7 @@ function TableCabecera(props) {
         <TableForm
             dataAPI={lotes}
             onChangePage={onChangePage}
-            columns={['#', 'Hacienda', 'Lote', 'Has.', 'Coord.X', 'Coord.Y', 'Ult. Act.', 'Estado', 'Accion']}
+            columns={['#', 'Hacienda', 'Lote', 'Has.', 'Distribucion', 'Ult. Act.', 'Estado', 'Accion']}
             pageSize={7}
         >
             {children}
@@ -222,12 +239,12 @@ function TableCabecera(props) {
 }
 
 function TableDetalle(props) {
-    const {data, history, onDelete} = props;
+    const {data, history, onDelete, showModalDistribuciones} = props;
     return (
         <>
             {data.length > 0 && data.map((data, index) =>
                 <tr key={data.id}>
-                    <td className="text-center">{index + 1}</td>
+                    <td className="text-center" width="5%">{index + 1}</td>
                     <td className="text-center" width="28%">
                         <i className="fas fa-map-marked-alt"/> <small>{data.hacienda.detalle}</small>
                     </td>
@@ -239,13 +256,17 @@ function TableDetalle(props) {
                             {parseFloat(data.has)}
                         </Badge>
                     </td>
-                    <td className="text-center" width="14%">
-                        <small><b><RoomIcon style={{color: "#1A4BAE"}}/> {parseFloat(data.longitud)}</b></small>
+                    <td className="text-center" width="15%">
+                        <button
+                            className={`btn btn-${data.secciones.length === 0 ? 'danger' : 'success'}`}
+                            onClick={() => showModalDistribuciones(data)}
+                        >
+                            <i className={`fas fa-${data.secciones.length === 0 ? 'eye-slash' : 'eye'}`}/>
+                            {" "} Secciones
+                            {" "} <span className="badge badge-light">{data.secciones.length}</span>
+                        </button>
                     </td>
-                    <td className="text-center" width="14%">
-                        <small><b><RoomIcon style={{color: "#E54C4C"}}/> {parseFloat(data.latitud)}</b></small>
-                    </td>
-                    <td className="text-center">
+                    <td className="text-center" width="15%">
                         <small>
                             <b>
                                 <UpdateIcon/>
@@ -271,12 +292,6 @@ function TableDetalle(props) {
                             >
                                 <SyncIcon/>
                             </Button>
-                            <Button
-                                variant="warning"
-                                onClick={() => history.push(`/hacienda/lote/formulario/${data.id}`)}
-                            >
-                                <ShareIcon/>
-                            </Button>
                             <Button variant="danger"
                                     onClick={() => onDelete(data)}
                             >
@@ -288,4 +303,96 @@ function TableDetalle(props) {
             )}
         </>
     )
+}
+
+function DetailDistribucion(props) {
+    const {open, setOpen, data, setData} = props;
+    const history = useHistory();
+
+    if (!data) {
+        return (<></>);
+    }
+
+    const {id, identificacion, has, hacienda, secciones} = data;
+    const cancelar = () => {
+        setOpen(false);
+        setData(null);
+    };
+
+    const totalizar = () => {
+        const secciones_activas = secciones.filter((seccion) => (seccion['estado'] === "1"));
+        return secciones_activas.reduce((total, seccion) => +total + +seccion.has, 0)
+    };
+
+    return (
+        <>
+            <ModalForm
+                show={open}
+                animation={true}
+                icon="fas fa-map-pin"
+                title={`Detalles del lote ${identificacion} - ${parseFloat(has).toFixed(2)} has.`}
+                backdrop="static"
+                size="lg"
+                centered={true}
+                scrollable={true}
+                save={() => null}
+                cancel={cancelar}
+            >
+                {secciones.length === 0 ?
+                    <div className="text-center pt-5 pl-2 pr-2">
+                        <i className="fas fa-sad-tear fa-10x"/><br/>
+                        <h5 className="mt-3">No tiene distribuciones.</h5>
+                    </div>
+                    :
+                    <div className="row">
+                        <div className="col-12">
+                            <button
+                                className="btn btn-primary btn-block"
+                                onClick={() => history.push(`/hacienda/lote/seccion/formulario/${id}`)}
+                            >
+                                <i className="fas fa-external-link-alt"/> Ir al formulario de distribucion
+                            </button>
+                        </div>
+                        <div className="col-12 mt-3 table-responsive">
+                            <table className="table table-hover text-center table-bordered">
+                                <thead>
+                                <tr>
+                                    <th>Descripcion</th>
+                                    <th>Has.</th>
+                                    <th>Fecha Siemb.</th>
+                                    <th>Edad</th>
+                                    <th>Tipo Variedad</th>
+                                    <th>Variedad</th>
+                                    <th>Tipo Suelo</th>
+                                    <th>Estado</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {secciones.map((item, index) => (
+                                    <tr key={item.idDistribucion}  style={{backgroundColor: `${item['estado'] !== "1" ? "#FFCCCC" : ""}`}}>
+                                        <td>{item['descripcion']}</td>
+                                        <td>{parseFloat(item['has']).toFixed(2)}</td>
+                                        <td>{moment(item['fecha_siembra']).format("DD/MM/YYYY")}</td>
+                                        <td>{((moment().diff(moment(item['fecha_siembra']), 'days')) / 352).toFixed(0)}</td>
+                                        <td>{item['tipo_variedad']}</td>
+                                        <td>{item['variedad']}</td>
+                                        <td>{item['tipo_suelo']}</td>
+                                        <td>{item['estado'] === "1" ? 'A' : 'I'}</td>
+                                    </tr>
+                                ))}
+                                <tr>
+                                    <td colSpan={4}>Hectareas
+                                        distribuidas: <b>{parseFloat(totalizar()).toFixed(2)}</b></td>
+                                    <td colSpan={4}>
+                                        Hectareas disponibles: <b>{(parseFloat(has) - totalizar()).toFixed(2)}</b>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            </ModalForm>
+        </>
+    );
 }

@@ -8,7 +8,7 @@ import FormModalSeccion from "./FormModalSeccion";
 import shortid from "shortid";
 import moment from "moment";
 import 'moment/locale/es';
-import {useHistory} from "react-router-dom";
+import {useHistory, useParams} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {progressActions} from "../../../../actions/progressActions";
 import FormDetallesDistribucion from "./FormDetallesDistribucion";
@@ -18,6 +18,15 @@ import qs from "qs";
 import SnackbarComponent from "../../../../components/Snackbar/Snackbar";
 
 const FormSeccionLote = () => {
+    const {id} = useParams();
+    const [loadLoteEdit, setLoadLoteEdit] = useState({
+        load: id !== undefined,
+        id
+    });
+
+    const [loadDataLote, setLoadDataLote] = useState(false);
+
+    //-----------------------------------------------------------------------
     const Regresar = '/hacienda/lote';
     const [disabledElements, setDisabledElements] = useState({
         hacienda: false,
@@ -91,6 +100,21 @@ const FormSeccionLote = () => {
     });
 
     useEffect(() => {
+        if (loadLoteEdit.load) {
+            setDisabledBtn({
+                btnNuevo: false,
+                btnSave: false
+            });
+            setLote({
+                id,
+                descripcion: '',
+                secciones: []
+            });
+            setLoadDataLote(true);
+        }
+    }, [loadLoteEdit, id]);
+
+    useEffect(() => {
         if (progressStatus.update) {
             setProgressStatus({...progressStatus, update: false});
         }
@@ -117,6 +141,96 @@ const FormSeccionLote = () => {
             setRecalculate(false);
         }
     }, [recalculate, lote, progressStatus, result]);
+
+    useEffect(() => {
+        if (loadDataLote && lote) {
+            const progessbarStatus = (state) => dispatch(progressActions(state));
+            (async () => {
+                await progessbarStatus(true);
+                const url = `${API_LINK}/bansis-app/index.php/lote/${lote.id}`;
+                const request = await fetch(url);
+                const response = await request.json();
+                const {code} = response;
+                if (code === 200) {
+
+                    if (loadLoteEdit.load) {
+                        const {lote: {hacienda, latitud, longitud, has}} = response;
+                        setDisabledElements({
+                            hacienda: true,
+                            lotes: true
+                        });
+                        setCoordenadas({
+                            latitud: latitud,
+                            longitud: longitud
+                        });
+
+                        setZoom(17);
+                        setReload(true);
+                        setHas(parseFloat(has));
+
+                        setDisabledFormAdd(false);
+                        setHacienda(hacienda);
+                        setLote(response.lote);
+                        setLoadLoteEdit({
+                            ...loadLoteEdit,
+                            load: false
+                        });
+                    }
+
+                    const {lote: {id, identificacion, has, secciones}} = response;
+                    if (secciones.length > 0) {
+                        //Añadir las distribuciones
+                        let array_data = [];
+                        let sumHas = 0;
+                        secciones.map((seccion) => {
+                            const {idDistribucion, descripcion, has, fecha_siembra, tipo_variedad, variedad, tipo_suelo, latitud, longitud, estado} = seccion;
+                            if (idDistribucion) {
+                                const seccion_db = {
+                                    idDistribucion,
+                                    id: shortid.generate(),
+                                    idlote: id,
+                                    lote: identificacion,
+                                    descripcion: descripcion,
+                                    has: (parseFloat(has).toFixed(2)).toString(),
+                                    fechaSiembra: moment(fecha_siembra).format('YYYY-MM-DD'),
+                                    tipoVariedad: tipo_variedad,
+                                    variedad: variedad,
+                                    tipoSuelo: tipo_suelo,
+                                    latitud,
+                                    longitud,
+                                    activo: estado === "1"
+                                };
+                                if (estado === "1") {
+                                    sumHas += +has;
+                                }
+                                array_data.push(seccion_db);
+                            }
+                            return true;
+                        });
+
+                        setResult(+has - +sumHas);
+                        setRecalculate(true);
+                        setDistribuciones(array_data);
+                        setReload(true);
+                    } else {
+                        setProgressStatus({...progressStatus, update: true, color: 'bg-success'});
+                        document.getElementById('id-lote-cupo').style.width = `100%`;
+                        return true;
+                    }
+                } else {
+                    if (loadLoteEdit.load) {
+                        setLoadLoteEdit({
+                            ...loadLoteEdit,
+                            load: false
+                        });
+                        await history.push("/error");
+                    }
+                }
+                await progessbarStatus(false);
+            })();
+            setLoadDataLote(false);
+        }
+    }, [loadDataLote, lote, dispatch, progressStatus, loadLoteEdit, history]);
 
     const changeHacienda = (e, value) => {
         setHacienda(value);
@@ -147,7 +261,7 @@ const FormSeccionLote = () => {
 
             const {secciones} = value;
             if (secciones.length > 0) {
-                loadDataLote(value);
+                setLoadDataLote(true);
             }
 
             setDisabledFormAdd(false);
@@ -169,63 +283,6 @@ const FormSeccionLote = () => {
             });
             clearFormulario();
         }
-    };
-
-    const loadDataLote = (lote) => {
-        if (lote) {
-            (async () => {
-                await progessbarStatus(true);
-                const url = `${API_LINK}/bansis-app/index.php/lote/${lote.id}`;
-                const request = await fetch(url);
-                const response = await request.json();
-                const {code} = response;
-                if (code === 200) {
-                    const {lote: {id, identificacion, secciones}} = response;
-                    if (secciones.length > 0) {
-                        //Añadir las distribuciones
-                        console.log(secciones);
-                        let array_data = [];
-                        let sumHas = 0;
-                        secciones.map((seccion) => {
-                            const {idDistribucion, descripcion, has, fecha_siembra, tipo_variedad, variedad, tipo_suelo, latitud, longitud, estado} = seccion;
-                            if (idDistribucion) {
-                                const seccion_db = {
-                                    idDistribucion,
-                                    id: shortid.generate(),
-                                    idlote: id,
-                                    lote: identificacion,
-                                    descripcion: descripcion,
-                                    has: (parseFloat(has).toFixed(2)).toString(),
-                                    fechaSiembra: moment(fecha_siembra).format('YYYY-MM-DD'),
-                                    tipoVariedad: tipo_variedad,
-                                    variedad: variedad,
-                                    tipoSuelo: tipo_suelo,
-                                    latitud,
-                                    longitud,
-                                    activo: estado === "1"
-                                };
-                                if (estado === "1") {
-                                    sumHas += +has;
-                                }
-                                array_data.push(seccion_db);
-                            }
-                            return true;
-                        });
-
-                        setResult(+lote.has - +sumHas);
-                        setRecalculate(true);
-                        setDistribuciones(array_data);
-                        setReload(true);
-                    } else {
-                        setProgressStatus({...progressStatus, update: true, color: 'bg-success'});
-                        document.getElementById('id-lote-cupo').style.width = `100%`;
-                        return true;
-                    }
-                }
-                await progessbarStatus(false);
-            })()
-        }
-        return false;
     };
 
     const calcularProgreso = (destroy = 0) => {
@@ -448,52 +505,57 @@ const FormSeccionLote = () => {
     };
 
     const clearFormulario = () => {
-        clearDataDistribucion();
-        setDistribuciones([]);
-        setDisabledFormAdd(true);
-        setShowModal(false);
-        setAddCoordenadas({
-            ...addCoordenadas,
-            status: false
-        });
-        setCoordenadas({
-            latitud: latitud_base,
-            longitud: longitud_base
-        });
-        setZoom(16);
-        setReload(true);
-        setEdit(false);
-        setHas(0);
+        if (loadLoteEdit.id !== '') {
+            setDisabledElements({
+                hacienda: true,
+                lotes: true
+            });
+            setDisabledFormAdd(false);
+        } else {
+            setDisabledElements({
+                hacienda: false,
+                lotes: false
+            });
+            setLote(null);
+            setDisabledBtn({
+                btnSave: true,
+                btnNuevo: false
+            });
+            setDistribuciones([]);
+            setDisabledFormAdd(true);
+            setShowModal(false);
+            setAddCoordenadas({
+                ...addCoordenadas,
+                status: false
+            });
+            setCoordenadas({
+                latitud: latitud_base,
+                longitud: longitud_base
+            });
+            setZoom(16);
+            setReload(true);
+            setEdit(false);
+            setHas(0);
 
-        if (progressbar)
-            progessbarStatus(false);
+            setProgressStatus({
+                ...progressStatus,
+                value: 0,
+                update: true,
+                color: 'bg-success'
+            });
 
-        setDisabledBtn({
-            btnSave: true,
-            btnNuevo: false
-        });
-        setProgressStatus({
-            ...progressStatus,
-            value: 0,
-            update: true,
-            color: 'bg-success'
-        });
+            document.getElementById('id-lote-cupo').style.width = `0%`;
 
-        setLote(null);
-        setDisabledElements({
-            hacienda: false,
-            lotes: false
-        });
+            clearDataDistribucion();
 
-        document.getElementById('id-lote-cupo').style.width = `0%`;
+            if (progressbar)
+                progessbarStatus(false);
+        }
+
     };
 
     const NuevaSeccion = () => {
         clearFormulario();
-    };
-
-    const InputGuardarSeccion = () => {
-
     };
 
     const saveDistribucionLote = async () => {
@@ -523,7 +585,7 @@ const FormSeccionLote = () => {
             const {code, message} = response;
 
             if (code === 200) {
-                loadDataLote(lote);
+                setLoadDataLote(true);
                 clearDataDistribucion();
             }
             await progessbarStatus(false);
