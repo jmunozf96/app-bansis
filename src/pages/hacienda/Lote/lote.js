@@ -177,7 +177,7 @@ export default function Lote() {
                 </Col>
             </Row>
             <Row className="mb-0 pb-0">
-                <Col className="col-12 col-md-2 mb-3 p-0">
+                <Col className="col-12 col-md-4 mb-3 p-0">
                     <ButtonGroup className="col-12">
                         <Button className="" variant="danger">
                             <i className="fas fa-sync fa-1x"/>
@@ -189,6 +189,14 @@ export default function Lote() {
                             onClick={() => history.push("/hacienda/lote/formulario")}
                         >
                             <AddCircleIcon/> Nuevo Lote
+                        </Button>
+                        <Button
+                            variant="primary"
+                            className="align-self-end"
+                            type="button"
+                            onClick={() => history.push("/hacienda/lote/seccion/formulario")}
+                        >
+                            <AddCircleIcon/> Nueva Distribucion
                         </Button>
                     </ButtonGroup>
                 </Col>
@@ -332,7 +340,7 @@ function DetailDistribucion(props) {
                 icon="fas fa-map-pin"
                 title={`Detalles del lote ${identificacion} - ${parseFloat(has).toFixed(2)} has.`}
                 backdrop="static"
-                size="lg"
+                size="xl"
                 centered={true}
                 scrollable={true}
                 save={() => null}
