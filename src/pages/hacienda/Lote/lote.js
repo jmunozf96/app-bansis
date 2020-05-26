@@ -19,6 +19,7 @@ import RoomIcon from '@material-ui/icons/Room';
 import CircularProgress from "@material-ui/core/CircularProgress";
 import AlertDialog from "../../../components/AlertDialog/AlertDialog";
 import InputSearch from "../../../components/InputSearch/InputSearch";
+import ShareIcon from '@material-ui/icons/Share';
 
 export default function Lote() {
     const [notificacion, setNotificacion] = useState({
@@ -133,7 +134,7 @@ export default function Lote() {
     }
 
     return (
-        <Container fluid>
+        <Container fluid className="mb-5">
             {
                 openModal &&
                 <AlertDialog
@@ -238,10 +239,10 @@ function TableDetalle(props) {
                             {parseFloat(data.has)}
                         </Badge>
                     </td>
-                    <td className="text-center" width="16%">
+                    <td className="text-center" width="14%">
                         <small><b><RoomIcon style={{color: "#1A4BAE"}}/> {parseFloat(data.longitud)}</b></small>
                     </td>
-                    <td className="text-center" width="16%">
+                    <td className="text-center" width="14%">
                         <small><b><RoomIcon style={{color: "#E54C4C"}}/> {parseFloat(data.latitud)}</b></small>
                     </td>
                     <td className="text-center">
@@ -259,7 +260,7 @@ function TableDetalle(props) {
                             (<Badge variant="danger">I</Badge>)
                         }
                     </td>
-                    <td className="text-center" width="9%">
+                    <td className="text-center" width="12%">
                         <ButtonGroup size="sm">
                             {/*<Button variant="info">
                                 <VisibilityIcon/>
@@ -269,6 +270,12 @@ function TableDetalle(props) {
                                 onClick={() => history.push(`/hacienda/lote/formulario/${data.id}`)}
                             >
                                 <SyncIcon/>
+                            </Button>
+                            <Button
+                                variant="warning"
+                                onClick={() => history.push(`/hacienda/lote/formulario/${data.id}`)}
+                            >
+                                <ShareIcon/>
                             </Button>
                             <Button variant="danger"
                                     onClick={() => onDelete(data)}

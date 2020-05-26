@@ -21,6 +21,7 @@ import Egreso from "./pages/bodega/Egreso";
 import FormularioLote from "./pages/hacienda/Lote/Formulario/formLote";
 import Lote from "./pages/hacienda/Lote";
 import FormSeccionLote from "./pages/hacienda/LoteSeccion/Formulario/FormSeccionLote";
+import SeccionLote from "./pages/hacienda/LoteSeccion";
 
 export const routes = [
     {
@@ -65,6 +66,10 @@ export const routes = [
     },
     {
         path: "/hacienda/lote/seccion",
+        component: SeccionLote
+    },
+    {
+        path: "/hacienda/lote/seccion/formulario/:id?",
         component: FormSeccionLote
     },
     {
