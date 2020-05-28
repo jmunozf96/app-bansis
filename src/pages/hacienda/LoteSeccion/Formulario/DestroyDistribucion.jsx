@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import InputDialog from "../../../../components/InputDialog";
 
-export default function DestroyDistribucion({id, has, metodo}) {
+export default function DestroyDistribucion({id, has, db = false, idDistribucion = '', metodo, classBtn, classIcon}) {
     //Estados para el dialogo
     const [openDialog, setOpenDialog] = useState(false);
     const dialog = {
@@ -10,7 +10,7 @@ export default function DestroyDistribucion({id, has, metodo}) {
     };
 
     const destroyDetalle = () => {
-        metodo(id, has);
+        metodo(id, has, db, idDistribucion);
         setOpenDialog(false);
     };
 
@@ -23,9 +23,9 @@ export default function DestroyDistribucion({id, has, metodo}) {
                 message={dialog.message}
                 afirmacion={destroyDetalle}
             />
-            <button className="btn btn-danger"
+            <button className={`btn btn-${classBtn}`}
                     onClick={() => setOpenDialog(true)}>
-                <i className="fas fa-minus fa-1x"/>
+                <i className={classIcon}/>
             </button>
         </>
     )

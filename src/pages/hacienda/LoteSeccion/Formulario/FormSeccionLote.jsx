@@ -93,7 +93,6 @@ const FormSeccionLote = () => {
         btnSave: true,
         btnNuevo: false
     });
-    const [error, setError] = useState(null);
     const [notificacion, setNotificacion] = useState({
         open: false,
         message: ''
@@ -308,7 +307,6 @@ const FormSeccionLote = () => {
                 if (!disabledFormAdd && parseFloat(distribucion.has) > 0) {
                     progessbarStatus(true);
                     setShowModal(true);
-                    setError(null);
                 }
             } else {
                 setDistribucion({
@@ -430,10 +428,28 @@ const FormSeccionLote = () => {
         return existe.length > 0;
     };
 
-    const destroyDistribucion = (id, has_destroy) => {
+    const destroyDistribucion = (id, has_destroy, db = false, idDistribucion = '') => {
         calcularProgreso(parseFloat(has_destroy));
         const nw_distribucion = distribuciones.filter(item => item.id !== id);
         setDistribuciones(nw_distribucion);
+
+        if (db) {
+            (async () => {
+                try {
+                    const url = `${API_LINK}/bansis-app/index.php/lote-seccion/${idDistribucion}`;
+                    const configuracion = {
+                        method: 'DELETE',
+                        headers: {authorization: authentication}
+                    };
+                    const request = await fetch(url, configuracion);
+                    const response = await request.json();
+                    console.log(response);
+                } catch (error) {
+                    console.log(error)
+                }
+            })();
+        }
+
     };
 
     const editDistribucion = (distribucion) => {

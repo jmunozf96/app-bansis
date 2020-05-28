@@ -1,1 +1,1 @@
-export {default} from "./SeccionLote";
+export {default} from "./SeccionLote.jsx";

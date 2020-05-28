@@ -22,6 +22,7 @@ import FormularioLote from "./pages/hacienda/Lote/Formulario/formLote";
 import Lote from "./pages/hacienda/Lote";
 import FormSeccionLote from "./pages/hacienda/LoteSeccion/Formulario/FormSeccionLote";
 import SeccionLote from "./pages/hacienda/LoteSeccion";
+import FormSeccionLabor from "./pages/hacienda/LoteSeccionLabor/Formulario/FormSeccionLabor";
 
 export const routes = [
     {
@@ -71,6 +72,10 @@ export const routes = [
     {
         path: "/hacienda/lote/seccion/formulario/:id?",
         component: FormSeccionLote
+    },
+    {
+        path: "/hacienda/lote/seccion/labor",
+        component: FormSeccionLabor
     },
     {
         path: "/bodega",

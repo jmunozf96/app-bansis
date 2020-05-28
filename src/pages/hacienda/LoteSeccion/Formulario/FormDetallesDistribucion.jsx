@@ -27,12 +27,20 @@ export default function FormDetallesDistribucion({data, edit, destroy, addCoorde
                                 <DestroyDistribucion
                                     id={data.id}
                                     has={data.has}
+                                    classBtn="danger"
+                                    classIcon="fas fa-minus fa-1x"
                                     metodo={destroy}
                                 />
                                 :
-                                <button className="btn btn-info" type="button">
-                                    <i className="fas fa-lock"/>
-                                </button>
+                                <DestroyDistribucion
+                                    id={data.id}
+                                    has={data.has}
+                                    db={true}
+                                    idDistribucion={data.idDistribucion}
+                                    classBtn="info"
+                                    classIcon="fas fa-minus"
+                                    metodo={destroy}
+                                />
                             }
                         </div>
                         :

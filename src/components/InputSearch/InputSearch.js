@@ -9,7 +9,7 @@ import YoutubeSearchedForIcon from '@material-ui/icons/YoutubeSearchedFor';
 import "./InputSearch.scss";
 
 export default function InputSearch(props) {
-    const {id, label, api_url, setSearch = null, onChangeValue, disabled, value = null} = props;
+    const {id, label, api_url, setSearch, onChangeValue, disabled, value = null} = props;
     const [open, setOpen] = useState(false);
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -56,9 +56,7 @@ export default function InputSearch(props) {
 
     const onChange = (e) => {
         //setLoading(true);
-        if (setSearch) {
-            setSearch(e.target.value);
-        }
+        setSearch(e.target.value);
         setLoading(true);
     };
 

@@ -53,7 +53,9 @@ export default function MenuTop() {
                                     <NavDropdown.Item as={Link} to="/hacienda/empleado">Empleados</NavDropdown.Item>
                                     <NavDropdown.Divider/>
                                     <NavDropdown.Item as={Link} to="/hacienda/lote">Lotes</NavDropdown.Item>
-                                    <NavDropdown.Item as={Link} to="/hacienda/lote/seccion">Lotes - Seccion</NavDropdown.Item>
+                                    <NavDropdown.Item as={Link} to="/hacienda/lote/seccion/labor">
+                                        Lotes - Labor
+                                    </NavDropdown.Item>
                                     <NavDropdown.Divider/>
                                     <NavDropdown.Item as={Link} to="/hacienda/mapa">Mapa</NavDropdown.Item>
                                     <NavDropdown.Item>Separated link</NavDropdown.Item>

@@ -15,11 +15,9 @@ import moment from "moment";
 import UpdateIcon from "@material-ui/icons/Update";
 import SyncIcon from "@material-ui/icons/Sync";
 import DeleteIcon from "@material-ui/icons/Delete";
-import RoomIcon from '@material-ui/icons/Room';
 import CircularProgress from "@material-ui/core/CircularProgress";
 import AlertDialog from "../../../components/AlertDialog/AlertDialog";
 import InputSearch from "../../../components/InputSearch/InputSearch";
-import ShareIcon from '@material-ui/icons/Share';
 import ModalForm from "../../../components/ModalForm";
 
 export default function Lote() {
@@ -321,7 +319,7 @@ function DetailDistribucion(props) {
         return (<></>);
     }
 
-    const {id, identificacion, has, hacienda, secciones} = data;
+    const {id, identificacion, has, secciones} = data;
     const cancelar = () => {
         setOpen(false);
         setData(null);
@@ -346,21 +344,22 @@ function DetailDistribucion(props) {
                 save={() => null}
                 cancel={cancelar}
             >
-                {secciones.length === 0 ?
-                    <div className="text-center pt-5 pl-2 pr-2">
-                        <i className="fas fa-sad-tear fa-10x"/><br/>
-                        <h5 className="mt-3">No tiene distribuciones.</h5>
+                <div className="row">
+                    <div className="col-12">
+                        <button
+                            className="btn btn-primary btn-block"
+                            onClick={() => history.push(`/hacienda/lote/seccion/formulario/${id}`)}
+                        >
+                            <i className="fas fa-external-link-alt"/> Ir al formulario de distribucion
+                        </button>
                     </div>
-                    :
-                    <div className="row">
-                        <div className="col-12">
-                            <button
-                                className="btn btn-primary btn-block"
-                                onClick={() => history.push(`/hacienda/lote/seccion/formulario/${id}`)}
-                            >
-                                <i className="fas fa-external-link-alt"/> Ir al formulario de distribucion
-                            </button>
+                    {secciones.length === 0 ?
+                        <div className="text-center pt-5 pl-2 pr-2 col-12">
+                            <i className="fas fa-sad-tear fa-10x"/><br/>
+                            <h5 className="mt-3">No tiene distribuciones.</h5>
                         </div>
+                        :
+
                         <div className="col-12 mt-3 table-responsive">
                             <table className="table table-hover text-center table-bordered">
                                 <thead>
@@ -377,7 +376,8 @@ function DetailDistribucion(props) {
                                 </thead>
                                 <tbody>
                                 {secciones.map((item, index) => (
-                                    <tr key={item.idDistribucion}  style={{backgroundColor: `${item['estado'] !== "1" ? "#FFCCCC" : ""}`}}>
+                                    <tr key={item.idDistribucion}
+                                        style={{backgroundColor: `${item['estado'] !== "1" ? "#FFCCCC" : ""}`}}>
                                         <td>{item['descripcion']}</td>
                                         <td>{parseFloat(item['has']).toFixed(2)}</td>
                                         <td>{moment(item['fecha_siembra']).format("DD/MM/YYYY")}</td>
@@ -398,8 +398,8 @@ function DetailDistribucion(props) {
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                }
+                    }
+                </div>
             </ModalForm>
         </>
     );
