@@ -142,14 +142,15 @@ const FormSeccionLote = () => {
     }, [recalculate, lote, progressStatus, result]);
 
     useEffect(() => {
+        const progessbarStatus = (state) => dispatch(progressActions(state));
         if (loadDataLote && lote) {
-            const progessbarStatus = (state) => dispatch(progressActions(state));
             (async () => {
-                await progessbarStatus(true);
+                progessbarStatus(true);
                 const url = `${API_LINK}/bansis-app/index.php/lote/${lote.id}`;
                 const request = await fetch(url);
                 const response = await request.json();
                 const {code} = response;
+                await progessbarStatus(false);
                 if (code === 200) {
 
                     if (loadLoteEdit.load) {
@@ -225,7 +226,6 @@ const FormSeccionLote = () => {
                         await history.push("/error");
                     }
                 }
-                await progessbarStatus(false);
             })();
             setLoadDataLote(false);
         }

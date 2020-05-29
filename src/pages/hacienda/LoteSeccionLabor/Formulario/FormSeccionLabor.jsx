@@ -42,6 +42,8 @@ export default function FormSeccionLabor() {
     const [empleado, setEmpleado] = useState(null);
     const [changeURL, setChangeURL] = useState(false);
 
+    const [searchHasDisponibles, setSearchHasDisponibles] = useState(false);
+    const [hasDistribuidas, setHasDistribuidas] = useState(0);
     const [has, setHas] = useState(0);
     const [hasDistribucion, setHasDistribucion] = useState(0);
     const [hasdisplay, setHasdisplay] = useState(0);
@@ -61,6 +63,7 @@ export default function FormSeccionLabor() {
         loteSeccion: null,
         hasDistribucion: 0
     });
+    const [idcabecera, setIdCabecera] = useState('');
     const [cabeceraDistribucion, setCabeceraDistribucion] = useState({
         hacienda: null,
         labor: null,
@@ -68,6 +71,8 @@ export default function FormSeccionLabor() {
         hasTotal: 0
     });
     const [detalleDistribucion, setDetalleDistribucion] = useState([]);
+    const [apiSearchDetalles, setApiSearchDetalles] = useState('');
+    const [searchDetallesDistribucion, setSearchDetallesDistribucion] = useState(false);
 
     const history = useHistory();
     const dispatch = useDispatch();
@@ -99,6 +104,79 @@ export default function FormSeccionLabor() {
             setChangeURL(false);
         }
     }, [changeURL, searchEmpleado, hacienda, labor]);
+
+    useEffect(() => {
+        if (searchHasDisponibles) {
+            (async () => {
+                try {
+                    const url = `${API_LINK}/bansis-app/index.php/get-data/has-seccion?seccion=${loteSeccion.id}&cabecera=${idcabecera}`;
+                    const config = {
+                        method: 'GET',
+                        headers: {'Authorization': authentication}
+                    };
+                    const request = await fetch(url, config);
+                    const response = await request.json();
+                    const {hasDistribuidas} = response;
+
+                    let has = 0;
+                    if (detalleDistribucion.length > 0) {
+                        const filterArray = detalleDistribucion.filter((item) => item.loteSeccion.id === loteSeccion.id);
+                        has = filterArray.reduce((total, item) => +total + +item.hasDistribucion, 0);
+                    }
+                    setHasDistribuidas(+hasDistribuidas);
+                    setResult(+loteSeccion.has - has - +(hasDistribuidas).toFixed(2));
+                    setHas(+loteSeccion.has - has - +(hasDistribuidas).toFixed(2));
+                    setRecalculate(true);
+                } catch (e) {
+                    console.log(e)
+                }
+            })();
+            setSearchHasDisponibles(false);
+        }
+    }, [searchHasDisponibles, authentication, loteSeccion, idcabecera, detalleDistribucion]);
+
+    useEffect(() => {
+        if (searchDetallesDistribucion) {
+            const progessbarStatus = (state) => dispatch(progressActions(state));
+            (async () => {
+                progessbarStatus(true);
+                const url = apiSearchDetalles;
+                const config = {
+                    method: 'GET',
+                    headers: {'Authorization': authentication}
+                };
+                const request = await fetch(url, config);
+                const response = await request.json();
+                await progessbarStatus(false);
+                const {secciones} = response;
+                if (secciones && Object.entries(secciones).length > 0) {
+                    const {secciones: {detalle_seccion_labor, id}} = response;
+                    if (detalle_seccion_labor.length > 0) {
+                        const detallesDB = [];
+                        setIdCabecera(id);
+                        detalle_seccion_labor.map((detalle) => {
+                            const distribucion = {
+                                id: shortid.generate(),
+                                idDB: detalle['idDetalle'],
+                                idcabecera: detalle['idcabecera'],
+                                fecha: moment(detalle['fecha']).format("DD/MM/YYYY"),
+                                loteSeccion: detalle['seccion_lote'],
+                                hasDistribucion: +(detalle['has'])
+                            };
+                            detallesDB.push(distribucion);
+                            setDisabledBtn({
+                                ...disabledBtn,
+                                btnSave: false
+                            });
+                            return true;
+                        });
+                        setDetalleDistribucion(detallesDB);
+                    }
+                }
+            })();
+            setSearchDetallesDistribucion(false);
+        }
+    }, [searchDetallesDistribucion, authentication, cabeceraDistribucion, apiSearchDetalles, disabledBtn]);
 
     useEffect(() => {
         if (updateData) {
@@ -174,6 +252,8 @@ export default function FormSeccionLabor() {
                 ...disabledElements,
                 loteSeccion: false
             });
+            setApiSearchDetalles(`${API_LINK}/bansis-app/index.php/get-data/lote-seccion-labor?labor=${value.id}&empleado=${empleado.id}`);
+            setSearchDetallesDistribucion(true);
         } else {
             setDisabledElements({
                 ...disabledElements,
@@ -195,9 +275,13 @@ export default function FormSeccionLabor() {
                 ...disabledElements,
                 hasDistribucion: false
             });
+
             setResult(+value.has - recalculatehasLote(value.id));
             setHas(+value.has - recalculatehasLote(value.id));
             setRecalculate(true);
+
+            setSearchHasDisponibles(true);
+
         } else {
             setDisabledElements({
                 ...disabledElements,
@@ -321,8 +405,8 @@ export default function FormSeccionLabor() {
                 }
 
                 if (loteSeccion && (loteSeccion.id === id)) {
-                    setResult(+loteSeccion.has - recalculatehasLote(id));
-                    setHas(+loteSeccion.has - recalculatehasLote(id));
+                    setResult(+loteSeccion.has - +hasDistribuidas - recalculatehasLote(id));
+                    setHas(+loteSeccion.has - +hasDistribuidas - recalculatehasLote(id));
                     setRecalculate(true);
                 }
 
@@ -337,8 +421,8 @@ export default function FormSeccionLabor() {
         setDetalleDistribucion(arrayFilter);
 
         if (loteSeccion && (loteSeccion.id === distribucion.loteSeccion.id)) {
-            setResult(+distribucion.loteSeccion.has);
-            setHas(+distribucion.loteSeccion.has);
+            setResult(+distribucion.loteSeccion.has - +hasDistribuidas);
+            setHas(+distribucion.loteSeccion.has - +hasDistribuidas);
             setRecalculate(true);
         }
     };
@@ -353,24 +437,32 @@ export default function FormSeccionLabor() {
     };
 
     const clearTransaccion = () => {
+        setIdCabecera('');
         setDetalleDistribucion([]);
     };
 
     const nuevaSeccionLabor = () => {
+    };
+
+    const saveSeccionLabor = () => {
         if (cabeceraDistribucion.empleado && cabeceraDistribucion.labor && cabeceraDistribucion.hacienda && !disabledBtn.btnSave) {
             (async () => {
-
                 setDisabledBtn({
                     ...disabledBtn,
                     btnSave: true
                 });
                 progessbarStatus(true);
 
-                const url = `${API_LINK}/bansis-app/`;
+                const url = `${API_LINK}/bansis-app/index.php/lote-seccion-labor`;
                 const data = qs.stringify({
                     json: JSON.stringify({
                         fecha: moment().format("DD/MM/YYYY"),
-                        cabeceraDistribucion,
+                        cabeceraDistribucion: {
+                            hacienda: cabeceraDistribucion.hacienda,
+                            labor: {id: cabeceraDistribucion.labor.id},
+                            empleado: {id: cabeceraDistribucion.empleado.id},
+                            hasTotal: calculateHasTotalDistribuidas()
+                        },
                         detalleDistribucion
                     })
                 });
@@ -384,12 +476,12 @@ export default function FormSeccionLabor() {
                 };
                 const request = await fetch(url, configuracion);
                 const response = await request.json();
-
-                const {code, message} = response;
+                console.log(response);
+                /*const {code, message} = response;
 
                 if (code === 200) {
                     console.log('mensaje');
-                }
+                }*/
                 await setDisabledBtn({
                     ...disabledBtn,
                     btnSave: false
@@ -397,10 +489,6 @@ export default function FormSeccionLabor() {
                 await progessbarStatus(false);
             })();
         }
-    };
-
-    const saveSeccionLabor = () => {
-
     };
 
     return (
@@ -589,6 +677,7 @@ function TableSeccionLaborDetalle(props) {
     const [distribucion, setDistribucion] = useState(null);
     const [updateData, setUpdateData] = useState(false);
     const [has, setHas] = useState(0);
+    const authentication = useSelector((state) => state.auth._token);
 
     useEffect(() => {
         if (updateData) {
@@ -614,18 +703,39 @@ function TableSeccionLaborDetalle(props) {
 
     const saveEdit = () => {
         console.log(has);
-        if (+distribucion.loteSeccion.has >= +has) {
-            eventEdit(distribucion, true);
-            setEdit(false);
-            setDistribucion(null);
-        } else {
-            setHas(distribucion.hasDistribucion);
-            focuselement('id-has-edit');
-        }
+        //consultar saldo
+        (async () => {
+            let datos = null;
+            if (distribucion.hasOwnProperty('idcabecera')) {
+                datos = await saldoHas(distribucion.loteSeccion.id, distribucion.idcabecera);
+            } else {
+                datos = await saldoHas(distribucion.loteSeccion.id, '');
+            }
+            const {hasDistribuidas} = datos;
+            if ((+distribucion.loteSeccion.has - +hasDistribuidas) >= +has) {
+                eventEdit(distribucion, true);
+                setEdit(false);
+                setDistribucion(null);
+            } else {
+                alert("El lote tiene un saldo compartido");
+                setHas(distribucion.hasDistribucion);
+                focuselement('id-has-edit');
+            }
+        })();
     };
 
     const destroyDistribucion = (item) => {
         eventDelete(item);
+    };
+
+    const saldoHas = async (id, idcabecera) => {
+        const url = `${API_LINK}/bansis-app/index.php/get-data/has-seccion?seccion=${id}&cabecera=${idcabecera}`;
+        const config = {
+            method: 'GET',
+            headers: {'Authorization': authentication}
+        };
+        const request = await fetch(url, config);
+        return await request.json();
     };
 
     return (
