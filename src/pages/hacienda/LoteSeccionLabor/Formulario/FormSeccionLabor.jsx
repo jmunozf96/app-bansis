@@ -11,13 +11,21 @@ import moment from "moment";
 import 'moment/locale/es';
 import qs from "qs";
 
-import {useHistory} from "react-router-dom";
+import {useHistory, useParams} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {progressActions} from "../../../../actions/progressActions";
+import SnackbarComponent from "../../../../components/Snackbar/Snackbar";
+import InputDialog from "../../../../components/InputDialog";
 
 export default function FormSeccionLabor() {
+    const {id} = useParams();
+    const [loadSeccionEdit, setLoadSeccionEdit] = useState({
+        load: id !== undefined,
+        id
+    });
+    const [editForm, setEditForm] = useState(false);
     //-----------------------------------------------------------------------
-    const Regresar = '/hacienda/lote';
+    const Regresar = '/hacienda/lote/seccion/labor';
     const [disabledElements, setDisabledElements] = useState({
         hacienda: false,
         loteSeccion: true,
@@ -74,12 +82,62 @@ export default function FormSeccionLabor() {
     const [apiSearchDetalles, setApiSearchDetalles] = useState('');
     const [searchDetallesDistribucion, setSearchDetallesDistribucion] = useState(false);
 
+    const [notificacion, setNotificacion] = useState({
+        open: false,
+        message: ''
+    });
+
     const history = useHistory();
     const dispatch = useDispatch();
     const progessbarStatus = (state) => dispatch(progressActions(state));
 
     const authentication = useSelector((state) => state.auth._token);
     const progressbar = useSelector((state) => state.progressbar.loading);
+
+    useEffect(() => {
+        if (loadSeccionEdit.load) {
+            (async () => {
+                try {
+                    const url = `${API_LINK}/bansis-app/index.php/lote-seccion-labor/${id}`;
+                    const request = await fetch(url);
+                    const response = await request.json();
+
+                    const {code} = response;
+                    if (code === 200) {
+                        const {laborSeccion: {id, labor, empleado}} = response;
+                        setIdCabecera(id);
+                        setLabor(labor);
+                        setEmpleado(empleado);
+                        setHacienda(empleado['hacienda']);
+                        setUpdateData(true);
+                        setApiSearchDetalles(`${API_LINK}/bansis-app/index.php/get-data/lote-seccion-labor?labor=${labor.id}&empleado=${empleado.id}`);
+                        setApiLoteSeccion(`${API_LINK}/bansis-app/index.php/lotes-seccion-select?hacienda=${empleado.hacienda.id}`);
+                        setSearchDetallesDistribucion(true);
+
+                        setDisabledElements({
+                            ...disabledElements,
+                            hacienda: true,
+                            loteSeccion: false,
+                        });
+
+                        setDisabledBtn({
+                            ...disabledBtn,
+                            btnSave: false
+                        });
+
+                        setEditForm(true);
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+            })();
+
+            setLoadSeccionEdit({
+                ...loadSeccionEdit,
+                load: false
+            })
+        }
+    }, [loadSeccionEdit, id, disabledBtn, disabledElements]);
 
     useEffect(() => {
         if (progressStatus.update) {
@@ -109,7 +167,7 @@ export default function FormSeccionLabor() {
         if (searchHasDisponibles) {
             (async () => {
                 try {
-                    const url = `${API_LINK}/bansis-app/index.php/get-data/has-seccion?seccion=${loteSeccion.id}&cabecera=${idcabecera}`;
+                    const url = `${API_LINK}/bansis-app/index.php/get-data/has-seccion?seccion=${loteSeccion.id}&cabecera=${idcabecera}&labor=${labor.id}`;
                     const config = {
                         method: 'GET',
                         headers: {'Authorization': authentication}
@@ -124,6 +182,7 @@ export default function FormSeccionLabor() {
                         has = filterArray.reduce((total, item) => +total + +item.hasDistribucion, 0);
                     }
                     setHasDistribuidas(+hasDistribuidas);
+
                     setResult(+loteSeccion.has - has - +(hasDistribuidas).toFixed(2));
                     setHas(+loteSeccion.has - has - +(hasDistribuidas).toFixed(2));
                     setRecalculate(true);
@@ -133,13 +192,13 @@ export default function FormSeccionLabor() {
             })();
             setSearchHasDisponibles(false);
         }
-    }, [searchHasDisponibles, authentication, loteSeccion, idcabecera, detalleDistribucion]);
+    }, [searchHasDisponibles, authentication, loteSeccion, idcabecera, detalleDistribucion, labor]);
 
     useEffect(() => {
         if (searchDetallesDistribucion) {
-            const progessbarStatus = (state) => dispatch(progressActions(state));
             (async () => {
-                progessbarStatus(true);
+                const progessbarStatus = (state) => dispatch(progressActions(state));
+                await progessbarStatus(true);
                 const url = apiSearchDetalles;
                 const config = {
                     method: 'GET',
@@ -171,12 +230,17 @@ export default function FormSeccionLabor() {
                             return true;
                         });
                         setDetalleDistribucion(detallesDB);
+                    } else {
+                        setNotificacion({
+                            open: true,
+                            message: 'No se han encontrado distribuciones'
+                        })
                     }
                 }
             })();
             setSearchDetallesDistribucion(false);
         }
-    }, [searchDetallesDistribucion, authentication, cabeceraDistribucion, apiSearchDetalles, disabledBtn]);
+    }, [dispatch, searchDetallesDistribucion, authentication, cabeceraDistribucion, apiSearchDetalles, disabledBtn]);
 
     useEffect(() => {
         if (updateData) {
@@ -205,6 +269,7 @@ export default function FormSeccionLabor() {
                 ...disabledElements,
                 empleado: false
             });
+            setApiEmpleado(`${API_LINK}/bansis-app/index.php/search/empleados?hacienda=${value.id}`);
             setApiLoteSeccion(`${API_LINK}/bansis-app/index.php/lotes-seccion-select?hacienda=${value.id}`)
         } else {
             setDisabledElements({
@@ -276,9 +341,9 @@ export default function FormSeccionLabor() {
                 hasDistribucion: false
             });
 
-            setResult(+value.has - recalculatehasLote(value.id));
+            /*setResult(+value.has - recalculatehasLote(value.id));
             setHas(+value.has - recalculatehasLote(value.id));
-            setRecalculate(true);
+            setRecalculate(true);*/
 
             setSearchHasDisponibles(true);
 
@@ -302,7 +367,7 @@ export default function FormSeccionLabor() {
                 } else {
                     setHasDistribucion(0);
                     setResult(has + ((+loteSeccion.has - +recalculatehasLote(loteSeccion.id)) - has));
-                    alert("Se excede las hectareas");
+                    loadNotificacion("Se excede las hectareas");
                 }
             } else {
                 setHasDistribucion(0);
@@ -311,6 +376,13 @@ export default function FormSeccionLabor() {
             setRecalculate(true);
         }
         setUpdateData(true);
+    };
+
+    const loadNotificacion = (message) => {
+        setNotificacion({
+            open: true,
+            message
+        })
     };
 
     const recalculatehasLote = (idlote) => {
@@ -368,7 +440,7 @@ export default function FormSeccionLabor() {
                     ...detalleDistribucion,
                     distribucionLabor
                 ]);
-                alert("Datos agregados correctamente");
+                loadNotificacion("Datos agregados correctamente");
 
                 setHas(has - +distribucionLabor.hasDistribucion);
                 setHasdisplay(has - +distribucionLabor.hasDistribucion);
@@ -376,7 +448,7 @@ export default function FormSeccionLabor() {
             } else {
                 //Edicion
                 editDistribucionLabor(distribucionLabor);
-                alert("Datos editados correctamente")
+                loadNotificacion("Datos editados correctamente")
             }
             setDisabledBtn({
                 ...disabledBtn,
@@ -417,6 +489,29 @@ export default function FormSeccionLabor() {
     };
 
     const deleteDistribucionLabor = (distribucion) => {
+        if (distribucion.hasOwnProperty('idDB')) {
+            (async () => {
+                const url = `${API_LINK}/bansis-app/index.php/lote-seccion-labor-detalle/${distribucion.idDB}`;
+                const config = {
+                    method: 'DELETE',
+                    headers: {'Authorization': authentication}
+                };
+                const request = await fetch(url, config);
+                const response = await request.json();
+                console.log(response);
+                const {code, message} = response;
+                if (code === 200) {
+                    await deleteDetalle(distribucion);
+                    await setSearchHasDisponibles(true);
+                }
+                loadNotificacion(message);
+            })();
+        } else {
+            deleteDetalle(distribucion);
+        }
+    };
+
+    const deleteDetalle = (distribucion) => {
         const arrayFilter = detalleDistribucion.filter((item) => item.loteSeccion.id !== distribucion.loteSeccion.id);
         setDetalleDistribucion(arrayFilter);
 
@@ -436,58 +531,88 @@ export default function FormSeccionLabor() {
         })
     };
 
+    const clearCabecera = () => {
+        setHacienda(null);
+        setLoteSeccion(null);
+        setLabor(null);
+        setEmpleado(null);
+    };
+
     const clearTransaccion = () => {
         setIdCabecera('');
         setDetalleDistribucion([]);
     };
 
     const nuevaSeccionLabor = () => {
+        if (editForm) {
+            history.push('/hacienda/lote/seccion/labor/formulario')
+        }
+        setDisabledElements({
+            hacienda: false,
+            loteSeccion: true,
+            labor: true,
+            empleado: true,
+            hasDistribucion: true
+        });
+        setDisabledBtn({
+            btnSave: true,
+            btnNuevo: false
+        });
+        clearCabecera();
+        clearTransaccion();
+        clearDistribucionLabor();
+        clearHasDistribucion();
+        setUpdateData(true);
     };
 
     const saveSeccionLabor = () => {
-        if (cabeceraDistribucion.empleado && cabeceraDistribucion.labor && cabeceraDistribucion.hacienda && !disabledBtn.btnSave) {
-            (async () => {
-                setDisabledBtn({
-                    ...disabledBtn,
-                    btnSave: true
-                });
-                progessbarStatus(true);
+        if (detalleDistribucion.length > 0) {
+            if (cabeceraDistribucion.empleado && cabeceraDistribucion.labor && cabeceraDistribucion.hacienda && !disabledBtn.btnSave) {
+                (async () => {
+                    setDisabledBtn({
+                        ...disabledBtn,
+                        btnSave: true
+                    });
+                    progessbarStatus(true);
 
-                const url = `${API_LINK}/bansis-app/index.php/lote-seccion-labor`;
-                const data = qs.stringify({
-                    json: JSON.stringify({
-                        fecha: moment().format("DD/MM/YYYY"),
-                        cabeceraDistribucion: {
-                            hacienda: cabeceraDistribucion.hacienda,
-                            labor: {id: cabeceraDistribucion.labor.id},
-                            empleado: {id: cabeceraDistribucion.empleado.id},
-                            hasTotal: calculateHasTotalDistribuidas()
-                        },
-                        detalleDistribucion
-                    })
-                });
-                const configuracion = {
-                    method: 'POST',
-                    body: data,
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'Authorization': authentication,
+                    const url = `${API_LINK}/bansis-app/index.php/lote-seccion-labor`;
+                    const data = qs.stringify({
+                        json: JSON.stringify({
+                            fecha: moment().format("DD/MM/YYYY"),
+                            cabeceraDistribucion: {
+                                hacienda: cabeceraDistribucion.hacienda,
+                                labor: {id: cabeceraDistribucion.labor.id},
+                                empleado: {id: cabeceraDistribucion.empleado.id},
+                                hasTotal: calculateHasTotalDistribuidas()
+                            },
+                            detalleDistribucion
+                        })
+                    });
+                    const configuracion = {
+                        method: 'POST',
+                        body: data,
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Authorization': authentication,
+                        }
+                    };
+                    const request = await fetch(url, configuracion);
+                    const response = await request.json();
+                    const {code, message} = response;
+
+                    if (code === 200) {
+                        setSearchDetallesDistribucion(true);
                     }
-                };
-                const request = await fetch(url, configuracion);
-                const response = await request.json();
-                console.log(response);
-                /*const {code, message} = response;
-
-                if (code === 200) {
-                    console.log('mensaje');
-                }*/
-                await setDisabledBtn({
-                    ...disabledBtn,
-                    btnSave: false
-                });
-                await progessbarStatus(false);
-            })();
+                    loadNotificacion(message);
+                    await setDisabledBtn({
+                        ...disabledBtn,
+                        btnSave: false
+                    });
+                    await progessbarStatus(false);
+                })();
+            }
+        } else {
+            loadNotificacion('No se han registrado distribuciones');
         }
     };
 
@@ -500,6 +625,10 @@ export default function FormSeccionLabor() {
             volver={Regresar}
             disabledElements={disabledBtn}
         >
+            <SnackbarComponent
+                notificacion={notificacion}
+                setNotificacion={setNotificacion}
+            />
             <div className="row">
                 <div className="col-md-5">
                     <div className="form-group">
@@ -621,6 +750,7 @@ export default function FormSeccionLabor() {
                             eventProgress={colorProgressCalculate}
                             eventEdit={editDistribucionLabor}
                             eventDelete={deleteDistribucionLabor}
+                            loadNotificacion={loadNotificacion}
                         />
                     </TablaSeccionLaborCabecera>
                 </div>
@@ -672,12 +802,42 @@ function TablaSeccionLaborCabecera(props) {
 }
 
 function TableSeccionLaborDetalle(props) {
-    const {data, eventProgress, eventEdit, eventDelete} = props;
+    const {data, eventProgress, eventEdit, eventDelete, loadNotificacion} = props;
     const [edit, setEdit] = useState(false);
     const [distribucion, setDistribucion] = useState(null);
     const [updateData, setUpdateData] = useState(false);
     const [has, setHas] = useState(0);
     const authentication = useSelector((state) => state.auth._token);
+
+    const [datosConsulta, setDatosConsulta] = useState(null);
+    const [searchDatos, setSearchDatos] = useState(false);
+
+    const [openDialog, setOpenDialog] = useState(false);
+    const [dialog, setDialog] = useState({
+        title: 'Eliminar Registro',
+        message: 'Desea Eliminar el registro'
+    });
+
+    useEffect(() => {
+        if (searchDatos) {
+            (async () => {
+                let url = '';
+                if (distribucion.hasOwnProperty('idcabecera')) {
+                    url = `${API_LINK}/bansis-app/index.php/get-data/has-seccion?seccion=${distribucion.loteSeccion.id}&cabecera=${distribucion.idcabecera}`;
+                } else {
+                    url = `${API_LINK}/bansis-app/index.php/get-data/has-seccion?seccion=${distribucion.loteSeccion.id}&cabecera=`;
+                }
+                const config = {
+                    method: 'GET',
+                    headers: {'Authorization': authentication}
+                };
+                const request = await fetch(url, config);
+                const saldoHas = await request.json();
+                setDatosConsulta(saldoHas);
+            })();
+            setSearchDatos(false);
+        }
+    }, [searchDatos, distribucion, authentication]);
 
     useEffect(() => {
         if (updateData) {
@@ -696,50 +856,52 @@ function TableSeccionLaborDetalle(props) {
 
     const activeEdit = (distribucion) => {
         setEdit(true);
+        setSearchDatos(true);
         setDistribucion(distribucion);
         setHas(+distribucion.hasDistribucion);
         focuselement('id-has-edit');
     };
 
     const saveEdit = () => {
-        console.log(has);
         //consultar saldo
-        (async () => {
-            let datos = null;
-            if (distribucion.hasOwnProperty('idcabecera')) {
-                datos = await saldoHas(distribucion.loteSeccion.id, distribucion.idcabecera);
-            } else {
-                datos = await saldoHas(distribucion.loteSeccion.id, '');
-            }
-            const {hasDistribuidas} = datos;
+        if (datosConsulta) {
+            const {hasDistribuidas} = datosConsulta;
             if ((+distribucion.loteSeccion.has - +hasDistribuidas) >= +has) {
                 eventEdit(distribucion, true);
                 setEdit(false);
                 setDistribucion(null);
             } else {
-                alert("El lote tiene un saldo compartido");
+                loadNotificacion("El lote tiene un saldo compartido");
                 setHas(distribucion.hasDistribucion);
                 focuselement('id-has-edit');
             }
-        })();
+        }
     };
 
-    const destroyDistribucion = (item) => {
-        eventDelete(item);
+    const dialogDestroyDistribucion = (item) => {
+        setOpenDialog(true);
+        setDistribucion(item);
+        setDialog({
+            ...dialog,
+            message: '¿Estas seguro de eliminar esta distribucion?'
+        })
     };
 
-    const saldoHas = async (id, idcabecera) => {
-        const url = `${API_LINK}/bansis-app/index.php/get-data/has-seccion?seccion=${id}&cabecera=${idcabecera}`;
-        const config = {
-            method: 'GET',
-            headers: {'Authorization': authentication}
-        };
-        const request = await fetch(url, config);
-        return await request.json();
+    const destroyDistribucion = () => {
+        eventDelete(distribucion);
+        setOpenDialog(false);
+        setDistribucion(null);
     };
 
     return (
         <>
+            <InputDialog
+                open={openDialog}
+                setOpen={setOpenDialog}
+                title={dialog.title}
+                message={dialog.message}
+                afirmacion={destroyDistribucion}
+            />
             {data.length > 0 &&
             data.map((item, index) => (
                 <tr className="text-center table-sm" key={item.id}>
@@ -791,7 +953,7 @@ function TableSeccionLaborDetalle(props) {
                             }
                             <button
                                 className="btn btn-danger"
-                                onClick={() => destroyDistribucion(item)}
+                                onClick={() => dialogDestroyDistribucion(item)}
                             >
                                 <i className="fas fa-trash-alt"/>
                             </button>

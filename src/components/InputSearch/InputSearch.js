@@ -27,13 +27,15 @@ export default function InputSearch(props) {
         }
         (async () => {
             try {
-                const response =
-                    await axios.get(api_url,
-                        {headers: {'content-type': 'application/json'}})
-                        .then((response) => {
-                            return response.data;
-                        });
+                const response = await axios.get(api_url,
+                    {headers: {'content-type': 'application/json'}})
+                    .then((response) => {
+                        return response.data;
+                    });
                 if (active) {
+                    if (response.length > 0)
+                        setOptions(response);
+
                     if (response.dataArray)
                         setOptions(response.dataArray.map((data) => data));
                     await setLoading(false);

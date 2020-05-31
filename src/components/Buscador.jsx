@@ -8,30 +8,41 @@ export default function Buscador(props) {
     const {api, value, ...moreParams} = props;
     const [open, setOpen] = useState(false);
     const [options, setOptions] = useState([]);
-    const loading = open && options.length === 0;
+    const [loading, setLoading] = useState(false);
+
+    React.useEffect(() => {
+        if (open) {
+            setLoading(true);
+        }
+    }, [open]);
 
     React.useEffect(() => {
         let active = true;
-
         if (!loading) {
             return undefined;
         }
-
-        (async () => {
-            const response = await fetch(api);
-            const datos = await response.json();
-
-            if (active) {
-                //setOptions(Object.keys(datos).map((key) => datos[key].item[0]));
-                if (datos.hasOwnProperty('dataArray')) {
-                    setOptions(datos.dataArray);
+        if (loading) {
+            (async () => {
+                try {
+                    const response = await fetch(api);
+                    const datos = await response.json();
+                    if (active) {
+                        //setOptions(Object.keys(datos).map((key) => datos[key].item[0]));
+                        if (datos.hasOwnProperty('dataArray')) {
+                            if (datos['dataArray'].length > 0) {
+                                await setOptions(datos.dataArray);
+                            }
+                            setLoading(false);
+                        }
+                    }
+                } catch (e) {
+                    setLoading(false);
                 }
-            }
-        })();
-
-        return () => {
-            active = false;
-        };
+            })();
+            return () => {
+                active = false;
+            };
+        }
     }, [loading, api]);
 
     React.useEffect(() => {
@@ -53,11 +64,14 @@ export default function Buscador(props) {
                 setOpen(false);
             }}
             value={value}
+            onFocus={() => setLoading(true)}
             onChange={(e, value) => moreParams.change(e, value)}
             getOptionSelected={(option, value) => option.id === value.id}
             getOptionLabel={(option) => option.descripcion}
             options={options}
             loading={loading}
+            loadingText="Cargando datos..."
+            noOptionsText="No se encontraron datos para la busqueda..."
             renderInput={(params) => (
                 <TextField
                     {...params}

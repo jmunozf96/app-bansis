@@ -25,6 +25,8 @@ export default function Lote() {
         open: false,
         message: ''
     });
+
+    const [loadData, setLoadData] = useState(true);
     const [lotes, setLotes] = useState(null);
     const [page, setPage] = useState(1);
     const [reload, setReload] = useState(true);
@@ -58,12 +60,10 @@ export default function Lote() {
                 if (response.code === 200) {
                     setLotes(response);
                 } else {
-                    if (Object.entries(lotes).length === 0) {
-                        const {code} = response;
-                        setLotes({code});
-                    }
-                    setNotificacion({open: true, message: response.message})
+                    setLotes(null);
+                    setNotificacion({open: true, message: response.message});
                 }
+                setLoadData(false);
                 progessbarStatus(false);
             })();
             setReload(false);
@@ -92,7 +92,7 @@ export default function Lote() {
         setOpenModal(true);
         setDataModal({
             title: `Lote: ${lote.identificacion} - Hacienda: ${lote.hacienda.detalle}`,
-            content: '¿Esta seguro de eliminar el registo?, de ser afirmativo se eliminara de la base de datos el registro seleccionado.',
+            content: '¿Esta seguro de eliminar el registro?, de ser afirmativo se eliminara de la base de datos.',
             id: lote.id
         })
     };
@@ -133,7 +133,7 @@ export default function Lote() {
         setDataLote(data);
     };
 
-    if (!lotes) {
+    if (!lotes && loadData) {
         return (
             <Backdrop open={true}>
                 <CircularProgress color="inherit"/>
