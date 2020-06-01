@@ -12,7 +12,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import {useDispatch} from "react-redux";
 import {progressActions} from "../../../actions/progressActions";
 import TableForm from "../../../components/Table";
-import moment from "moment";
+import moment, {lang} from "moment";
 import UpdateIcon from "@material-ui/icons/Update";
 
 import SyncIcon from '@material-ui/icons/Sync';
@@ -34,6 +34,8 @@ export default function Egreso() {
         message: '',
     });
 
+    const [searchEmpleado, setSearchEmpleado] = useState('');
+    const [changeURL, setChangeURL] = useState(false);
     const api_origen_empleados = `${API_LINK}/bansis-app/index.php/search/empleados`;
     const [api_empleados, setApiEmpleados] = useState(`${api_origen_empleados}`);
     const [empleado, setEmpleado] = useState(null);
@@ -46,6 +48,25 @@ export default function Egreso() {
     const dispatch = useDispatch();
     const progessbarStatus = (state) => dispatch(progressActions(state));
     //const authentication = useSelector((state) => state.auth._token);
+
+    useEffect(() => {
+        if (changeURL) {
+            setApiEmpleados(`${API_LINK}/bansis-app/index.php/search/empleados?params=${searchEmpleado}`);
+
+            if (hacienda) {
+                setApiEmpleados(`${API_LINK}/bansis-app/index.php/search/empleados?params=${searchEmpleado}&hacienda=${hacienda.id}`);
+            }
+            if (labor) {
+                setApiEmpleados(`${API_LINK}/bansis-app/index.php/search/empleados?params=${searchEmpleado}&labor=${labor.id}`);
+            }
+
+            if (hacienda && labor) {
+                setApiEmpleados(`${API_LINK}/bansis-app/index.php/search/empleados?params=${searchEmpleado}&hacienda=${hacienda.id}&labor=${labor.id}`);
+            }
+
+            setChangeURL(false);
+        }
+    }, [changeURL, setApiEmpleados, searchEmpleado, hacienda, labor]);
 
     useEffect(() => {
         if (reload) {
@@ -221,8 +242,10 @@ export default function Egreso() {
                                         id="asynchronous-empleado"
                                         label="Listado de empleados"
                                         api_url={api_empleados}
+                                        setSearch={setSearchEmpleado}
                                         onChangeValue={onChangeValueEmpleadoSearch}
                                         value={empleado}
+                                        setChangeURL={setChangeURL}
                                     />
                                     <FormHelperText id="outlined-weight-helper-text">
                                         Puede filtrar los empleados por nombre o numero de cedula

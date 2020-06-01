@@ -310,6 +310,7 @@ export default function EgresoCabecera(props) {
                                                 onChangeValue={onChangeValueEmpleadoSearch}
                                                 disabled={disabledElements.empleado}
                                                 value={cabeceraEgreso.empleado}
+                                                setChangeURL={setChangeURL}
                                             />
                                             <FormHelperText id="outlined-weight-helper-text">
                                                 Puede filtrar los empleados por nombre o numero de cedula

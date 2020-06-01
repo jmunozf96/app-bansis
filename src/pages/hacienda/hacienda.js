@@ -54,6 +54,7 @@ export default function Hacienda(props) {
     const onChangePage = (page) => {
         progessbarStatus(true);
         setPage(page);
+        setReload(true);
     };
 
     return (

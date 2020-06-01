@@ -10,7 +10,7 @@ import TableDetail from "../../components/TableDetalle";
 import DataDetail from "../dataDetail";
 import {editFormAction} from "../../actions/statusFormAction";
 
-export default function Empleado(props) {
+export default function Empleado() {
     const [empleados, setEmpleados] = useState([]);
     const [page, setPage] = useState(1);
     const [reload, setReload] = useState(true);
@@ -52,13 +52,15 @@ export default function Empleado(props) {
     const onChangePage = (page) => {
         progessbarStatus(true);
         setPage(page);
+        setReload(true);
     };
 
     return (
         <DataDetail
             title="Empleado"
             setFormulario={setFormulario}
-            page={page} setPage={setPage}
+            page={page}
+            setPage={setPage}
             openModal={openModal} setOpenModal={setOpenModal}
             dataModal={dataModal} setDataModal={setDataModal}
             data={{getData: empleados, setData: setEmpleados}}

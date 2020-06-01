@@ -653,6 +653,7 @@ export default function FormSeccionLabor() {
                         onChangeValue={changeEmpleado}
                         disabled={disabledElements.empleado}
                         value={empleado}
+                        setChangeURL={setChangeURL}
                     />
                     <FormHelperText id="outlined-weight-helper-text">
                         Puede filtrar los empleados por nombre o numero de cedula

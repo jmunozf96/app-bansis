@@ -44,8 +44,23 @@ export default function FormAvanceLabor() {
         message: ''
     });
 
+    //Avances segun labor
+    const [enfunde, setEnfunde] = useState({
+        presente: {
+            cantidad: 0,
+            idmaterial: 0,
+            reelevo: null
+        },
+        futuro: {
+            cantidad: 0,
+            idmaterial: 0,
+            reelevo: null,
+            desbunche: 0
+        }
+    });
+
     //Estados de transaccion de enfunde
-    const [openFullScreen, setOpenFullScreen] = useState(true);
+    const [openFullScreen, setOpenFullScreen] = useState(false);
 
     const history = useHistory();
     const dispatch = useDispatch();
@@ -54,6 +69,7 @@ export default function FormAvanceLabor() {
     const authentication = useSelector((state) => state.auth._token);
     const progressbar = useSelector((state) => state.progressbar.loading);
 
+    const [distribucionSelect, setDistribucionSelect] = useState(null); //Variable para ecpecificar el lote de registro de avance por labor
     const [detalleDistribucion, setDetalleDistribucion] = useState([]);
     const [apiSearchDetalles, setApiSearchDetalles] = useState('');
     const [searchDetallesDistribucion, setSearchDetallesDistribucion] = useState(false);
@@ -161,6 +177,11 @@ export default function FormAvanceLabor() {
         }
     };
 
+    const openModal = (distribucion) => {
+        setOpenFullScreen(true);
+        setDistribucionSelect(distribucion);
+    };
+
     const nuevoAvanceLabor = () => {
 
     };
@@ -223,6 +244,7 @@ export default function FormAvanceLabor() {
                         onChangeValue={changeEmpleado}
                         disabled={disabledElements.empleado}
                         value={empleado}
+                        setChangeURL={setChangeURL}
                     />
                     <FormHelperText id="outlined-weight-helper-text">
                         Puede filtrar los empleados por nombre o numero de cedula
@@ -236,7 +258,14 @@ export default function FormAvanceLabor() {
                         open={openFullScreen}
                         setOpen={setOpenFullScreen}
                     >
-                        <FormLaborEnfunde/>
+                        <FormLaborEnfunde
+                            hacienda={hacienda}
+                            empleado={empleado}
+                            labor={labor}
+                            distribucion={distribucionSelect}
+                            enfunde={enfunde}
+                            setEnfunde={setEnfunde}
+                        />
                     </FullScreen>
                     <table className="table table-hover table-bordered">
                         <thead>
@@ -262,7 +291,7 @@ export default function FormAvanceLabor() {
                                     <div className="btn-group">
                                         <button
                                             className="btn btn-primary"
-                                            onClick={() => setOpenFullScreen(true)}
+                                            onClick={() => openModal(item)}
                                         >
                                             <i className="fas fa-external-link-square-alt"/>
                                         </button>
