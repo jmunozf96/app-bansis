@@ -44,21 +44,6 @@ export default function FormAvanceLabor() {
         message: ''
     });
 
-    //Avances segun labor
-    const [enfunde, setEnfunde] = useState({
-        presente: {
-            cantidad: 0,
-            idmaterial: 0,
-            reelevo: null
-        },
-        futuro: {
-            cantidad: 0,
-            idmaterial: 0,
-            reelevo: null,
-            desbunche: 0
-        }
-    });
-
     //Estados de transaccion de enfunde
     const [openFullScreen, setOpenFullScreen] = useState(false);
 
@@ -263,8 +248,6 @@ export default function FormAvanceLabor() {
                             empleado={empleado}
                             labor={labor}
                             distribucion={distribucionSelect}
-                            enfunde={enfunde}
-                            setEnfunde={setEnfunde}
                         />
                     </FullScreen>
                     <table className="table table-hover table-bordered">

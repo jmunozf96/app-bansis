@@ -4,15 +4,33 @@ import {API_LINK, focuselement} from "../../../../../utils/constants";
 import InputSearch from "../../../../../components/InputSearch/InputSearch";
 import {FormHelperText} from "@material-ui/core";
 
-const statusAvanceSemana = ['Presente', 'Futuro'];
+import shortid from "shortid";
+import moment from "moment";
+import 'moment/locale/es';
 
-export default function FormLaborEnfunde({hacienda, empleado, labor, distribucion, enfunde, setEnfunde}) {
+const statusAvanceSemana = ['Presente', 'Futuro'];
+const style = {
+    table: {
+        textCenter: {
+            textAlign: "center",
+            verticalAlign: "middle"
+        }
+    }
+};
+
+export default function FormLaborEnfunde({hacienda, empleado, labor, distribucion}) {
     const [changeStatus, setChangeStatus] = useState(false);
     const [index, setIndex] = useState(0);
     const [semana, setSemana] = useState({
         presente: {status: true, index: 0},
         futuro: {status: false, index: 1}
     });
+
+    //Avances segun labor
+    const [detallesEnfundePresente, setDetallesEnfundePresente] = useState([]);
+    const [detallesEnfundeFuturo, setDetallesEnfundeFuturo] = useState([]);
+
+    const [loadDataDetalle, setLoadDataDetalle] = useState(false);
 
     const [loadMaterialesInventario, setLoadMaterialesInventario] = useState(true);
     const [materialesInventario, setMaterialesInventario] = useState([]);
@@ -52,13 +70,14 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
                 setSemana({
                     presente: {...semana.presente, status: false},
                     futuro: {...semana.futuro, status: true}
-                })
+                });
             } else {
                 setSemana({
                     presente: {...semana.presente, status: true},
                     futuro: {...semana.futuro, status: false}
-                })
+                });
             }
+            setLoadDataDetalle(true);
             setChangeStatus(false);
         }
     }, [changeStatus, semana, index]);
@@ -66,23 +85,200 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
     const onChangeReelevo = () => {
         setSearchReelevo(!searchReelevo);
         clearFormulario();
+        setLoadDataDetalle(true);
+    };
+
+    const destroyReelevo = () => {
+        setEmpleadoReelevo(null);
+        setSearchReelevo(false);
+        clearFormulario();
+        setChangeStatus(true);
+        setLoadMaterialesInventario(true);
+        reloadProressbar(true);
+        setValue(0);
+        setSaldo(0);
     };
 
     const clearFormulario = () => {
         setMaterialSelect(null);
     };
 
+    const getArrayFilter = () => {
+        let arraydata = [];
+
+        if (semana.presente.status) {
+            arraydata = detallesEnfundePresente;
+        } else {
+            arraydata = detallesEnfundeFuturo;
+        }
+
+        return arraydata;
+    };
+
+    const cantidadUsada = (material, reelevo = empleadoReelevo) => {
+        let arrayFilter = [];
+
+        if (!reelevo) {
+            arrayFilter = getArrayFilter().filter((item) => item.detalle.material.id === material.id && !item.reelevo);
+        } else {
+            arrayFilter = getArrayFilter().filter((item) => item.detalle.material.id === material.id && (item.reelevo && item.reelevo.id === reelevo.id));
+        }
+
+        return arrayFilter.reduce((total, item) => +total + +item.cantidad, 0);
+    };
+
+    const canChangeCantidad = (cantidad) => {
+        if (parseInt(cantidad) <= saldo) {
+            setValue(saldo - parseInt(cantidad));
+            return true;
+        } else {
+            setValue(saldo);
+            return false;
+        }
+    };
+
+    const reloadProressbar = (reload) => {
+        setprogressStatus({
+            ...progressStatus,
+            reload
+        });
+    };
+
+    const addItemtoSemana = (cantidad, desbunche = 0) => {
+        const itemSemana = {
+            id: shortid.generate(),
+            fecha: moment().format("DD/MM/YYYY"),
+            cantidad,
+            detalle: materialSelect,
+            reelevo: empleadoReelevo,
+            desbunche
+        };
+
+        const itemExists = existeItemtoSemana(itemSemana);
+
+        if (!itemExists.length > 0) {
+            if (semana.presente.status) {
+                setDetallesEnfundePresente([
+                    ...detallesEnfundePresente,
+                    itemSemana
+                ])
+            } else {
+                setDetallesEnfundeFuturo([
+                    ...detallesEnfundeFuturo,
+                    itemSemana
+                ])
+            }
+        } else {
+            editItemtoSemana(itemExists[0], itemSemana);
+        }
+
+        setSaldo(saldo - cantidad);
+
+        setprogressStatus({
+            ...progressStatus,
+            reload: true
+        });
+
+        setLoadDataDetalle(true);
+    };
+
+    const existeItemtoSemana = ({detalle: {material}, reelevo}) => {
+        let arrayFilter = [];
+
+        if (!reelevo) {
+            arrayFilter = getArrayFilter().filter((item) => item.detalle.material.id === material.id);
+        } else {
+            arrayFilter = getArrayFilter().filter((item) => item.detalle.material.id === material.id && (item.reelevo && item.reelevo.id === reelevo.id));
+        }
+
+        return arrayFilter;
+    };
+
+    const editItemtoSemana = (item, {cantidad, desbunche}) => {
+        item['cantidad'] += +cantidad;
+        item['desbunche'] += +desbunche;
+    };
+
+    const searchTotalUsadoItem = (material, reelevo) => {
+        let arrayFilterP = [];
+        let arrayFilterF = [];
+
+        if (!reelevo) {
+            arrayFilterP = detallesEnfundePresente.filter((item) => item.detalle.material.id === material.id && !item.reelevo);
+            arrayFilterF = detallesEnfundeFuturo.filter((item) => item.detalle.material.id === material.id && !item.reelevo);
+        } else {
+            arrayFilterP = detallesEnfundePresente.filter((item) => item.detalle.material.id === material.id && (item.reelevo && item.reelevo.id === reelevo.id));
+            arrayFilterF = detallesEnfundeFuturo.filter((item) => item.detalle.material.id === material.id && (item.reelevo && item.reelevo.id === reelevo.id));
+        }
+
+        return arrayFilterP.reduce((total, item) => +total + +item.cantidad, 0) + arrayFilterF.reduce((total, item) => +total + +item.cantidad, 0);
+    };
+
+    const editItemtoSemanaDirect = (item, item_new) => {
+        const calculoSaldo = (+item.detalle['sld_final'] - (searchTotalUsadoItem(item.detalle.material, item.reelevo) - +item.cantidad));
+        const canChange = +item_new.cantidad <= calculoSaldo;
+        if (canChange) {
+            if (reloadProgressBarofItemSelect(item_new.detalle.material.id)) {
+                if (reloadProgressBarofEmpleadoSelect(item.reelevo)) {
+                    setValue(+((calculoSaldo) - +item_new.cantidad));
+                    setSaldo(+((calculoSaldo) - +item_new.cantidad));
+                    reloadProressbar(true);
+                }
+            }
+
+            item['cantidad'] = item_new['cantidad'];
+            item['desbunche'] = item_new['desbunche'];
+            setLoadDataDetalle(true);
+            return true;
+        }
+        return false;
+    };
+
+    const destroyItemtoSemana = (data) => {
+        const newArray = getArrayFilter().filter((item) => item.id !== data.id);
+        if (semana.presente.status) {
+            setDetallesEnfundePresente(newArray);
+        } else {
+            setDetallesEnfundeFuturo(newArray);
+        }
+
+        if (reloadProgressBarofItemSelect(data.detalle.material.id)) {
+            if (reloadProgressBarofEmpleadoSelect(data.reelevo)) {
+                setValue(+value + +data.cantidad);
+                setSaldo(+saldo + +data.cantidad);
+                reloadProressbar(true);
+            }
+        }
+
+        setLoadDataDetalle(true);
+    };
+
+    const reloadProgressBarofItemSelect = (id) => {
+        //En caso de que el material este seleccionado se pueden ahcer ediciones como en la barra de progreso
+        return materialSelect.material.id === id;
+    };
+
+    const reloadProgressBarofEmpleadoSelect = (reelevo) => {
+        if (empleadoReelevo) {
+            return reelevo && (reelevo.id === empleadoReelevo.id);
+        } else {
+            return true;
+        }
+    };
+
     return (
         <div className="container-fluid mt-3">
             <div className="row">
                 <div className="col-12">
-                    <h5><i className="fas fa-user"/> {empleado.nombres} |
-                        Lote: {distribucion['loteSeccion'].descripcion}</h5>
+                    <h5>
+                        <i className="fas fa-user"/> {empleado.nombres} |
+                        Lote: {distribucion['loteSeccion'].descripcion}
+                    </h5>
                 </div>
             </div>
             <hr className="mt-0"/>
             <div className="row">
-                <div className="col-md-4 mb-3">
+                <div className="col-md-2 mb-3">
                     <div className="row">
                         <div className="col-md-12">
                             {!searchReelevo &&
@@ -95,72 +291,96 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
                             </div>
                             }
                             <button
-                                className={`btn btn-${!searchReelevo ? 'primary' : 'danger'} btn-block`}
+                                className={`btn btn-${!searchReelevo ? 'primary' : 'danger'} btn-block mb-2`}
                                 onClick={() => onChangeReelevo()}
                             >
                                 <i className="fas fa-search"/> {!searchReelevo ? 'Buscar Reelevo' : 'Cancelar Busqueda'}
                             </button>
+                            {empleadoReelevo && !searchReelevo &&
+                            <button
+                                className={`btn btn-danger btn-block`}
+                                onClick={() => destroyReelevo()}
+                            >
+                                <i className="fas fa-times"/> Eliminar Reelevo
+                            </button>
+                            }
                         </div>
-                        {empleadoReelevo &&
-                        <div className="col-md-12 mt-2">
-                            <ProfileReelevo
-                                empleado={empleadoReelevo}
-                            />
-                        </div>
-                        }
                     </div>
                 </div>
-                <div className="col-md-8">
+                <div className="col-md-10">
                     <div className="row">
                         {!searchReelevo ?
                             <>
-                                <div className="col-md-12">
+                                <div className="col-md-6">
                                     {(materialesInventario.length > 0 && !loadMaterialesInventario) &&
                                     <MaterialesInventario
                                         materiales={materialesInventario}
                                         setMaterialSelect={setMaterialSelect}
                                         setSaldo={setSaldo}
                                         setValue={setValue}
+                                        setLoadDataDetalle={setLoadDataDetalle}
+                                        cantidadUsada={searchTotalUsadoItem}
+                                        reloadProressbar={reloadProressbar}
+                                        reelevo={empleadoReelevo}
                                     />
                                     }
                                 </div>
+                                <div className="col-md-6">
+                                    <div className="row">
+                                        {empleadoReelevo &&
+                                        <div className="col-md-12 mb-2">
+                                            <ProfileReelevo
+                                                empleado={empleadoReelevo}
+                                            />
+                                        </div>
+                                        }
+                                        <div className={`col-md-12`}>
+                                            <StatusSaldoMaterial
+                                                material={materialSelect}
+                                                value={value}
+                                                saldo={saldo}
+                                                progressStatus={progressStatus}
+                                                setprogressStatus={setprogressStatus}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                                 {materialSelect &&
                                 <>
-                                    <div className="col-md-12">
-                                        <StatusSaldoMaterial
-                                            material={materialSelect}
-                                            value={value}
-                                            saldo={saldo}
-                                            progressStatus={progressStatus}
-                                            setprogressStatus={setprogressStatus}
-                                        />
-                                    </div>
-                                    <div className="col-md-12 mt-0">
+                                    <div className="col-md-12 mt-0 mb-3">
                                         <AvanceSemana
                                             semana={semana}
                                         >
                                             {semana.presente.status ?
                                                 <SemanaPresente
-                                                    datos={enfunde}
-                                                    setDatos={setEnfunde}
                                                     setValue={setValue}
                                                     saldo={saldo}
-                                                    material={materialSelect}
-                                                    reelevo={empleadoReelevo}
-                                                    progressStatus={progressStatus}
-                                                    setprogressStatus={setprogressStatus}
+                                                    reloadProressbar={reloadProressbar}
+                                                    addItemtoSemana={addItemtoSemana}
+                                                    canChange={canChangeCantidad}
                                                 /> :
                                                 <SemanaFuturo
-                                                    datos={enfunde}
-                                                    setDatos={setEnfunde}
-                                                    setValue={value}
+                                                    setValue={setValue}
                                                     saldo={saldo}
+                                                    reloadProressbar={reloadProressbar}
+                                                    addItemtoSemana={addItemtoSemana}
+                                                    canChange={canChangeCantidad}
                                                 />
                                             }
                                         </AvanceSemana>
                                     </div>
                                 </>
                                 }
+                                <div className="col-md-12 table-responsive">
+                                    <DetalleEnfunde
+                                        semana={semana}
+                                        detalles={getArrayFilter}
+                                        loadDataDetalle={loadDataDetalle}
+                                        setLoadDataDetalle={setLoadDataDetalle}
+                                        destroy={destroyItemtoSemana}
+                                        edition={editItemtoSemanaDirect}
+                                    />
+                                </div>
                             </>
                             :
                             <BuscarReelevos
@@ -184,7 +404,6 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
     )
 }
 
-
 function AvanceSemana({semana, children}) {
     return (
         <div className="card">
@@ -194,22 +413,23 @@ function AvanceSemana({semana, children}) {
             <div className="card-body">
                 {children}
             </div>
-            <div className="card-footer">
-            </div>
         </div>
     );
 }
 
-function SemanaPresente({datos, setDatos, setValue, saldo, material, reelevo, progressStatus, setprogressStatus}) {
+function SemanaPresente(props) {
+    const {
+        setValue, saldo, canChange, reloadProressbar, addItemtoSemana
+    } = props;
+
     const [cantidad, setCantidad] = useState(0);
 
     const changeValue = (e) => {
-        if (e.target.value.trim()) {
-            if (parseInt(e.target.value) <= saldo) {
-                setValue(parseInt(saldo) - parseInt(e.target.value));
-                setCantidad(parseInt(e.target.value));
+        const cantidad = parseInt((e.target.value));
+        if (e.target.value !== undefined) {
+            if (canChange(cantidad)) {
+                setCantidad(cantidad);
             } else {
-                setValue(parseInt(saldo));
                 alert("No tiene saldo suficiente");
                 resetInput();
             }
@@ -217,21 +437,14 @@ function SemanaPresente({datos, setDatos, setValue, saldo, material, reelevo, pr
             setValue(parseInt(saldo));
             resetInput();
         }
-        setprogressStatus({
-            ...progressStatus,
-            reload: true
-        });
+        reloadProressbar(true);
     };
 
-    const addCantidad = (e) => {
-        setDatos({
-            ...datos,
-            presente: {
-                cantidad,
-                idmaterial: material.id,
-                reelevo
-            }
-        })
+    const addCantidad = () => {
+        if (cantidad !== undefined && cantidad > 0) {
+            addItemtoSemana(cantidad);
+            resetInput();
+        }
     };
 
     const resetInput = () => {
@@ -255,6 +468,7 @@ function SemanaPresente({datos, setDatos, setValue, saldo, material, reelevo, pr
                         type="number"
                         min={0}
                         defaultValue={cantidad}
+                        onKeyDown={(e) => e.keyCode === 13 && addCantidad()}
                         onFocus={(e) => e.target.select()}
                         onChange={(e) => changeValue(e)}
                     />
@@ -275,7 +489,52 @@ function SemanaPresente({datos, setDatos, setValue, saldo, material, reelevo, pr
     );
 }
 
-function SemanaFuturo({datos}) {
+function SemanaFuturo(props) {
+    const {
+        setValue, saldo, canChange, reloadProressbar, addItemtoSemana
+    } = props;
+
+    const [cantidad, setCantidad] = useState(0);
+    const [desbunchados, setDesbunchados] = useState(0);
+
+    const changeValue = (e) => {
+        const cantidad = parseInt((e.target.value));
+        if (e.target.value !== undefined) {
+            if (canChange(cantidad)) {
+                setCantidad(cantidad);
+            } else {
+                alert("No tiene saldo suficiente");
+                resetInput();
+            }
+        } else {
+            setValue(parseInt(saldo));
+            resetInput();
+        }
+        reloadProressbar(true);
+    };
+
+    const changeDesbunche = (e) => {
+        if (e.target.value.trim()) {
+            if (parseInt(e.target.value) > 0) {
+                setDesbunchados(+e.target.value);
+            }
+        }
+    };
+
+    const addCantidad = () => {
+        if (cantidad !== undefined && cantidad > 0) {
+            addItemtoSemana(cantidad, desbunchados);
+            resetInput();
+        }
+    };
+
+    const resetInput = () => {
+        setCantidad(0);
+        setDesbunchados(0);
+        focuselement('id-cantidad-futuro');
+        document.getElementById('id-cantidad-futuro').value = '';
+        document.getElementById('id-desbunchados-futuro').value = '';
+    };
     return (
         <div className="row">
             <div className="col-md-6">
@@ -285,7 +544,16 @@ function SemanaFuturo({datos}) {
                             <b>F</b>
                         </span>
                     </div>
-                    <input className="form-control" type="number" min={0}/>
+                    <input
+                        id='id-cantidad-futuro'
+                        className="form-control"
+                        type="number"
+                        min={0}
+                        defaultValue={cantidad}
+                        onKeyDown={(e) => e.keyCode === 13 && addCantidad()}
+                        onFocus={(e) => e.target.select()}
+                        onChange={(e) => changeValue(e)}
+                    />
                     <div className="input-group-append">
                         <span className="input-group-text">
                             <i className="fas fa-hands-wash"/>
@@ -301,12 +569,20 @@ function SemanaFuturo({datos}) {
                             <i className="fas fa-times"/>
                         </span>
                     </div>
-                    <input className="form-control" type="number" min={0}/>
+                    <input
+                        className="form-control"
+                        type="number"
+                        id='id-desbunchados-futuro'
+                        min={0}
+                        onKeyDown={(e) => e.keyCode === 13 && addCantidad()}
+                        onFocus={(e) => e.target.select()}
+                        onChange={(e) => changeDesbunche(e)}
+                    />
                 </div>
                 <small>Desbunchados</small>
             </div>
             <div className="col-md-auto">
-                <button type="button" className="btn btn-success">
+                <button type="button" className="btn btn-success" onClick={() => addCantidad()}>
                     Agregar
                 </button>
             </div>
@@ -314,18 +590,139 @@ function SemanaFuturo({datos}) {
     );
 }
 
+function DetalleEnfunde({semana, detalles, loadDataDetalle, setLoadDataDetalle, destroy, edition}) {
+    const [listData, setListData] = useState([]);
+
+    const [edit, setEdit] = useState(false);
+    const [itemEdit, setItemEdit] = useState(null);
+
+    useEffect(() => {
+        if (loadDataDetalle) {
+            setListData(detalles());
+            setLoadDataDetalle(false);
+        }
+    }, [loadDataDetalle, setLoadDataDetalle, setListData, detalles]);
+
+    const changeEdit = (item) => {
+        setEdit(true);
+        setItemEdit(item);
+        focuselement('id-cantidad-edit');
+    };
+
+    const changeCantidad = (e) => {
+        const cantidad = parseInt(e.target.value);
+        if (cantidad > 0) {
+            setItemEdit({
+                ...itemEdit,
+                cantidad
+            });
+        }
+    };
+
+    const changeDesbunche = (e) => {
+        const desbunche = parseInt(e.target.value);
+        if (desbunche > 0) {
+            setItemEdit({
+                ...itemEdit,
+                desbunche
+            });
+        }
+    };
+
+    const saveEdit = (item) => {
+        if (edition(item, itemEdit)) {
+            setItemEdit(null);
+            setEdit(false);
+        } else {
+            alert("sobrepasa el saldo");
+        }
+    };
+
+    return (
+        <table className="table table-bordered">
+            <thead className="text-center">
+            <tr>
+                <th width="5%">...</th>
+                <th>Material</th>
+                <th width="10%">Cantidad</th>
+                <th width="10%">Desbunche</th>
+                <th width="20%">Reelevo</th>
+                <th width="15%">Accion</th>
+            </tr>
+            </thead>
+            <tbody>
+            {listData.length > 0 &&
+            listData.map((item) => (
+                <tr key={item.id} className="table-sm text-center">
+                    <td style={style.table.textCenter}>
+                        <i className="fas fa-receipt"/>
+                    </td>
+                    <td className="text-left" style={style.table.textCenter}>
+                        {item.detalle.material.descripcion}
+                    </td>
+                    <td style={style.table.textCenter}>
+                        {edit && itemEdit.id === item.id ?
+                            <input
+                                id='id-cantidad-edit'
+                                type="number"
+                                className="form-control text-center"
+                                defaultValue={itemEdit.cantidad}
+                                onFocus={(e) => e.target.select()}
+                                onChange={(e) => changeCantidad(e)}
+                                onKeyDown={(e) => e.keyCode === 13 && saveEdit(item)}
+                            />
+                            :
+                            item.cantidad
+                        }
+                    </td>
+                    <td style={style.table.textCenter}>
+                        {semana.futuro.status && edit && itemEdit.id === item.id ?
+                            <input
+                                id='id-desbunche-edit'
+                                type="number"
+                                className="form-control text-center"
+                                defaultValue={itemEdit.desbunche}
+                                onFocus={(e) => e.target.select()}
+                                onChange={(e) => changeDesbunche(e)}
+                                onKeyDown={(e) => e.keyCode === 13 && saveEdit(item)}
+                            />
+                            :
+                            item.desbunche
+                        }
+                    </td>
+                    <td style={style.table.textCenter}>
+                        {item.reelevo && `${item.reelevo.apellido1} ${item.reelevo.nombre1} ${item.reelevo.nombre2}`}
+                    </td>
+                    <td>
+                        <div className="btn-group">
+                            {edit && itemEdit.id === item.id ?
+                                <button className="btn btn-success" onClick={() => saveEdit(item)}>
+                                    <i className="fas fa-save"/>
+                                </button>
+                                :
+                                <button className="btn btn-primary" onClick={() => changeEdit(item)}>
+                                    <i className="fas fa-edit"/>
+                                </button>
+                            }
+                            <button className="btn btn-danger" onClick={() => destroy(item)}>
+                                <i className="fas fa-trash-alt"/>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            ))}
+            </tbody>
+        </table>
+    );
+}
+
 function ProfileReelevo({empleado}) {
     return (
-        <div className="card mt-3">
-            <div className="card-body">
-                <blockquote className="blockquote mb-0">
-                    <p><i className="fas fa-user-circle"/> {empleado.descripcion}</p>
-                    <footer className="blockquote-footer">
-                        Empleado Reelevo. {" "}
-                        <cite title="Source Title">
-                            CI: {empleado.cedula}
-                        </cite>
-                    </footer>
+        <div className="card">
+            <div className="card-body p-0">
+                <blockquote className="blockquote mb-0 ml-3 mt-3">
+                    <p><i className="fas fa-user-circle"/> {empleado.descripcion} - <small><var>Reelevo</var></small>
+                    </p>
                 </blockquote>
             </div>
         </div>
@@ -334,7 +731,8 @@ function ProfileReelevo({empleado}) {
 
 function BuscarReelevos(props) {
     const {
-        hacienda, labor, empPrincipal, apiEmpleado, setApiEmpleado, empleado, setEmpleado, setMaterialesInventario, setLoadMaterialesInventario,
+        hacienda, labor, empPrincipal, apiEmpleado, setApiEmpleado,
+        empleado, setEmpleado, setMaterialesInventario, setLoadMaterialesInventario,
         materialesInventarioReelevo, setMaterialesInventarioReelevo
     } = props;
 
@@ -410,7 +808,7 @@ function BuscarReelevos(props) {
                     </thead>
                     <tbody>
                     {materialesInventarioReelevo.map((item) => (
-                        <tr>
+                        <tr key={item.material.id}>
                             <td>{item.material.descripcion}</td>
                             <td className="text-center"><b>{parseFloat(item['sld_final']).toFixed(2)}</b></td>
                         </tr>
@@ -423,18 +821,24 @@ function BuscarReelevos(props) {
     )
 }
 
-function MaterialesInventario({materiales, setMaterialSelect, setSaldo, setValue}) {
+function MaterialesInventario(props) {
+    const {
+        materiales, setMaterialSelect, setSaldo, setValue,
+        setLoadDataDetalle, reloadProressbar, cantidadUsada, reelevo
+    } = props;
 
     const onSetValue = (e, value) => {
         setMaterialSelect(value);
-        setSaldo(parseInt(value['sld_final']));
-        setValue(parseInt(value['sld_final']));
+        setLoadDataDetalle(true);
+        setSaldo(parseInt(value['sld_final']) - +cantidadUsada(value.material, reelevo));
+        setValue(parseInt(value['sld_final']) - +cantidadUsada(value.material, reelevo));
+        reloadProressbar(true);
     };
 
     return (
         <div className="row">
             {materiales.map((item) => (
-                <div className="input-group col-md-6 mb-3" key={item.id}>
+                <div className="input-group col-md-12 mb-3" key={item.id}>
                     <div className="input-group-prepend">
                         <div className="input-group-text">
                             <input
@@ -452,28 +856,32 @@ function MaterialesInventario({materiales, setMaterialSelect, setSaldo, setValue
     );
 }
 
-function StatusSaldoMaterial({material, value, saldo, progressStatus, setprogressStatus}) {
+function StatusSaldoMaterial({value, saldo, progressStatus, setprogressStatus}) {
 
     useEffect(() => {
         if (progressStatus.reload) {
             let color;
-            const rango2 = (saldo) * 0.25;
-            const rango3 = (saldo) * 0.50;
-            const rango4 = (saldo) * 0.75;
+            let porcentaje = 0;
 
-            if (value === parseInt(saldo)) {
-                color = 'bg-success';
-            } else if (value > rango4 && value < parseInt(saldo)) {
-                color = 'bg-primary';
-            } else if (value > rango3 && value < rango4) {
-                color = 'bg-info';
-            } else if (value > rango2 && value < rango3) {
-                color = 'bg-warning';
-            } else {
-                color = 'bg-danger';
+            if (saldo > 0) {
+                const rango2 = (saldo) * 0.25;
+                const rango3 = (saldo) * 0.50;
+                const rango4 = (saldo) * 0.75;
+
+                if (value === parseInt(saldo)) {
+                    color = 'bg-success';
+                } else if (value > rango4 && value < parseInt(saldo)) {
+                    color = 'bg-primary';
+                } else if (value > rango3 && value < rango4) {
+                    color = 'bg-info';
+                } else if (value > rango2 && value < rango3) {
+                    color = 'bg-warning';
+                } else {
+                    color = 'bg-danger';
+                }
+
+                porcentaje = ((value / saldo) * 100).toFixed(0);
             }
-
-            const porcentaje = ((value / saldo) * 100).toFixed(0);
 
             document.getElementById('id-lote-cupo').style.width = `${porcentaje}%`;
 
@@ -487,11 +895,10 @@ function StatusSaldoMaterial({material, value, saldo, progressStatus, setprogres
 
     return (
         <>
-            {!progressStatus.reload &&
             <ul className="list-group mb-3">
                 <li className="list-group-item">
                                 <span className="lead">
-                                    Saldo disponible: {parseFloat(material['sld_final']).toFixed(2)}
+                                    Saldo disponible: {parseFloat(saldo).toFixed(2)}
                                 </span>
                     <div className="progress mt-2">
                         <div className={`progress-bar ${progressStatus.color}`} role="progressbar"
@@ -504,7 +911,6 @@ function StatusSaldoMaterial({material, value, saldo, progressStatus, setprogres
                     </div>
                 </li>
             </ul>
-            }
         </>
     )
 }
