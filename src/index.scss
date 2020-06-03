@@ -1,21 +1,61 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  monospace;
 }
 
-.id-mapa-hacienda{
+.id-mapa-hacienda {
   padding: 0;
-.leaflet-control-attribution{
-  display: none !important;
+
+  .leaflet-control-attribution {
+    display: none !important;
+  }
+
+  z-index: 0;
 }
-z-index: 0;
+
+input[name="LILA-CALENDARIO"]:disabled {
+  background: #5D0577 !important;
 }
+
+input[name="AMARILLO-CALENDARIO"]:disabled {
+  background: #F0F043 !important;
+}
+
+input[name="BLANCO-CALENDARIO"]:disabled {
+  background: #ffffff !important;
+}
+
+input[name="AZUL-CALENDARIO"]:disabled {
+  background: #0242A2 !important;
+}
+
+input[name="VERDE-CALENDARIO"]:disabled {
+  background: #20A84D !important;
+}
+
+input[name="NEGRO-CALENDARIO"]:disabled {
+  background: #000 !important;
+}
+
+input[name="CAFE-CALENDARIO"]:disabled {
+  background: #725934 !important;
+}
+
+input[name="ROJO-CALENDARIO"]:disabled {
+  background: #D01C00 !important;
+}
+
+input[name="NARANJA-CALENDARIO"]:disabled {
+  background: #F5A300 !important;
+}
+
+

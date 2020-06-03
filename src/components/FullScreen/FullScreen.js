@@ -49,9 +49,9 @@ export default function FullScreen(props) {
                         <Typography variant="h6" className={classes.title}>
                             {title}
                         </Typography>
-                        <Button color="inherit" onClick={handleClose}>
+                        {/*<Button color="inherit" onClick={handleClose}>
                             Guardar
-                        </Button>
+                        </Button>*/}
                     </Toolbar>
                 </AppBar>
                 <Container fluid className="p-0" style={{marginTop: "4.1rem"}}>

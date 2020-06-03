@@ -18,15 +18,17 @@ const style = {
     }
 };
 
-export default function FormLaborEnfunde({hacienda, empleado, labor, distribucion}) {
+export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribucion, detalles, save}) {
     const [changeStatus, setChangeStatus] = useState(false);
     const [index, setIndex] = useState(0);
     const [semana, setSemana] = useState({
         presente: {status: true, index: 0},
         futuro: {status: false, index: 1}
     });
+    const [colorSemana, setColorSemana] = useState(cabecera.colorp);
 
     //Avances segun labor
+    const [loadDataEnfunde, setLoadDataEnfunde] = useState(true);
     const [detallesEnfundePresente, setDetallesEnfundePresente] = useState([]);
     const [detallesEnfundeFuturo, setDetallesEnfundeFuturo] = useState([]);
 
@@ -51,9 +53,29 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
     const [materialesInventarioReelevo, setMaterialesInventarioReelevo] = useState([]);
 
     useEffect(() => {
+        if (loadDataEnfunde) {
+            let array = [];
+            const arrayFilterPresente = detalles.filter((item) => item.hasOwnProperty('presente'));
+            if (arrayFilterPresente.length > 0) {
+                arrayFilterPresente.map((item) => [].push.apply(array, item.presente));
+                setDetallesEnfundePresente(array);
+            }
+            array = [];
+            const arrayFilterFuturo = detalles.filter((item) => item.hasOwnProperty('futuro'));
+            if (arrayFilterFuturo.length > 0) {
+                arrayFilterFuturo.map((item) => [].push.apply(array, item.futuro));
+                setDetallesEnfundeFuturo(array);
+            }
+
+            setLoadDataDetalle(true);
+            setLoadDataEnfunde(false);
+        }
+    }, [loadDataEnfunde, distribucion, detalles]);
+
+    useEffect(() => {
         if (loadMaterialesInventario) {
             (async () => {
-                const url = `${API_LINK}/bansis-app/index.php/search/empleados/${hacienda.id}/${empleado.id}/inventario?indirecto=true`;
+                const url = `${API_LINK}/bansis-app/index.php/search/empleados/${hacienda.id}/${empleado.id}/inventario?indirecto=true&calendario=${cabecera.codigoSemana}`;
                 const request = await fetch(url);
                 const response = await request.json();
                 if (response.length > 0) {
@@ -62,7 +84,7 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
             })();
             setLoadMaterialesInventario(false);
         }
-    }, [loadMaterialesInventario, hacienda, empleado]);
+    }, [loadMaterialesInventario, hacienda, empleado, cabecera]);
 
     useEffect(() => {
         if (changeStatus) {
@@ -71,16 +93,18 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
                     presente: {...semana.presente, status: false},
                     futuro: {...semana.futuro, status: true}
                 });
+                setColorSemana(cabecera.colorf);
             } else {
                 setSemana({
                     presente: {...semana.presente, status: true},
                     futuro: {...semana.futuro, status: false}
                 });
+                setColorSemana(cabecera.colorp);
             }
             setLoadDataDetalle(true);
             setChangeStatus(false);
         }
-    }, [changeStatus, semana, index]);
+    }, [changeStatus, semana, index, cabecera]);
 
     const onChangeReelevo = () => {
         setSearchReelevo(!searchReelevo);
@@ -93,7 +117,7 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
         setSearchReelevo(false);
         clearFormulario();
         setChangeStatus(true);
-        setLoadMaterialesInventario(true);
+        setMaterialesInventarioReelevo([]);
         reloadProressbar(true);
         setValue(0);
         setSaldo(0);
@@ -115,7 +139,7 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
         return arraydata;
     };
 
-    const cantidadUsada = (material, reelevo = empleadoReelevo) => {
+    /*const cantidadUsada = (material, reelevo = empleadoReelevo) => {
         let arrayFilter = [];
 
         if (!reelevo) {
@@ -125,7 +149,7 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
         }
 
         return arrayFilter.reduce((total, item) => +total + +item.cantidad, 0);
-    };
+    };*/
 
     const canChangeCantidad = (cantidad) => {
         if (parseInt(cantidad) <= saldo) {
@@ -148,6 +172,10 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
         const itemSemana = {
             id: shortid.generate(),
             fecha: moment().format("DD/MM/YYYY"),
+            distribucion: {
+                id: distribucion.id,
+                loteSeccion: distribucion.loteSeccion
+            },
             cantidad,
             detalle: materialSelect,
             reelevo: empleadoReelevo,
@@ -186,9 +214,9 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
         let arrayFilter = [];
 
         if (!reelevo) {
-            arrayFilter = getArrayFilter().filter((item) => item.detalle.material.id === material.id);
+            arrayFilter = getArrayFilter().filter((item) => item.detalle.material.id === material.id && item.distribucion.id === distribucion.id);
         } else {
-            arrayFilter = getArrayFilter().filter((item) => item.detalle.material.id === material.id && (item.reelevo && item.reelevo.id === reelevo.id));
+            arrayFilter = getArrayFilter().filter((item) => item.detalle.material.id === material.id && item.distribucion.id === distribucion.id && (item.reelevo && item.reelevo.id === reelevo.id));
         }
 
         return arrayFilter;
@@ -255,7 +283,11 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
 
     const reloadProgressBarofItemSelect = (id) => {
         //En caso de que el material este seleccionado se pueden ahcer ediciones como en la barra de progreso
-        return materialSelect.material.id === id;
+        if (materialSelect) {
+            return materialSelect.material.id === id;
+        }
+        return false;
+
     };
 
     const reloadProgressBarofEmpleadoSelect = (reelevo) => {
@@ -264,6 +296,23 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
         } else {
             return true;
         }
+    };
+
+    const saveEnfunde = () => {
+        const presente = detallesEnfundePresente.filter((item) => item.distribucion.id === distribucion.id);
+        const total_presente = presente.reduce((total, item) => total + +item.cantidad, 0);
+        const datos_presente = {
+            detalle: presente, total: total_presente
+        };
+
+        const futuro = detallesEnfundeFuturo.filter((item) => item.distribucion.id === distribucion.id);
+        const total_futuro = futuro.reduce((total, item) => total + +item.cantidad, 0);
+        const total_desbunchados = futuro.reduce((total, item) => total + +item.desbunche, 0);
+        const datos_futuro = {
+            detalle: futuro, total: total_futuro, desbunche: total_desbunchados
+        };
+
+        save(distribucion, datos_presente, datos_futuro);
     };
 
     return (
@@ -282,13 +331,37 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
                     <div className="row">
                         <div className="col-md-12">
                             {!searchReelevo &&
-                            <div className="nav flex-column mb-2">
-                                <ListSelect
-                                    data={statusAvanceSemana}
-                                    setStatusData={setIndex}
-                                    setChange={setChangeStatus}
-                                />
-                            </div>
+                            <>
+                                <div className="row">
+                                    <div className="col-md-12 col-12 mb-2">
+                                        <div className="input-group">
+                                            <input className="form-control" name={`${colorSemana}-CALENDARIO`}
+                                                   type="text"
+                                                   disabled={true}/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="jumbotron mb-0 jumbotron-fluid p-1 text-center rounded">
+                                    <div className="container">
+                                        <h1 className="display-4">{distribucion['loteSeccion'].alias}</h1>
+                                        <p className="lead">{distribucion['has']} has.</p>
+                                    </div>
+                                </div>
+                                <div className="nav flex-column mb-2 mt-2">
+                                    <ListSelect
+                                        data={statusAvanceSemana}
+                                        index={index}
+                                        setStatusData={setIndex}
+                                        setChange={setChangeStatus}
+                                    />
+                                </div>
+                                <button
+                                    className={`btn btn-success btn-block`}
+                                    onClick={() => saveEnfunde()}
+                                >
+                                    <i className="fas fa-save"/> Guardar Enfunde
+                                </button>
+                            </>
                             }
                             <button
                                 className={`btn btn-${!searchReelevo ? 'primary' : 'danger'} btn-block mb-2`}
@@ -298,7 +371,7 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
                             </button>
                             {empleadoReelevo && !searchReelevo &&
                             <button
-                                className={`btn btn-danger btn-block`}
+                                className={`btn btn-danger btn-block mb-2`}
                                 onClick={() => destroyReelevo()}
                             >
                                 <i className="fas fa-times"/> Eliminar Reelevo
@@ -312,17 +385,22 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
                         {!searchReelevo ?
                             <>
                                 <div className="col-md-6">
-                                    {(materialesInventario.length > 0 && !loadMaterialesInventario) &&
-                                    <MaterialesInventario
-                                        materiales={materialesInventario}
-                                        setMaterialSelect={setMaterialSelect}
-                                        setSaldo={setSaldo}
-                                        setValue={setValue}
-                                        setLoadDataDetalle={setLoadDataDetalle}
-                                        cantidadUsada={searchTotalUsadoItem}
-                                        reloadProressbar={reloadProressbar}
-                                        reelevo={empleadoReelevo}
-                                    />
+                                    {(materialesInventario.length > 0 && !loadMaterialesInventario) ?
+                                        <MaterialesInventario
+                                            materiales={materialesInventario}
+                                            setMaterialSelect={setMaterialSelect}
+                                            setSaldo={setSaldo}
+                                            setValue={setValue}
+                                            setLoadDataDetalle={setLoadDataDetalle}
+                                            cantidadUsada={searchTotalUsadoItem}
+                                            reloadProressbar={reloadProressbar}
+                                            reelevo={empleadoReelevo}
+                                        />
+                                        :
+                                        <div className="alert alert-info">
+                                            <i className="fas fa-exclamation-circle"/> <b>Advertencia!</b> El empleado
+                                            no tiene saldo disponible.
+                                        </div>
                                     }
                                 </div>
                                 <div className="col-md-6">
@@ -374,6 +452,7 @@ export default function FormLaborEnfunde({hacienda, empleado, labor, distribucio
                                 <div className="col-md-12 table-responsive">
                                     <DetalleEnfunde
                                         semana={semana}
+                                        distribucion={distribucion}
                                         detalles={getArrayFilter}
                                         loadDataDetalle={loadDataDetalle}
                                         setLoadDataDetalle={setLoadDataDetalle}
@@ -590,7 +669,7 @@ function SemanaFuturo(props) {
     );
 }
 
-function DetalleEnfunde({semana, detalles, loadDataDetalle, setLoadDataDetalle, destroy, edition}) {
+function DetalleEnfunde({semana, distribucion, detalles, loadDataDetalle, setLoadDataDetalle, destroy, edition}) {
     const [listData, setListData] = useState([]);
 
     const [edit, setEdit] = useState(false);
@@ -644,6 +723,7 @@ function DetalleEnfunde({semana, detalles, loadDataDetalle, setLoadDataDetalle, 
             <tr>
                 <th width="5%">...</th>
                 <th>Material</th>
+                <th width="5%">Lote</th>
                 <th width="10%">Cantidad</th>
                 <th width="10%">Desbunche</th>
                 <th width="20%">Reelevo</th>
@@ -652,13 +732,16 @@ function DetalleEnfunde({semana, detalles, loadDataDetalle, setLoadDataDetalle, 
             </thead>
             <tbody>
             {listData.length > 0 &&
-            listData.map((item) => (
+            listData.map((item) => item.distribucion.id === distribucion.id && (
                 <tr key={item.id} className="table-sm text-center">
                     <td style={style.table.textCenter}>
                         <i className="fas fa-receipt"/>
                     </td>
                     <td className="text-left" style={style.table.textCenter}>
                         {item.detalle.material.descripcion}
+                    </td>
+                    <td className="text-center" style={style.table.textCenter}>
+                        {item.distribucion.loteSeccion.alias}
                     </td>
                     <td style={style.table.textCenter}>
                         {edit && itemEdit.id === item.id ?
@@ -850,6 +933,9 @@ function MaterialesInventario(props) {
                     </div>
                     <input type="text" className="form-control bg-white" value={item.material.descripcion}
                            aria-label="Text input with radio button" disabled/>
+                    <div className="input-group-append">
+                        <span className="input-group-text"><b>{parseFloat(item['sld_final']).toFixed(2)}</b></span>
+                    </div>
                 </div>
             ))}
         </div>
