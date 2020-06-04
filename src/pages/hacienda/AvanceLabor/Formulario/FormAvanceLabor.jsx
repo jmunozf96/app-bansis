@@ -3,7 +3,7 @@ import SnackbarComponent from "../../../../components/Snackbar/Snackbar";
 import Buscador from "../../../../components/Buscador";
 import InputSearch from "../../../../components/InputSearch/InputSearch";
 import FormularioBase from "../../../../components/FormularioBase";
-import {API_LINK} from "../../../../utils/constants";
+import {API_LINK, idGrupoMaterialEnfunde} from "../../../../utils/constants";
 import {FormHelperText} from "@material-ui/core";
 import {progressActions} from "../../../../actions/progressActions";
 import {useHistory} from "react-router-dom";
@@ -80,6 +80,14 @@ export default function FormAvanceLabor() {
     const [apiSearchDetalles, setApiSearchDetalles] = useState('');
     const [searchDetallesDistribucion, setSearchDetallesDistribucion] = useState(false);
 
+    const [reloadComponent, setReloadComponent] = useState(false);
+
+    useEffect(() => {
+        if (reloadComponent) {
+            setReloadComponent(false);
+        }
+    }, [reloadComponent]);
+
     useEffect(() => {
         if (loadCalendar) {
             (async () => {
@@ -135,10 +143,32 @@ export default function FormAvanceLabor() {
                         const detallesDB = [];
                         detalle_seccion_labor.map((detalle) => {
                             const distribucion = {
-                                id: detalle['idDetalle'],
+                                id: detalle['id'],
                                 loteSeccion: detalle['seccion_lote'],
-                                has: +(detalle['has'])
+                                has: +(detalle['has']),
+                                status_presente: true,
+                                status_futuro: false,
                             };
+                            //Cargar distribucion enfundada
+                            (async () => {
+                                try {
+                                    const apiEnfunde = `${API_LINK}/bansis-app/index.php/getEnfunde/empleado?calendario=22023&seccion=${detalle['id']}&empleado=${empleado.id}&grupoMaterial=${idGrupoMaterialEnfunde}`;
+                                    const request = await fetch(apiEnfunde);
+                                    const response = await request.json();
+                                    if (response.presente.length > 0) {
+                                        distribucion.presente = response.presente;
+                                        distribucion.futuro = response.futuro;
+                                        distribucion.total_presente = response['totalP'];
+                                        distribucion.total_futuro = response['totalF'];
+                                        distribucion.total_desbunchados = response['totalD'];
+                                        distribucion.status_presente = true;
+                                        distribucion.status_futuro = true;
+                                        setReloadComponent(true);
+                                    }
+                                } catch (e) {
+                                    console.log(e)
+                                }
+                            })();
                             detallesDB.push(distribucion);
                             setDisabledBtn({
                                 ...disabledBtn,
@@ -209,7 +239,7 @@ export default function FormAvanceLabor() {
                 ...disabledElements,
                 labor: false
             });
-            setApiSearchDetalles(`${API_LINK}/bansis-app/index.php/get-data/lote-seccion-labor?labor=${labor.id}&empleado=${value.id}`);
+            setApiSearchDetalles(`${API_LINK}/bansis-app/index.php/get-data/lote-seccion-labor?labor=${labor.id}&empleado=${value.id}&calendario=${cabeceraEnfunde.codigoSemana}`);
             setSearchDetallesDistribucion(true);
         } else {
             setDisabledElements({
@@ -292,6 +322,7 @@ export default function FormAvanceLabor() {
                 const request = await fetch(url, configuracion);
                 const response = await request.json();
                 console.log(response);
+                setSearchDetallesDistribucion(true);
             } catch (e) {
                 console.log(e);
             }
@@ -454,11 +485,11 @@ export default function FormAvanceLabor() {
                             ))}
                             <tr className="text-center">
                                 <td className="text-left"
-                                    colSpan={2}>{`TOTAL ENFUNDE SEMANA ${cabeceraEnfunde.semana}`}</td>
+                                    colSpan={2}>{`TOTAL SEMANA ${cabeceraEnfunde.semana}`}</td>
                                 <td><b>{totalPresente()}</b></td>
                                 <td><b>{totalFuturo()}</b></td>
                                 <td><b>{totalDesbunche()}</b></td>
-                                <td>{" "}</td>
+                                <td><b>{totalPresente() + totalFuturo()}</b></td>
                             </tr>
                         </>
                         }

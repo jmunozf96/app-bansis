@@ -52,6 +52,14 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
     const [apiSearchEmpleadoReelevo, setApiSearchEmpleadoReelevo] = useState(`${API_LINK}/bansis-app/index.php/search/empleados?params=&hacienda=${hacienda.id}`);
     const [materialesInventarioReelevo, setMaterialesInventarioReelevo] = useState([]);
 
+    const [reloadComponent, setReloadComponent] = useState(false);
+
+    useEffect(() => {
+        if (reloadComponent) {
+            setReloadComponent(false);
+        }
+    }, [reloadComponent]);
+
     useEffect(() => {
         if (loadDataEnfunde) {
             let array = [];
@@ -89,11 +97,16 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
     useEffect(() => {
         if (changeStatus) {
             if (index !== semana.presente.index) {
-                setSemana({
-                    presente: {...semana.presente, status: false},
-                    futuro: {...semana.futuro, status: true}
-                });
-                setColorSemana(cabecera.colorf);
+                if (distribucion.status_futuro) {
+                    setSemana({
+                        presente: {...semana.presente, status: false},
+                        futuro: {...semana.futuro, status: true}
+                    });
+                    setColorSemana(cabecera.colorf);
+                } else {
+                    setIndex(0);
+                    setReloadComponent(true);
+                }
             } else {
                 setSemana({
                     presente: {...semana.presente, status: true},
@@ -104,7 +117,7 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
             setLoadDataDetalle(true);
             setChangeStatus(false);
         }
-    }, [changeStatus, semana, index, cabecera]);
+    }, [changeStatus, semana, index, cabecera, distribucion]);
 
     const onChangeReelevo = () => {
         setSearchReelevo(!searchReelevo);
@@ -138,18 +151,6 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
 
         return arraydata;
     };
-
-    /*const cantidadUsada = (material, reelevo = empleadoReelevo) => {
-        let arrayFilter = [];
-
-        if (!reelevo) {
-            arrayFilter = getArrayFilter().filter((item) => item.detalle.material.id === material.id && !item.reelevo);
-        } else {
-            arrayFilter = getArrayFilter().filter((item) => item.detalle.material.id === material.id && (item.reelevo && item.reelevo.id === reelevo.id));
-        }
-
-        return arrayFilter.reduce((total, item) => +total + +item.cantidad, 0);
-    };*/
 
     const canChangeCantidad = (cantidad) => {
         if (parseInt(cantidad) <= saldo) {
@@ -223,6 +224,10 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
     };
 
     const editItemtoSemana = (item, {cantidad, desbunche}) => {
+        if (item.hasOwnProperty('contabilizar')) {
+            item['contabilizar'] = true;
+            item['edicion'] += +cantidad;
+        }
         item['cantidad'] += +cantidad;
         item['desbunche'] += +desbunche;
     };
@@ -232,18 +237,33 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
         let arrayFilterF = [];
 
         if (!reelevo) {
-            arrayFilterP = detallesEnfundePresente.filter((item) => item.detalle.material.id === material.id && !item.reelevo);
-            arrayFilterF = detallesEnfundeFuturo.filter((item) => item.detalle.material.id === material.id && !item.reelevo);
+            arrayFilterP = detallesEnfundePresente.filter((item) => item.detalle.material.id === material.id && !item.reelevo && !item.hasOwnProperty('contabilizar'));
+            arrayFilterF = detallesEnfundeFuturo.filter((item) => item.detalle.material.id === material.id && !item.reelevo && !item.hasOwnProperty('contabilizar'));
         } else {
-            arrayFilterP = detallesEnfundePresente.filter((item) => item.detalle.material.id === material.id && (item.reelevo && item.reelevo.id === reelevo.id));
-            arrayFilterF = detallesEnfundeFuturo.filter((item) => item.detalle.material.id === material.id && (item.reelevo && item.reelevo.id === reelevo.id));
+            arrayFilterP = detallesEnfundePresente.filter((item) => item.detalle.material.id === material.id && !item.hasOwnProperty('contabilizar') && (item.reelevo && item.reelevo.id === reelevo.id));
+            arrayFilterF = detallesEnfundeFuturo.filter((item) => item.detalle.material.id === material.id && !item.hasOwnProperty('contabilizar') && (item.reelevo && item.reelevo.id === reelevo.id));
         }
 
         return arrayFilterP.reduce((total, item) => +total + +item.cantidad, 0) + arrayFilterF.reduce((total, item) => +total + +item.cantidad, 0);
     };
 
+    const searchTotalEditadoItem = (material, reelevo) => {
+        let arrayFilterP = [];
+        let arrayFilterF = [];
+
+        if (!reelevo) {
+            arrayFilterP = detallesEnfundePresente.filter((item) => item.detalle.material.id === material.id && !item.reelevo && (item.hasOwnProperty('contabilizar') && item.contabilizar));
+            arrayFilterF = detallesEnfundeFuturo.filter((item) => item.detalle.material.id === material.id && !item.reelevo && (item.hasOwnProperty('contabilizar') && item.contabilizar));
+        } else {
+            arrayFilterP = detallesEnfundePresente.filter((item) => item.detalle.material.id === material.id && (item.hasOwnProperty('contabilizar') && item.contabilizar) && (item.reelevo && item.reelevo.id === reelevo.id));
+            arrayFilterF = detallesEnfundeFuturo.filter((item) => item.detalle.material.id === material.id && (item.hasOwnProperty('contabilizar') && item.contabilizar) && (item.reelevo && item.reelevo.id === reelevo.id));
+        }
+
+        return arrayFilterP.reduce((total, item) => +total + +item.edicion, 0) + arrayFilterF.reduce((total, item) => +total + +item.edicion, 0);
+    };
+
     const editItemtoSemanaDirect = (item, item_new) => {
-        const calculoSaldo = (+item.detalle['sld_final'] - (searchTotalUsadoItem(item.detalle.material, item.reelevo) - +item.cantidad));
+        const calculoSaldo = (+item.detalle['sld_final'] - (searchTotalUsadoItem(item.detalle.material, item.reelevo) - +item.cantidad)) - searchTotalEditadoItem(item.detalle.material, item.reelevo);
         const canChange = +item_new.cantidad <= calculoSaldo;
         if (canChange) {
             if (reloadProgressBarofItemSelect(item_new.detalle.material.id)) {
@@ -253,9 +273,13 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
                     reloadProressbar(true);
                 }
             }
-
+            if (item.hasOwnProperty('contabilizar')) {
+                item['contabilizar'] = true;
+                item['edicion'] = item['edicion'] - (+item['cantidad'] - item_new['cantidad']);
+            }
             item['cantidad'] = item_new['cantidad'];
             item['desbunche'] = item_new['desbunche'];
+
             setLoadDataDetalle(true);
             return true;
         }
@@ -348,12 +372,13 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
                                     </div>
                                 </div>
                                 <div className="nav flex-column mb-2 mt-2">
+                                    {!reloadComponent &&
                                     <ListSelect
                                         data={statusAvanceSemana}
                                         index={index}
                                         setStatusData={setIndex}
                                         setChange={setChangeStatus}
-                                    />
+                                    />}
                                 </div>
                                 <button
                                     className={`btn btn-success btn-block`}
@@ -393,6 +418,7 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
                                             setValue={setValue}
                                             setLoadDataDetalle={setLoadDataDetalle}
                                             cantidadUsada={searchTotalUsadoItem}
+                                            cantidadEditada={searchTotalEditadoItem}
                                             reloadProressbar={reloadProressbar}
                                             reelevo={empleadoReelevo}
                                         />
@@ -907,14 +933,14 @@ function BuscarReelevos(props) {
 function MaterialesInventario(props) {
     const {
         materiales, setMaterialSelect, setSaldo, setValue,
-        setLoadDataDetalle, reloadProressbar, cantidadUsada, reelevo
+        setLoadDataDetalle, reloadProressbar, cantidadUsada, cantidadEditada, reelevo
     } = props;
 
     const onSetValue = (e, value) => {
         setMaterialSelect(value);
         setLoadDataDetalle(true);
-        setSaldo(parseInt(value['sld_final']) - +cantidadUsada(value.material, reelevo));
-        setValue(parseInt(value['sld_final']) - +cantidadUsada(value.material, reelevo));
+        setSaldo((parseInt(value['sld_final']) - +cantidadUsada(value.material, reelevo)) - cantidadEditada(value.material, reelevo));
+        setValue((parseInt(value['sld_final']) - +cantidadUsada(value.material, reelevo)) - cantidadEditada(value.material, reelevo));
         reloadProressbar(true);
     };
 

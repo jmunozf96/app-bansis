@@ -6,6 +6,8 @@ export const API_LINK = 'http://192.168.191.1:8084/api';
 export const API_XASS_PRIMO = `${API_LINK}/bansis-app/XassInventario.php/primo`;
 export const API_XASS_SOFCA = `${API_LINK}/bansis-app/XassInventario.php/sofca`;
 
+export const idGrupoMaterialEnfunde = 2;
+
 export const _saveApi = async (config) => {
     try {
         axios.defaults.headers.put['Content-Type'] = 'application/x-www-form-urlencoded';
