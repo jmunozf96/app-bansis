@@ -216,7 +216,7 @@ export default function FormSeccionLabor() {
                         detalle_seccion_labor.map((detalle) => {
                             const distribucion = {
                                 id: shortid.generate(),
-                                idDB: detalle['idDetalle'],
+                                idDB: detalle['id'],
                                 idcabecera: detalle['idcabecera'],
                                 fecha: moment(detalle['fecha']).format("DD/MM/YYYY"),
                                 loteSeccion: detalle['seccion_lote'],
@@ -805,6 +805,7 @@ function TablaSeccionLaborCabecera(props) {
 function TableSeccionLaborDetalle(props) {
     const {data, eventProgress, eventEdit, eventDelete, loadNotificacion} = props;
     const [edit, setEdit] = useState(false);
+    const [hasRespaldoEdit, setHasRespaldoEdit] = useState(0);
     const [distribucion, setDistribucion] = useState(null);
     const [updateData, setUpdateData] = useState(false);
     const [has, setHas] = useState(0);
@@ -859,6 +860,7 @@ function TableSeccionLaborDetalle(props) {
         setEdit(true);
         setSearchDatos(true);
         setDistribucion(distribucion);
+        setHasRespaldoEdit(+(distribucion.hasDistribucion).toFixed(2));
         setHas(+distribucion.hasDistribucion);
         focuselement('id-has-edit');
     };
@@ -871,9 +873,12 @@ function TableSeccionLaborDetalle(props) {
                 eventEdit(distribucion, true);
                 setEdit(false);
                 setDistribucion(null);
+                setHasRespaldoEdit(0);
             } else {
-                loadNotificacion("El lote tiene un saldo compartido");
-                setHas(distribucion.hasDistribucion);
+                loadNotificacion("No se puede procesar esta cantidad, sobrepasa las hectareas del lote.");
+                document.getElementById('id-has-edit').value = +(hasRespaldoEdit).toFixed(2);
+                setHas(+hasRespaldoEdit.toFixed(2));
+                setUpdateData(true);
                 focuselement('id-has-edit');
             }
         }

@@ -152,9 +152,10 @@ export default function FormAvanceLabor() {
                             //Cargar distribucion enfundada
                             (async () => {
                                 try {
-                                    const apiEnfunde = `${API_LINK}/bansis-app/index.php/getEnfunde/empleado?calendario=22023&seccion=${detalle['id']}&empleado=${empleado.id}&grupoMaterial=${idGrupoMaterialEnfunde}`;
+                                    const apiEnfunde = `${API_LINK}/bansis-app/index.php/getEnfunde/empleado?calendario=${cabeceraEnfunde.codigoSemana}&hacienda=${hacienda.id}&seccion=${detalle['id']}&empleado=${empleado.id}&grupoMaterial=${idGrupoMaterialEnfunde}`;
                                     const request = await fetch(apiEnfunde);
                                     const response = await request.json();
+                                    console.log(response)
                                     if (response.presente.length > 0) {
                                         distribucion.presente = response.presente;
                                         distribucion.futuro = response.futuro;
@@ -205,6 +206,7 @@ export default function FormAvanceLabor() {
             });
             setEmpleado(null);
             setLabor(null);
+            clearDistribuciones();
         }
         setCabeceraEnfunde({
             ...cabeceraEnfunde,
@@ -223,8 +225,10 @@ export default function FormAvanceLabor() {
         } else {
             setDisabledElements({
                 ...disabledElements,
-                empleado: true,
+                empleado: true
             });
+            setEmpleado(null);
+            clearDistribuciones();
         }
         setCabeceraEnfunde({
             ...cabeceraEnfunde,
@@ -242,15 +246,17 @@ export default function FormAvanceLabor() {
             setApiSearchDetalles(`${API_LINK}/bansis-app/index.php/get-data/lote-seccion-labor?labor=${labor.id}&empleado=${value.id}&calendario=${cabeceraEnfunde.codigoSemana}`);
             setSearchDetallesDistribucion(true);
         } else {
-            setDisabledElements({
-                ...disabledElements,
-            });
+            clearDistribuciones();
             setDetalleDistribucion([]);
         }
         setCabeceraEnfunde({
             ...cabeceraEnfunde,
             empleado: value
         });
+    };
+
+    const clearDistribuciones = () => {
+        setDetalleDistribucion([]);
     };
 
     const openModal = (distribucion) => {

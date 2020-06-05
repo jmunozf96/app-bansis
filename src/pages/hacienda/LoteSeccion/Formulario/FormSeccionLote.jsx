@@ -208,7 +208,7 @@ const FormSeccionLote = () => {
                             return true;
                         });
 
-                        setResult(+has - +sumHas);
+                        setResult(+has - +sumHas.toFixed(2));
                         setRecalculate(true);
                         setDistribuciones(array_data);
                         setReload(true);
@@ -258,11 +258,8 @@ const FormSeccionLote = () => {
             setReload(true);
             setHas(parseFloat(value.has));
 
-            const {secciones} = value;
-            if (secciones.length > 0) {
-                setLoadDataLote(true);
-            }
 
+            setLoadDataLote(true);
             setDisabledFormAdd(false);
             focuselement('id-descripcion-distribucion');
 
@@ -292,7 +289,7 @@ const FormSeccionLote = () => {
             result = +has.toFixed(2) + +destroy.toFixed(2);
         }
         if (result >= 0) {
-            setResult(result);
+            setResult(+result.toFixed(2));
             setRecalculate(true);
             return true;
         } else {
@@ -362,9 +359,9 @@ const FormSeccionLote = () => {
                     //Buscar si ya tengo las hectareas completas
                     const distribuciones_activas = distribuciones.filter((item) => item.idDistribucion !== distribucion.idDistribucion && item.activo);
                     const has_disponibles = distribuciones_activas.reduce((total, item) => +total + +item.has, 0);
-                    if ((+distribucion.has + +has_disponibles) > +lote.has) {
+                    if (+(+distribucion.has + +has_disponibles).toFixed(2) > +(+lote.has).toFixed(2)) {
                         //No se puede editar
-                        setResult(+lote.has - +has_disponibles);
+                        setResult(+(+lote.has - +has_disponibles).toFixed(2));
                         setRecalculate(true);
                         setEdit(false);
                         clearDataDistribucion();
@@ -375,7 +372,7 @@ const FormSeccionLote = () => {
                     } else {
                         if (distribucion.activo) {
                             //Se puede editar
-                            setResult(+lote.has - (+distribucion.has + +has_disponibles));
+                            setResult(+(+lote.has - +(+distribucion.has + +has_disponibles).toFixed(2)).toFixed(2));
                             setRecalculate(true);
                             setEditDistribucion(distribucion);
                             setDisabledFormAdd(true);
@@ -429,7 +426,13 @@ const FormSeccionLote = () => {
     };
 
     const destroyDistribucion = (id, has_destroy, db = false, idDistribucion = '') => {
-        calcularProgreso(parseFloat(has_destroy));
+        const itemFiler = distribuciones.filter((item) => item.id === id);
+        if (!itemFiler[0].activo) {
+            calcularProgreso(0);
+        } else {
+            calcularProgreso(parseFloat(has_destroy));
+        }
+
         const nw_distribucion = distribuciones.filter(item => item.id !== id);
         setDistribuciones(nw_distribucion);
 
@@ -444,6 +447,11 @@ const FormSeccionLote = () => {
                     const request = await fetch(url, configuracion);
                     const response = await request.json();
                     console.log(response);
+                    const {message} = response;
+                    setNotificacion({
+                        open: true,
+                        message
+                    });
                 } catch (error) {
                     console.log(error)
                 }
@@ -521,53 +529,47 @@ const FormSeccionLote = () => {
     };
 
     const clearFormulario = () => {
-        if (loadLoteEdit.id !== '') {
-            setDisabledElements({
-                hacienda: true,
-                lotes: true
-            });
-            setDisabledFormAdd(false);
-        } else {
-            setDisabledElements({
-                hacienda: false,
-                lotes: false
-            });
-            setLote(null);
-            setDisabledBtn({
-                btnSave: true,
-                btnNuevo: false
-            });
-            setDistribuciones([]);
-            setDisabledFormAdd(true);
-            setShowModal(false);
-            setAddCoordenadas({
-                ...addCoordenadas,
-                status: false
-            });
-            setCoordenadas({
-                latitud: latitud_base,
-                longitud: longitud_base
-            });
-            setZoom(16);
-            setReload(true);
-            setEdit(false);
-            setHas(0);
+        setDisabledElements({
+            hacienda: false,
+            lotes: true
+        });
+        setHacienda(null);
+        setLote(null);
+        setDisabledBtn({
+            btnSave: true,
+            btnNuevo: false
+        });
+        setDistribuciones([]);
+        setDisabledFormAdd(true);
+        setShowModal(false);
+        setAddCoordenadas({
+            ...addCoordenadas,
+            status: false
+        });
+        setCoordenadas({
+            latitud: latitud_base,
+            longitud: longitud_base
+        });
+        setZoom(16);
+        setReload(true);
+        setEdit(false);
+        setHas(0);
 
-            setProgressStatus({
-                ...progressStatus,
-                value: 0,
-                update: true,
-                color: 'bg-success'
-            });
+        setProgressStatus({
+            ...progressStatus,
+            value: 0,
+            update: true,
+            color: 'bg-success'
+        });
 
-            document.getElementById('id-lote-cupo').style.width = `0%`;
+        document.getElementById('id-lote-cupo').style.width = `0%`;
 
-            clearDataDistribucion();
+        clearDataDistribucion();
 
-            if (progressbar)
-                progessbarStatus(false);
-        }
+        if (progressbar)
+            progessbarStatus(false);
 
+        history.push('/hacienda/lote/seccion/formulario');
     };
 
     const NuevaSeccion = () => {
