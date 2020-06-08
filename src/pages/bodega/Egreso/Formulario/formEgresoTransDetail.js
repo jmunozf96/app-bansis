@@ -10,13 +10,13 @@ import {useDispatch, useSelector} from "react-redux";
 import {progressActions} from "../../../../actions/progressActions";
 
 export default function EgresoTransDetail(props) {
-    const {data: {id, tot_egreso, material}, hacienda, recibe, solicita, setSearchTransaccionSemana, setNotificacion} = props;
+    const {data: {id, material, sld_final}, hacienda, recibe, solicita, setSearchTransaccionSemana, setNotificacion} = props;
     const [dataTransfer, setDataTransfer] = useState({
         hacienda: hacienda,
         emp_recibe: recibe,
         emp_solicitado: solicita,
         id_inventario_tomado: id,
-        tot_egreso,
+        sld_final: +sld_final,
         cantidad: 0,
         time: moment().format("DD/MM/YYYY")
     });
@@ -35,8 +35,8 @@ export default function EgresoTransDetail(props) {
 
     const onChangeCantidad = (e) => {
         const cantidad = parseInt(e.target.value);
-        if (cantidad !== undefined && cantidad > 0 && cantidad !== '') {
-            if (parseInt(cantidad) <= parseInt(dataTransfer.tot_egreso)) {
+        if (cantidad !== undefined && cantidad > 0) {
+            if (cantidad <= dataTransfer.sld_final) {
                 setDataTransfer({
                     ...dataTransfer,
                     cantidad
@@ -54,29 +54,35 @@ export default function EgresoTransDetail(props) {
     };
 
     const onclickTransfer = () => {
-        (async () => {
-            const datos = qs.stringify({json: JSON.stringify(dataTransfer)});
-            const url = `${API_LINK}/bansis-app/index.php/egreso-bodega/saldos/transfer`;
-            const configuracion = _configStoreApi('POST', url, datos, progressbarStatus, authentication);
-            const request = await _saveApi(configuracion);
-            const {code, message} = request;
-            if (code === 200) {
-                setNotificacion({
-                    open: true,
-                    message
-                });
-                setSearchTransaccionSemana(true);
-            }
-        })();
+        if (+dataTransfer.cantidad > 0) {
+            (async () => {
+                const datos = qs.stringify({json: JSON.stringify(dataTransfer)});
+                const url = `${API_LINK}/bansis-app/index.php/egreso-bodega/saldos/transfer`;
+                const configuracion = _configStoreApi('POST', url, datos, progressbarStatus, authentication);
+                const request = await _saveApi(configuracion);
+                const {code, message} = request;
+                if (code === 200) {
+                    setNotificacion({
+                        open: true,
+                        message
+                    });
+                    setSearchTransaccionSemana(true);
+                }
+            })();
+            setDataTransfer({
+                ...dataTransfer,
+                sld_final: +(dataTransfer.sld_final - dataTransfer.cantidad),
+                cantidad: 0
+            });
 
-        setDataTransfer({
-            ...dataTransfer,
-            tot_egreso: (dataTransfer.tot_egreso - dataTransfer.cantidad),
-            cantidad: 0
-        });
-
-        document.getElementById(`'id-cantidad-inv'${id}`).value = '';
-        setReload(true);
+            document.getElementById(`'id-cantidad-inv'${id}`).value = '';
+            setReload(true);
+        }else{
+            setNotificacion({
+                open: true,
+                message: 'Cantidad no permitida'
+            })
+        }
     };
 
     return (
@@ -95,7 +101,7 @@ export default function EgresoTransDetail(props) {
                 <input
                     name="tot_egreso"
                     className="form-control text-center"
-                    value={dataTransfer.tot_egreso}
+                    value={dataTransfer.sld_final}
                     disabled
                 />
                 <FormHelperText id="outlined-weight-helper-text">

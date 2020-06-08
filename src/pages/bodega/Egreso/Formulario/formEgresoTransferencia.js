@@ -26,7 +26,6 @@ export default function EgresoTransferencia(props) {
 
     const {result} = response;
 
-
     if (empleados.length === 0 && loadData) {
         if (result.length === 0) {
             setOpen(false);
@@ -49,7 +48,7 @@ export default function EgresoTransferencia(props) {
                             data={empleado}
                         >
                             <Container fluid className="p-0 m-0">
-                                {empleado.inventario.map((inv, index) =>
+                                {empleado.hasOwnProperty('inventario') && empleado.inventario.map((inv, index) =>
                                     <Row className="col-12 ml-0 p-0" key={index}>
                                         <EgresoTransDetail
                                             data={inv}

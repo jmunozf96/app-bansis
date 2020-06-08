@@ -7,7 +7,6 @@ import {progressActions} from "../../../../actions/progressActions";
 
 export default function EgresoShowTransferencia(props) {
     const {data: {transfer, entra}, setOpen, setNotificacion, setSearchTransaccionSemana} = props;
-    console.log(transfer);
 
     const {
         cantidad, id,

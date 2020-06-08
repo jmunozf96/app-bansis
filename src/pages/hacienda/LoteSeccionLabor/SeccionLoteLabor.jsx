@@ -315,7 +315,7 @@ function DetailDistribucion(props) {
         return (<></>);
     }
 
-    const {id, empleado: {nombres, hacienda: {detalle}}, labor: {descripcion}, has, detalle_seccion_labor} = data;
+    const {id, empleado: {nombres}, labor: {descripcion}, has, detalle_seccion_labor} = data;
 
     const cancelar = () => {
         setOpen(false);

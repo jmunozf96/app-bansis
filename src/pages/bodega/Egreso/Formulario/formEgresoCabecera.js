@@ -278,9 +278,35 @@ export default function EgresoCabecera(props) {
 
     return (
         <Row>
-            <Col md={4}>
+            <Col md={12}>
+                <Form onChange={onChange}>
+                    <Row>
+                        <Col md={4} className="">
+                            <FormGroup>
+                                <label>Fecha</label>
+                                <input className="form-control bg-white" name="fecha"
+                                       value={cabeceraEgreso.fecha}
+                                       readOnly/>
+                            </FormGroup>
+                        </Col>
+                        <Col md={8} className="">
+                            <FormGroup>
+                                <label>Hacienda</label>
+                                <CustomSelect
+                                    name="hacienda"
+                                    defaultValue={cabeceraEgreso.hacienda}
+                                    placeholder="SELECCIONE UNA HACIENDA..."
+                                    api_url={api_haciendas}
+                                    disabled={disabledElements.hacienda}
+                                />
+                            </FormGroup>
+                        </Col>
+                    </Row>
+                </Form>
+            </Col>
+            <Col md={12}>
                 <Row>
-                    <Col md={12}>
+                    <Col md={6}>
                         <Form onChange={onChange}>
                             <Card>
                                 <Card.Header className="pb-3 pt-1 pl-3">
@@ -322,7 +348,7 @@ export default function EgresoCabecera(props) {
                         </Form>
                         <hr/>
                     </Col>
-                    <Col md={12}>
+                    <Col md={6}>
                         <Card>
                             <Card.Header className="pb-3 pt-1 pl-3">
                                 <Form onChange={onChange}>
@@ -414,31 +440,7 @@ export default function EgresoCabecera(props) {
                     </Col>
                 </Row>
             </Col>
-            <Col md={8}>
-                <Form onChange={onChange}>
-                    <Row>
-                        <Col md={4} className="">
-                            <FormGroup>
-                                <label>Fecha</label>
-                                <input className="form-control bg-white" name="fecha"
-                                       value={cabeceraEgreso.fecha}
-                                       readOnly/>
-                            </FormGroup>
-                        </Col>
-                        <Col md={8} className="">
-                            <FormGroup>
-                                <label>Hacienda</label>
-                                <CustomSelect
-                                    name="hacienda"
-                                    defaultValue={cabeceraEgreso.hacienda}
-                                    placeholder="SELECCIONE UNA HACIENDA..."
-                                    api_url={api_haciendas}
-                                    disabled={disabledElements.hacienda}
-                                />
-                            </FormGroup>
-                        </Col>
-                    </Row>
-                </Form>
+            <Col md={12}>
                 <Row>
                     {children}
                 </Row>

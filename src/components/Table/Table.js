@@ -24,7 +24,7 @@ export default function TableForm(props) {
             </Row>
             <Row>
                 <Col>
-                    {code !== 400 &&
+                    {code !== 400 && dataArray && Object.entries(dataArray).length > 0 &&
                     <PaginationForm
                         current_page={dataArray.current_page}
                         total={dataArray.total}

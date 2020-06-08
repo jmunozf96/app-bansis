@@ -1,15 +1,11 @@
 import React from "react";
-import {Route, Switch, Redirect} from "react-router-dom";
+import {Route, Switch} from "react-router-dom";
 import {routes} from "../router";
 
-import {useSelector} from "react-redux";
 import Login from "../pages/login";
+import VerifyAuthentication from "./VerifyAuthentication";
 
 export default function RouterConfig() {
-    const authentication = useSelector(
-        (state) => state.auth._token
-    );
-
     return (
         <Switch>
             <Route exact path="/login" component={Login}/>
@@ -20,11 +16,9 @@ export default function RouterConfig() {
                     exact={true}
                     render={(props) => (
                         // pass the sub-routes down to keep nesting
-                        authentication !== '' ?
-                            <route.component {...props} routes={route.routes}/> :
-                            <Redirect
-                                to="/login"
-                            />
+                        <VerifyAuthentication>
+                            <route.component {...props} routes={route.routes}/>
+                        </VerifyAuthentication>
                     )}
                 />
             ))}

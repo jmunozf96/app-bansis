@@ -18,7 +18,7 @@ const style = {
     }
 };
 
-export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribucion, detalles, save}) {
+export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribucion, detalles, save, itemsToDelete, setItemsToDelete}) {
     const [changeStatus, setChangeStatus] = useState(false);
     const [index, setIndex] = useState(0);
     const [semana, setSemana] = useState({
@@ -53,6 +53,7 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
     const [materialesInventarioReelevo, setMaterialesInventarioReelevo] = useState([]);
 
     const [reloadComponent, setReloadComponent] = useState(false);
+    const [loadAlertEmptyMateriales, setLoadAlertEmptyMateriales] = useState(false);
 
     useEffect(() => {
         if (reloadComponent) {
@@ -74,7 +75,6 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
                 arrayFilterFuturo.map((item) => [].push.apply(array, item.futuro));
                 setDetallesEnfundeFuturo(array);
             }
-
             setLoadDataDetalle(true);
             setLoadDataEnfunde(false);
         }
@@ -87,7 +87,9 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
                 const request = await fetch(url);
                 const response = await request.json();
                 if (response.length > 0) {
-                    await setMaterialesInventario(response[0]['inventario']);
+                    setMaterialesInventario(response[0]['inventario']);
+                } else {
+                    setLoadAlertEmptyMateriales(true);
                 }
             })();
             setLoadMaterialesInventario(false);
@@ -97,7 +99,14 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
     useEffect(() => {
         if (changeStatus) {
             if (index !== semana.presente.index) {
-                if (distribucion.status_futuro) {
+                setSemana({
+                    presente: {...semana.presente, status: false},
+                    futuro: {...semana.futuro, status: true}
+                });
+                setColorSemana(cabecera.colorf);
+
+                //Si primero deben reportar el enfunde presente, pero queda abierto
+                /*if (distribucion.status_futuro) {
                     setSemana({
                         presente: {...semana.presente, status: false},
                         futuro: {...semana.futuro, status: true}
@@ -106,7 +115,7 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
                 } else {
                     setIndex(0);
                     setReloadComponent(true);
-                }
+                }*/
             } else {
                 setSemana({
                     presente: {...semana.presente, status: true},
@@ -302,6 +311,23 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
             }
         }
 
+        const delete_enfunde = {
+            material: data.detalle.material.id,
+            seccion: data.distribucion.id,
+            hacienda: cabecera.hacienda.id,
+            calendario: cabecera.codigoSemana,
+            cantidad: data.cantidad,
+            reelevo: data.reelevo,
+            presente: semana.presente.status,
+            futuro: semana.futuro.status
+        };
+
+        if (data.hasOwnProperty('contabilizar')) {
+            setItemsToDelete([
+                ...itemsToDelete,
+                delete_enfunde
+            ]);
+        }
         setLoadDataDetalle(true);
     };
 
@@ -423,10 +449,15 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
                                             reelevo={empleadoReelevo}
                                         />
                                         :
-                                        <div className="alert alert-info">
-                                            <i className="fas fa-exclamation-circle"/> <b>Advertencia!</b> El empleado
-                                            no tiene saldo disponible.
-                                        </div>
+                                        <>
+                                            {loadAlertEmptyMateriales &&
+                                            <div className="alert alert-info">
+                                                <i className="fas fa-exclamation-circle"/> <b>Advertencia!</b> El
+                                                empleado
+                                                no tiene saldo disponible.
+                                            </div>
+                                            }
+                                        </>
                                     }
                                 </div>
                                 <div className="col-md-6">
@@ -489,6 +520,7 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
                             </>
                             :
                             <BuscarReelevos
+                                codigoSemana={cabecera.codigoSemana}
                                 hacienda={hacienda}
                                 apiEmpleado={apiSearchEmpleadoReelevo}
                                 setApiEmpleado={setApiSearchEmpleadoReelevo}
@@ -840,7 +872,7 @@ function ProfileReelevo({empleado}) {
 
 function BuscarReelevos(props) {
     const {
-        hacienda, labor, empPrincipal, apiEmpleado, setApiEmpleado,
+        codigoSemana, hacienda, labor, empPrincipal, apiEmpleado, setApiEmpleado,
         empleado, setEmpleado, setMaterialesInventario, setLoadMaterialesInventario,
         materialesInventarioReelevo, setMaterialesInventarioReelevo
     } = props;
@@ -859,7 +891,7 @@ function BuscarReelevos(props) {
     useEffect(() => {
         if (loadInventario) {
             (async () => {
-                const url = `${API_LINK}/bansis-app/index.php/search/empleados/${hacienda.id}/${empleado.id}/inventario?indirecto=true`;
+                const url = `${API_LINK}/bansis-app/index.php/search/empleados/${hacienda.id}/${empleado.id}/inventario?indirecto=true&calendario=${codigoSemana}`;
                 const request = await fetch(url);
                 const response = await request.json();
                 if (response.length > 0) {
@@ -872,7 +904,7 @@ function BuscarReelevos(props) {
             })();
             setLoadInventario(false);
         }
-    }, [loadInventario, hacienda, labor, empleado, setMaterialesInventario, setMaterialesInventarioReelevo, setEmpleado]);
+    }, [loadInventario, hacienda, labor, empleado, setMaterialesInventario, setMaterialesInventarioReelevo, setEmpleado, codigoSemana]);
 
     const changeEmpleado = (e, value) => {
         setEmpleado(value);

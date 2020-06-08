@@ -6,19 +6,17 @@ import FormularioBase from "../../../../components/FormularioBase";
 import {API_LINK, idGrupoMaterialEnfunde} from "../../../../utils/constants";
 import {FormHelperText} from "@material-ui/core";
 import {progressActions} from "../../../../actions/progressActions";
-import {useHistory} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import FullScreen from "../../../../components/FullScreen/FullScreen";
 import FormLaborEnfunde from "./Labor/FormLaborEnfunde";
 
-import shortid from "shortid";
 import moment from "moment";
 import 'moment/locale/es';
 import qs from "qs";
 
 export default function FormAvanceLabor() {
     //-----------------------------------------------------------------------
-    const Regresar = '/hacienda/lote/seccion/labor';
+    const Regresar = '/hacienda/avances/labor/empleado/list';
     const [disabledElements, setDisabledElements] = useState({
         hacienda: false,
         loteSeccion: true,
@@ -82,6 +80,26 @@ export default function FormAvanceLabor() {
 
     const [reloadComponent, setReloadComponent] = useState(false);
 
+    //Eliminar enfundes
+    const [itemsToDelete, setItemsToDelete] = useState([]);
+
+    const [changeSemana, setChangeSemana] = useState({
+        status: false,
+        codigoSemana: 0
+    });
+
+    useEffect(() => {
+        if (changeSemana.status) {
+            setDetalleDistribucion([]);
+            setApiSearchDetalles(`${API_LINK}/bansis-app/index.php/get-data/lote-seccion-labor?labor=${labor.id}&empleado=${empleado.id}&activo=true&calendario=${changeSemana.codigo}`);
+            setSearchDetallesDistribucion(true);
+            setChangeSemana({
+                ...changeSemana,
+                status: false
+            });
+        }
+    }, [changeSemana, labor, empleado, cabeceraEnfunde]);
+
     useEffect(() => {
         if (reloadComponent) {
             setReloadComponent(false);
@@ -98,6 +116,14 @@ export default function FormAvanceLabor() {
                     const {code, calendario} = response;
 
                     if (code === 200) {
+
+                        if (changeSemana.status) {
+                            setChangeSemana({
+                                ...changeSemana,
+                                codigo: calendario.presente.codigo
+                            });
+                        }
+
                         setCabeceraEnfunde({
                             ...cabeceraEnfunde,
                             codigoSemana: calendario.presente.codigo,
@@ -114,7 +140,7 @@ export default function FormAvanceLabor() {
             })();
             setLoadCalendar(false);
         }
-    }, [loadCalendar, cabeceraEnfunde]);
+    }, [loadCalendar, cabeceraEnfunde, changeSemana]);
 
     useEffect(() => {
         if (changeURL) {
@@ -140,44 +166,54 @@ export default function FormAvanceLabor() {
                 if (secciones && Object.entries(secciones).length > 0) {
                     const {secciones: {detalle_seccion_labor}} = response;
                     if (detalle_seccion_labor.length > 0) {
-                        const detallesDB = [];
-                        detalle_seccion_labor.map((detalle) => {
-                            const distribucion = {
-                                id: detalle['id'],
-                                loteSeccion: detalle['seccion_lote'],
-                                has: +(detalle['has']),
-                                status_presente: true,
-                                status_futuro: false,
-                            };
-                            //Cargar distribucion enfundada
-                            (async () => {
-                                try {
-                                    const apiEnfunde = `${API_LINK}/bansis-app/index.php/getEnfunde/empleado?calendario=${cabeceraEnfunde.codigoSemana}&hacienda=${hacienda.id}&seccion=${detalle['id']}&empleado=${empleado.id}&grupoMaterial=${idGrupoMaterialEnfunde}`;
-                                    const request = await fetch(apiEnfunde);
-                                    const response = await request.json();
-                                    console.log(response)
-                                    if (response.presente.length > 0) {
-                                        distribucion.presente = response.presente;
-                                        distribucion.futuro = response.futuro;
-                                        distribucion.total_presente = response['totalP'];
-                                        distribucion.total_futuro = response['totalF'];
-                                        distribucion.total_desbunchados = response['totalD'];
-                                        distribucion.status_presente = true;
-                                        distribucion.status_futuro = true;
-                                        setReloadComponent(true);
+                        (async () => {
+                            try {
+                                const apiEnfunde = `${API_LINK}/bansis-app/index.php/getEnfunde/empleado?calendario=${cabeceraEnfunde.codigoSemana}&hacienda=${hacienda.id}&empleado=${empleado.id}&grupoMaterial=${idGrupoMaterialEnfunde}`;
+                                const request = await fetch(apiEnfunde);
+                                const response = await request.json();
+                                const detallesDB = [];
+                                detalle_seccion_labor.map(seccion => {
+                                    const distribucion = {
+                                        id: seccion['id'],
+                                        loteSeccion: seccion['seccion_lote'],
+                                        has: +(seccion['has']),
+                                        status_presente: true,
+                                        status_futuro: false,
+                                    };
+                                    if (response.code === 200) {
+                                        if (response.dataArray.length > 0) {
+                                            const arrayFilter = response.dataArray.filter((item) => item['idseccion'] === seccion.id);
+                                            if (arrayFilter.length > 0) {
+                                                distribucion.presente = [];
+                                                distribucion.futuro = [];
+                                                distribucion.total_presente = 0;
+                                                distribucion.total_futuro = 0;
+                                                distribucion.total_desbunchados = 0;
+                                                distribucion.status_presente = true;
+                                                distribucion.status_futuro = true;
+                                                arrayFilter.map((item) => {
+                                                    item.presente.length > 0 && distribucion.presente.push(item.presente[0]);
+                                                    item.futuro.length > 0 && distribucion.futuro.push(item.futuro[0]);
+                                                    distribucion.total_presente = +distribucion.total_presente + +item['totalP'];
+                                                    distribucion.total_futuro = +distribucion.total_futuro + +item['totalF'];
+                                                    distribucion.total_desbunchados = +distribucion.total_desbunchados + +item['totalD'];
+                                                    return true;
+                                                });
+                                            }
+                                        }
                                     }
-                                } catch (e) {
-                                    console.log(e)
-                                }
-                            })();
-                            detallesDB.push(distribucion);
-                            setDisabledBtn({
-                                ...disabledBtn,
-                                btnSave: false
-                            });
-                            return true;
-                        });
-                        setDetalleDistribucion(detallesDB);
+                                    detallesDB.push(distribucion);
+                                    return true;
+                                });
+                                await setDetalleDistribucion(detallesDB);
+                            } catch (e) {
+                                console.log(e)
+                            }
+                        })();
+                        setDisabledBtn({
+                            ...disabledBtn,
+                            btnSave: false
+                        })
                     } else {
                         setNotificacion({
                             open: true,
@@ -188,7 +224,9 @@ export default function FormAvanceLabor() {
             })();
             setSearchDetallesDistribucion(false);
         }
-    }, [dispatch, searchDetallesDistribucion, authentication, apiSearchDetalles, disabledBtn]);
+    }, [dispatch, searchDetallesDistribucion,
+        authentication, apiSearchDetalles, disabledBtn,
+        cabeceraEnfunde, empleado, hacienda]);
 
     const changeHacienda = (e, value) => {
         setHacienda(value);
@@ -243,7 +281,7 @@ export default function FormAvanceLabor() {
                 ...disabledElements,
                 labor: false
             });
-            setApiSearchDetalles(`${API_LINK}/bansis-app/index.php/get-data/lote-seccion-labor?labor=${labor.id}&empleado=${value.id}&calendario=${cabeceraEnfunde.codigoSemana}`);
+            setApiSearchDetalles(`${API_LINK}/bansis-app/index.php/get-data/lote-seccion-labor?labor=${labor.id}&empleado=${value.id}&activo=true&calendario=${cabeceraEnfunde.codigoSemana}`);
             setSearchDetallesDistribucion(true);
         } else {
             clearDistribuciones();
@@ -262,6 +300,24 @@ export default function FormAvanceLabor() {
     const openModal = (distribucion) => {
         setOpenFullScreen(true);
         setDistribucionSelect(distribucion);
+    };
+
+    const irSemanaAnterior = () => {
+        setCabeceraEnfunde({
+            ...cabeceraEnfunde,
+            fecha: moment(cabeceraEnfunde.fecha, "DD-MM-YYYY").subtract(7, 'days').format('DD/MM/YYYY')
+        });
+        setLoadCalendar(true);
+        setChangeSemana({...changeSemana, status: true});
+    };
+
+    const irSemanaSiguiente = () => {
+        setCabeceraEnfunde({
+            ...cabeceraEnfunde,
+            fecha: moment(cabeceraEnfunde.fecha, "DD-MM-YYYY").add(7, 'days').format('DD/MM/YYYY')
+        });
+        setLoadCalendar(true);
+        setChangeSemana({...changeSemana, status: true});
     };
 
     const totalPresente = () => {
@@ -296,8 +352,8 @@ export default function FormAvanceLabor() {
             item.futuro = futuro.detalle;
             return true;
         });
-
         setOpenFullScreen(false);
+        openNotificacion('Enfunde agregado a seccion');
     };
 
     const nuevoAvanceLabor = () => {
@@ -305,8 +361,32 @@ export default function FormAvanceLabor() {
     };
 
     const saveAvanceLabor = () => {
-        console.log(cabeceraEnfunde);
-        console.log(detalleDistribucion);
+        //Eliminar registros
+        if (itemsToDelete.length > 0) {
+            (async () => {
+                try {
+                    const url = `${API_LINK}/bansis-app/index.php/deleteEnfunde/empleado`;
+                    const configuracion = {
+                        method: 'DELETE',
+                        body: qs.stringify({
+                            json: JSON.stringify({eliminar: itemsToDelete})
+                        }),
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Authorization': authentication
+                        }
+                    };
+                    const request = await fetch(url, configuracion);
+                    const response = await request.json();
+                    const {message} = response;
+                    openNotificacion(message);
+                } catch (e) {
+                    console.log(e)
+                }
+            })();
+        }
+        setItemsToDelete([]);
+
         //Guardar enfunde
         (async () => {
             try {
@@ -327,7 +407,8 @@ export default function FormAvanceLabor() {
                 };
                 const request = await fetch(url, configuracion);
                 const response = await request.json();
-                console.log(response);
+                const {message} = response;
+                openNotificacion(message);
                 setSearchDetallesDistribucion(true);
             } catch (e) {
                 console.log(e);
@@ -335,9 +416,16 @@ export default function FormAvanceLabor() {
         })();
     };
 
+    const openNotificacion = (message) => {
+        setNotificacion({
+            open: true,
+            message
+        })
+    };
+
     return (
         <FormularioBase
-            icon='fas fa-location-arrow'
+            icon='fas fa-street-view'
             title={'Formulario Secciones por Labor'}
             nuevo={nuevoAvanceLabor}
             guardar={saveAvanceLabor}
@@ -377,14 +465,14 @@ export default function FormAvanceLabor() {
                                value="ENFUNDE SEMANAL POR EMPLEADO"/>
                     </div>
                 </div>
-                <div className="offset-md-2 col-md-1 col-6">
+                <div className="col-md-2 col-6">
                     <label>PRE.</label>
                     <div className="input-group">
                         <input className="form-control" name={`${cabeceraEnfunde.colorp}-CALENDARIO`} type="text"
                                disabled={true}/>
                     </div>
                 </div>
-                <div className="col-md-1 col-6">
+                <div className="col-md-2 col-6">
                     <label>FUT.</label>
                     <div className="input-group">
                         <input className="form-control" name={`${cabeceraEnfunde.colorf}-CALENDARIO`} type="text"
@@ -454,6 +542,8 @@ export default function FormAvanceLabor() {
                             distribucion={distribucionSelect}
                             detalles={detalleDistribucion}
                             save={saveDistribucionLabor}
+                            itemsToDelete={itemsToDelete}
+                            setItemsToDelete={setItemsToDelete}
                         />
                     </FullScreen>
                     <table className="table table-hover table-bordered">
@@ -468,7 +558,7 @@ export default function FormAvanceLabor() {
                         </tr>
                         </thead>
                         <tbody>
-                        {detalleDistribucion.length > 0 &&
+                        {detalleDistribucion.length > 0 && !reloadComponent &&
                         <>
                             {detalleDistribucion.map((item) => (
                                 <tr key={item.id} className="text-center table-sm">
@@ -501,6 +591,20 @@ export default function FormAvanceLabor() {
                         }
                         </tbody>
                     </table>
+                    {detalleDistribucion.length > 0 && !reloadComponent &&
+                    <div className="row p-0">
+                        <div className="col-md-4">
+                            <button className="btn btn-danger btn-block" onClick={() => irSemanaAnterior()}>
+                                <i className="fas fa-arrow-alt-circle-left"/> -1 Semana
+                            </button>
+                        </div>
+                        <div className="offset-4 col-md-4">
+                            <button className="btn btn-primary btn-block" onClick={() => irSemanaSiguiente()}>
+                                +1 Semana <i className="fas fa-arrow-alt-circle-right"/>
+                            </button>
+                        </div>
+                    </div>
+                    }
                 </div>
             </div>
         </FormularioBase>

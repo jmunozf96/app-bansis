@@ -73,12 +73,9 @@ export default function DataDetail(props) {
                             return error.response.data;
                         });
                 const {code, message} = deleteEmp;
-                console.log(deleteEmp);
                 if (code === 200) {
                     setDataModal({});
                     setReload(true);
-                } else {
-                    console.log(deleteEmp.error_message)
                 }
                 setNotificacion({
                     open: true,

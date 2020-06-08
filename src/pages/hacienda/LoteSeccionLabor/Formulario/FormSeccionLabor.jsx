@@ -71,7 +71,6 @@ export default function FormSeccionLabor() {
         loteSeccion: null,
         hasDistribucion: 0
     });
-    const [idcabecera, setIdCabecera] = useState('');
     const [cabeceraDistribucion, setCabeceraDistribucion] = useState({
         hacienda: null,
         labor: null,
@@ -92,7 +91,7 @@ export default function FormSeccionLabor() {
     const progessbarStatus = (state) => dispatch(progressActions(state));
 
     const authentication = useSelector((state) => state.auth._token);
-    const progressbar = useSelector((state) => state.progressbar.loading);
+    //const progressbar = useSelector((state) => state.progressbar.loading);
 
     useEffect(() => {
         if (loadSeccionEdit.load) {
@@ -104,8 +103,7 @@ export default function FormSeccionLabor() {
 
                     const {code} = response;
                     if (code === 200) {
-                        const {laborSeccion: {id, labor, empleado}} = response;
-                        setIdCabecera(id);
+                        const {laborSeccion: {labor, empleado}} = response;
                         setLabor(labor);
                         setEmpleado(empleado);
                         setHacienda(empleado['hacienda']);
@@ -167,7 +165,7 @@ export default function FormSeccionLabor() {
         if (searchHasDisponibles) {
             (async () => {
                 try {
-                    const url = `${API_LINK}/bansis-app/index.php/get-data/has-seccion?seccion=${loteSeccion.id}&cabecera=${idcabecera}&labor=${labor.id}`;
+                    const url = `${API_LINK}/bansis-app/index.php/get-data/has-seccion?seccion=${loteSeccion.id}&empleado=${empleado.id}&labor=${labor.id}`;
                     const config = {
                         method: 'GET',
                         headers: {'Authorization': authentication}
@@ -175,14 +173,12 @@ export default function FormSeccionLabor() {
                     const request = await fetch(url, config);
                     const response = await request.json();
                     const {hasDistribuidas} = response;
-
                     let has = 0;
                     if (detalleDistribucion.length > 0) {
-                        const filterArray = detalleDistribucion.filter((item) => item.loteSeccion.id === loteSeccion.id);
+                        const filterArray = detalleDistribucion.filter((item) => item.loteSeccion.id === loteSeccion.id && ((!item.hasOwnProperty('estado')) || (item.hasOwnProperty('estado') && item.estado)));
                         has = filterArray.reduce((total, item) => +total + +item.hasDistribucion, 0);
                     }
                     setHasDistribuidas(+hasDistribuidas);
-
                     setResult(+loteSeccion.has - has - +(hasDistribuidas).toFixed(2));
                     setHas(+loteSeccion.has - has - +(hasDistribuidas).toFixed(2));
                     setRecalculate(true);
@@ -192,7 +188,7 @@ export default function FormSeccionLabor() {
             })();
             setSearchHasDisponibles(false);
         }
-    }, [searchHasDisponibles, authentication, loteSeccion, idcabecera, detalleDistribucion, labor]);
+    }, [searchHasDisponibles, authentication, loteSeccion, empleado, detalleDistribucion, labor]);
 
     useEffect(() => {
         if (searchDetallesDistribucion) {
@@ -209,10 +205,9 @@ export default function FormSeccionLabor() {
                 await progessbarStatus(false);
                 const {secciones} = response;
                 if (secciones && Object.entries(secciones).length > 0) {
-                    const {secciones: {detalle_seccion_labor, id}} = response;
+                    const {secciones: {detalle_seccion_labor}} = response;
                     if (detalle_seccion_labor.length > 0) {
                         const detallesDB = [];
-                        setIdCabecera(id);
                         detalle_seccion_labor.map((detalle) => {
                             const distribucion = {
                                 id: shortid.generate(),
@@ -220,7 +215,8 @@ export default function FormSeccionLabor() {
                                 idcabecera: detalle['idcabecera'],
                                 fecha: moment(detalle['fecha']).format("DD/MM/YYYY"),
                                 loteSeccion: detalle['seccion_lote'],
-                                hasDistribucion: +(detalle['has'])
+                                hasDistribucion: +(detalle['has']),
+                                estado: detalle['estado'] === "1"
                             };
                             detallesDB.push(distribucion);
                             setDisabledBtn({
@@ -255,7 +251,8 @@ export default function FormSeccionLabor() {
                 ...distribucionLabor,
                 id: shortid.generate(),
                 loteSeccion,
-                hasDistribucion
+                hasDistribucion,
+                estado: true
             });
 
             setUpdateData(false);
@@ -340,13 +337,7 @@ export default function FormSeccionLabor() {
                 ...disabledElements,
                 hasDistribucion: false
             });
-
-            /*setResult(+value.has - recalculatehasLote(value.id));
-            setHas(+value.has - recalculatehasLote(value.id));
-            setRecalculate(true);*/
-
             setSearchHasDisponibles(true);
-
         } else {
             setDisabledElements({
                 ...disabledElements,
@@ -366,12 +357,12 @@ export default function FormSeccionLabor() {
                     setResult(has - has_distribuir);
                 } else {
                     setHasDistribucion(0);
-                    setResult(has + ((+loteSeccion.has - +recalculatehasLote(loteSeccion.id)) - has));
+                    setResult(+has.toFixed(2));
                     loadNotificacion("Se excede las hectareas");
                 }
             } else {
                 setHasDistribucion(0);
-                setResult(has + ((+loteSeccion.has - +recalculatehasLote(loteSeccion.id)) - has));
+                setResult(+has.toFixed(2));
             }
             setRecalculate(true);
         }
@@ -388,8 +379,9 @@ export default function FormSeccionLabor() {
     const recalculatehasLote = (idlote) => {
         let has = 0;
         if (detalleDistribucion.length > 0) {
-            const filterArray = detalleDistribucion.filter((item) => item.loteSeccion.id === idlote);
+            const filterArray = detalleDistribucion.filter((item) => item.loteSeccion.id === idlote && ((!item.hasOwnProperty('estado')) || (item.hasOwnProperty('estado') && item.estado)));
             has = filterArray.reduce((total, item) => +total + +item.hasDistribucion, 0);
+            console.log('este es el metodo')
         }
         return has;
     };
@@ -419,7 +411,8 @@ export default function FormSeccionLabor() {
     const calculateHasTotalDistribuidas = () => {
         let total = 0;
         if (detalleDistribucion.length > 0) {
-            total = detalleDistribucion.reduce((total, item) => +total + +item.hasDistribucion, 0);
+            const arrayFilter = detalleDistribucion.filter((item) => (!item.hasOwnProperty('estado')) || (item.hasOwnProperty('estado') && item.estado));
+            total = arrayFilter.reduce((total, item) => +total + +item.hasDistribucion, 0);
         }
         return (total).toFixed(2);
     };
@@ -462,7 +455,7 @@ export default function FormSeccionLabor() {
     };
 
     const existeDistribucionLaborHas = (idlote) => {
-        const arrayFilter = detalleDistribucion.filter((item) => item.loteSeccion.id === idlote);
+        const arrayFilter = detalleDistribucion.filter((item) => item.loteSeccion.id === idlote && ((!item.hasOwnProperty('estado')) || (item.hasOwnProperty('estado') && item.estado)));
         return arrayFilter.length > 0;
     };
 
@@ -471,9 +464,9 @@ export default function FormSeccionLabor() {
             if (+distribucionLabor.hasDistribucion > 0) {
                 const {loteSeccion: {id}, hasDistribucion} = distribucionLabor;
                 if (!directa) {
-                    detalleDistribucion.map((item) => (item.loteSeccion.id === id ? item.hasDistribucion += +hasDistribucion : false));
+                    detalleDistribucion.map((item) => (item.loteSeccion.id === id && (!item.hasOwnProperty('estado') || (item.hasOwnProperty('estado') && item.estado)) ? item.hasDistribucion += +hasDistribucion : false));
                 } else {
-                    detalleDistribucion.map((item) => (item.loteSeccion.id === id ? item.hasDistribucion = +hasDistribucion : false));
+                    detalleDistribucion.map((item) => (item.loteSeccion.id === id && (!item.hasOwnProperty('estado') || (item.hasOwnProperty('estado') && item.estado)) ? item.hasDistribucion = +hasDistribucion : false));
                 }
 
                 if (loteSeccion && (loteSeccion.id === id)) {
@@ -512,8 +505,10 @@ export default function FormSeccionLabor() {
     };
 
     const deleteDetalle = (distribucion) => {
-        const arrayFilter = detalleDistribucion.filter((item) => item.loteSeccion.id !== distribucion.loteSeccion.id);
-        setDetalleDistribucion(arrayFilter);
+        if (!distribucion.hasOwnProperty('estado') || (distribucion.hasOwnProperty('estado') && distribucion.estado)) {
+            const arrayFilter = detalleDistribucion.filter((item) => item.id !== distribucion.id);
+            setDetalleDistribucion(arrayFilter);
+        }
 
         if (loteSeccion && (loteSeccion.id === distribucion.loteSeccion.id)) {
             setResult(+distribucion.loteSeccion.has - +hasDistribuidas);
@@ -539,7 +534,6 @@ export default function FormSeccionLabor() {
     };
 
     const clearTransaccion = () => {
-        setIdCabecera('');
         setDetalleDistribucion([]);
     };
 
@@ -915,7 +909,7 @@ function TableSeccionLaborDetalle(props) {
                     <td>{item.loteSeccion.alias}</td>
                     <td>{(+item.loteSeccion.has).toFixed(2)}</td>
                     <td>
-                        {(edit && distribucion) && distribucion.loteSeccion.id === item.loteSeccion.id ?
+                        {(edit && distribucion) && distribucion.loteSeccion.id === item.loteSeccion.id && (!item.hasOwnProperty('estado') || (item.hasOwnProperty('estado') && item.estado)) ?
                             <input
                                 id="id-has-edit"
                                 className="text-center form-control"
@@ -942,7 +936,7 @@ function TableSeccionLaborDetalle(props) {
                     </td>
                     <td>
                         <div className="btn btn-group p-0 m-0">
-                            {(edit && distribucion) && distribucion.loteSeccion.id === item.loteSeccion.id ?
+                            {(edit && distribucion) && distribucion.loteSeccion.id === item.loteSeccion.id && (!item.hasOwnProperty('estado') || (item.hasOwnProperty('estado') && item.estado)) ?
                                 <button
                                     className="btn btn-success"
                                     onClick={() => saveEdit()}
@@ -950,12 +944,22 @@ function TableSeccionLaborDetalle(props) {
                                     <i className="fas fa-save"/>
                                 </button>
                                 :
-                                <button
-                                    className="btn btn-primary"
-                                    onClick={() => activeEdit(item)}
-                                >
-                                    <i className="fas fa-edit"/>
-                                </button>
+                                <>
+                                    {(!item.hasOwnProperty('estado') || (item.hasOwnProperty('estado') && item.estado)) ?
+                                        <button
+                                            className="btn btn-primary"
+                                            onClick={() => activeEdit(item)}
+                                        >
+                                            <i className="fas fa-edit"/>
+                                        </button>
+                                        :
+                                        <button
+                                            className="btn btn-dark"
+                                        >
+                                            <i className="fas fa-lock"/>
+                                        </button>
+                                    }
+                                </>
                             }
                             <button
                                 className="btn btn-danger"

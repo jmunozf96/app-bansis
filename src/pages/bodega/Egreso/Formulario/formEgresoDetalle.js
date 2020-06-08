@@ -123,7 +123,6 @@ export default function EgresoDetalle(props) {
                             open: true,
                             message
                         });
-                        console.log(response);
                     } catch (e) {
                         console.error(e);
                     }
@@ -148,7 +147,6 @@ export default function EgresoDetalle(props) {
                 });
                 setOpenModalDetailTransferencia(true);
             }
-            console.log(showDetailTransferencia)
         })()
     };
 

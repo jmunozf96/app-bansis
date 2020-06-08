@@ -58,7 +58,7 @@ export default function FormEgreso() {
         message: '',
         errors: [],
     });
-    const [alert, setAlert] = useState(false);
+    //const [alert, setAlert] = useState(false);
 
     const history = useHistory();
     const dispatch = useDispatch();
@@ -128,7 +128,7 @@ export default function FormEgreso() {
             const request = await _saveApi(config);
             const {code, message} = request;
 
-            setAlert(true);
+            //setAlert(true);
             if (code !== 200) {
                 const {errors} = request;
                 setNotificacion({open: true, message, errors, variant: 'danger'});
@@ -168,11 +168,11 @@ export default function FormEgreso() {
                 cantidad: true,
                 transfer: true
             });
-            setAlert(null);
+            //setAlert(null);
             setDetalleEgreso([]);
             setMaterial(null);
             setStock(0);
-            setAlert(false);
+            //setAlert(false);
         } else {
             setMaterial(null);
             setStock(0);

@@ -12,7 +12,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import {useDispatch} from "react-redux";
 import {progressActions} from "../../../actions/progressActions";
 import TableForm from "../../../components/Table";
-import moment, {lang} from "moment";
+import moment from "moment";
 import UpdateIcon from "@material-ui/icons/Update";
 
 import SyncIcon from '@material-ui/icons/Sync';

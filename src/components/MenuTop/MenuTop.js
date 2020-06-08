@@ -12,18 +12,9 @@ import {logoutActions} from "../../actions/authActions";
 import {cleanCredentialAction} from "../../actions/credentialActions";
 
 export default function MenuTop() {
-
-    const authentication = useSelector(
-        (state) => state.auth._token
-    );
-
-    const progressbarStatus = useSelector(
-        (state) => state.progressbar.loading
-    );
-
-    const credentialCard = useSelector(
-        (state) => state.credential.credential
-    );
+    const authentication = useSelector((state) => state.auth._token);
+    const progressbarStatus = useSelector((state) => state.progressbar.loading);
+    const credentialCard = useSelector((state) => state.credential.credential);
 
     const dispatch = useDispatch();
     const logout = (state) => dispatch(logoutActions(state));

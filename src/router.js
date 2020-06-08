@@ -25,6 +25,9 @@ import SeccionLote from "./pages/hacienda/LoteSeccion";
 import FormSeccionLabor from "./pages/hacienda/LoteSeccionLabor/Formulario/FormSeccionLabor";
 import SeccionLoteLabor from "./pages/hacienda/LoteSeccionLabor";
 import FormAvanceLabor from "./pages/hacienda/AvanceLabor/Formulario/FormAvanceLabor";
+import AvanceLabor from "./pages/hacienda/AvanceLabor";
+import ListAvances from "./pages/hacienda/AvanceLabor/Formulario/ListAvances";
+import {ListAvanceDetail} from "./pages/hacienda/AvanceLabor/Formulario/ListAvanceDetail";
 
 export const routes = [
     {
@@ -84,7 +87,19 @@ export const routes = [
         component: FormSeccionLabor
     },
     {
-        path: "/hacienda/avances/labor/empleado",
+        path: "/hacienda/avances/labor/empleado/",
+        component: AvanceLabor
+    },
+    {
+        path: "/hacienda/avances/labor/empleado/list",
+        component: ListAvances
+    },
+    {
+        path: "/hacienda/avances/labor/empleado/list/detalle/:id",
+        component: ListAvanceDetail
+    },
+    {
+        path: "/hacienda/avances/labor/empleado/formulario",
         component: FormAvanceLabor
     },
     {
