@@ -2,6 +2,10 @@ import React, {useEffect, useState} from "react";
 import {useHistory, useParams} from "react-router-dom";
 import {API_LINK} from "../../../../utils/constants";
 import ApexChart from "../../../../components/ApexChart/ApexChart";
+import {Col, Row} from "react-bootstrap";
+import Breadcrumbs from "@material-ui/core/Breadcrumbs";
+import Link from "@material-ui/core/Link";
+import Typography from "@material-ui/core/Typography";
 
 export function ListAvanceDetail() {
     const {id} = useParams();
@@ -61,13 +65,26 @@ export function ListAvanceDetail() {
         <>
             {cabeceraEnfunde &&
             <div className="container-fluid mt-3 mb-5">
+                <Row>
+                    <Col className="mb-3">
+                        <Breadcrumbs aria-label="breadcrumb">
+                            <Link color="inherit" to="/">
+                                Hacienda
+                            </Link>
+                            <Typography color="textPrimary">Labor</Typography>
+                            <Typography color="textPrimary">Enfunde</Typography>
+                            <Typography color="textPrimary">Semana</Typography>
+                            <Typography color="textPrimary">Detalle Seccion</Typography>
+                        </Breadcrumbs>
+                    </Col>
+                </Row>
                 <div className="row">
                     <div className="btn-group col-5">
                         <button
-                            className="btn btn-danger col-4 text-center"
+                            className="btn btn-danger col-1 text-center"
                             onClick={() => history.push(`/hacienda/avances/labor/empleado/list`)}
                         >
-                            <i className="fas fa-arrow-circle-left"/> Regresar
+                            <i className="fas fa-arrow-circle-left"/>
                         </button>
                     </div>
                 </div>

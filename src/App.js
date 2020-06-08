@@ -12,7 +12,7 @@ import {Provider,} from "react-redux";
 function App() {
     return (
         <Provider store={store}>
-            <Router>
+            <Router basename="/bansis">
                 <header>
                     <MenuTop/>
                 </header>

@@ -6,6 +6,10 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import PaginationForm from "../../../../components/Pagination/Pagination";
 import {useHistory} from "react-router-dom";
 import {useSelector} from "react-redux";
+import {Col, Row} from "react-bootstrap";
+import Breadcrumbs from "@material-ui/core/Breadcrumbs";
+import Link from "@material-ui/core/Link";
+import Typography from "@material-ui/core/Typography";
 
 const style = {
     table: {
@@ -69,6 +73,18 @@ export default function ListAvances() {
         <>
             {!reload &&
             <div className="container-fluid mt-3 mb-5">
+                <Row>
+                    <Col className="mb-3">
+                        <Breadcrumbs aria-label="breadcrumb">
+                            <Link color="inherit" to="/">
+                                Hacienda
+                            </Link>
+                            <Typography color="textPrimary">Labor</Typography>
+                            <Typography color="textPrimary">Enfunde</Typography>
+                            <Typography color="textPrimary">Semana</Typography>
+                        </Breadcrumbs>
+                    </Col>
+                </Row>
                 <div className="row">
                     <div className="btn-group col-5">
                         <button
@@ -78,10 +94,10 @@ export default function ListAvances() {
                             <i className="fas fa-arrow-circle-left"/>
                         </button>
                         <button
-                            className="btn btn-success col-auto"
+                            className="btn btn-success col-5"
                             onClick={() => history.push(`/hacienda/avances/labor/empleado/formulario`)}
                         >
-                            <i className="fab fa-buffer"/> Registrar Enfunde Semanal
+                            <i className="fab fa-buffer"/> Registrar Enfunde
                         </button>
                     </div>
                 </div>

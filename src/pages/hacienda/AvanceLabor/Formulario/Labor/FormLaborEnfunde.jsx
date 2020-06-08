@@ -151,7 +151,6 @@ export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribu
 
     const getArrayFilter = () => {
         let arraydata = [];
-
         if (semana.presente.status) {
             arraydata = detallesEnfundePresente;
         } else {

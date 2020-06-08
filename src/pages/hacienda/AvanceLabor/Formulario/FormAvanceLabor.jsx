@@ -275,6 +275,7 @@ export default function FormAvanceLabor() {
     };
 
     const changeEmpleado = (e, value) => {
+        setItemsToDelete([]);
         setEmpleado(value);
         if (value) {
             setDisabledElements({

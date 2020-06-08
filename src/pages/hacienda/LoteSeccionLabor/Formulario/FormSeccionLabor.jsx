@@ -381,7 +381,6 @@ export default function FormSeccionLabor() {
         if (detalleDistribucion.length > 0) {
             const filterArray = detalleDistribucion.filter((item) => item.loteSeccion.id === idlote && ((!item.hasOwnProperty('estado')) || (item.hasOwnProperty('estado') && item.estado)));
             has = filterArray.reduce((total, item) => +total + +item.hasDistribucion, 0);
-            console.log('este es el metodo')
         }
         return has;
     };
