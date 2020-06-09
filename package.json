@@ -1,5 +1,5 @@
 {
-  "homepage": "http://192.168.191.1:4750",
+  "homepage": "http://192.168.1.127:9091",
   "name": "app-bansis",
   "version": "0.1.0",
   "private": true,

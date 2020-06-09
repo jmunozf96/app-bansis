@@ -138,5 +138,4 @@ export const routes = [
         path: "*",
         component: Error404
     }
-
 ];

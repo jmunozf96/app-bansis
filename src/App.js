@@ -2,7 +2,7 @@ import React from 'react';
 import MenuTop from "./components/MenuTop";
 
 import {BrowserRouter as Router} from "react-router-dom";
-import RouterConfig from "./components/config.router";
+import RouterConfig from "./config.router";
 import Footer from "./components/Footer";
 
 //Redux
