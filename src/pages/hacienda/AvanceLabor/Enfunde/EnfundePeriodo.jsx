@@ -1,14 +1,8 @@
 import React, {useEffect, useState} from "react";
-import ApexChart from "../../../components/ApexChart";
-import {useHistory} from "react-router-dom";
-import Breadcrumbs from "@material-ui/core/Breadcrumbs";
-import Link from "@material-ui/core/Link";
-import Typography from "@material-ui/core/Typography";
-import {Col, Row} from "react-bootstrap";
-import {API_LINK} from "../../../utils/constants";
+import ApexChart from "../../../../components/ApexChart";
+import {API_LINK} from "../../../../utils/constants";
 
-export default function AvanceLabor() {
-    const history = useHistory();
+export default function EnfundePeriodo() {
     const [enfunde, setEnfunde] = useState(null);
     const [loadData, setLoadData] = useState(true);
 
@@ -100,38 +94,12 @@ export default function AvanceLabor() {
     }, [loadData, enfunde]);
 
     return (
-        <div className="container-fluid mt-3 mb-3">
-            <Row>
-                <Col className="mb-3">
-                    <Breadcrumbs aria-label="breadcrumb">
-                        <Link color="inherit" to="/">
-                            Hacienda
-                        </Link>
-                        <Typography color="textPrimary">Labor</Typography>
-                        <Typography color="textPrimary">Enfunde</Typography>
-                    </Breadcrumbs>
-                </Col>
-            </Row>
-            <div className="row">
-                <div className="col-12">
-                    <button
-                        className="btn btn-success"
-                        onClick={() => history.push(`/hacienda/avances/labor/empleado/list`)}
-                    >
-                        <i className="fab fa-buffer"/> Enfunde Semanal
-                    </button>
-                </div>
-            </div>
-            <hr/>
-            <div className="row">
-                <div className="col-12 p-4">
-                    {enfunde && !loadData &&
-                    <ApexChart
-                        data={enfunde}
-                    />
-                    }
-                </div>
-            </div>
+        <div className="col-12 p-4">
+            {enfunde && !loadData &&
+            <ApexChart
+                data={enfunde}
+            />
+            }
         </div>
     );
 }

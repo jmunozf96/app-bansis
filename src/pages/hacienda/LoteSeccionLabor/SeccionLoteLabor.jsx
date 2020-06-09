@@ -229,7 +229,7 @@ function TableCabecera(props) {
         <TableForm
             dataAPI={data}
             onChangePage={onChangePage}
-            columns={['#', 'Hacienda', 'Empleado', 'Labor', 'Has.', 'Distribucion', 'Ult. Act.', 'Estado', 'Accion']}
+            columns={['#', 'Hacienda', 'Empleado', 'Formulario', 'Has.', 'Distribucion', 'Ult. Act.', 'Estado', 'Accion']}
             pageSize={7}
         >
             {children}

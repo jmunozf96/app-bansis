@@ -7,7 +7,7 @@ import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
 
-export function ListAvanceDetail() {
+export function EnfundeLoteDetalle() {
     const {id} = useParams();
     const [loadData, setLoadData] = useState(true);
     const [secciones, setSecciones] = useState([]);
@@ -82,7 +82,7 @@ export function ListAvanceDetail() {
                     <div className="btn-group col-5">
                         <button
                             className="btn btn-danger col-1 text-center"
-                            onClick={() => history.push(`/hacienda/avances/labor/empleado/list`)}
+                            onClick={() => history.push(`/hacienda/avances/labor/enfunde`)}
                         >
                             <i className="fas fa-arrow-circle-left"/>
                         </button>

@@ -10,6 +10,7 @@ import {Col, Row} from "react-bootstrap";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
+import EnfundePeriodo from "./EnfundePeriodo";
 
 const style = {
     table: {
@@ -20,7 +21,7 @@ const style = {
     }
 };
 
-export default function ListAvances() {
+export default function EnfundeSemanal() {
     const [enfundes, setEnfundes] = useState(null);
     const [page, setPage] = useState(1);
     const history = useHistory();
@@ -88,18 +89,16 @@ export default function ListAvances() {
                 <div className="row">
                     <div className="btn-group col-5">
                         <button
-                            className="btn btn-danger col-1 text-center"
-                            onClick={() => history.push(`/hacienda/avances/labor/empleado`)}
-                        >
-                            <i className="fas fa-arrow-circle-left"/>
-                        </button>
-                        <button
                             className="btn btn-success col-5"
-                            onClick={() => history.push(`/hacienda/avances/labor/empleado/formulario`)}
+                            onClick={() => history.push(`/hacienda/avances/labor/enfunde/empleado`)}
                         >
                             <i className="fab fa-buffer"/> Registrar Enfunde
                         </button>
                     </div>
+                </div>
+                <hr/>
+                <div className="row">
+                    <EnfundePeriodo/>
                 </div>
                 <hr/>
                 <div className="row">
@@ -160,7 +159,7 @@ export default function ListAvances() {
                                             }
                                             <button
                                                 className="btn btn-primary"
-                                                onClick={() => history.push(`/hacienda/avances/labor/empleado/list/detalle/${item.id}`)}
+                                                onClick={() => history.push(`/hacienda/avances/labor/enfunde/semana/detalle/${item.id}`)}
                                             >
                                                 <i className="fas fa-archive"/>
                                             </button>

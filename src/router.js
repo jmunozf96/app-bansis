@@ -24,10 +24,10 @@ import FormSeccionLote from "./pages/hacienda/LoteSeccion/Formulario/FormSeccion
 import SeccionLote from "./pages/hacienda/LoteSeccion";
 import FormSeccionLabor from "./pages/hacienda/LoteSeccionLabor/Formulario/FormSeccionLabor";
 import SeccionLoteLabor from "./pages/hacienda/LoteSeccionLabor";
-import FormAvanceLabor from "./pages/hacienda/AvanceLabor/Formulario/FormAvanceLabor";
-import AvanceLabor from "./pages/hacienda/AvanceLabor";
-import ListAvances from "./pages/hacienda/AvanceLabor/Formulario/ListAvances";
-import {ListAvanceDetail} from "./pages/hacienda/AvanceLabor/Formulario/ListAvanceDetail";
+import FormEnfunde from "./pages/hacienda/AvanceLabor/Enfunde/Formulario/FormEnfunde";
+import EnfundeSemanal from "./pages/hacienda/AvanceLabor/Enfunde/EnfundeSemanal";
+import {EnfundeLoteDetalle} from "./pages/hacienda/AvanceLabor/Enfunde/EnfundeLoteDetalle";
+import EnfundeLoteroList from "./pages/hacienda/AvanceLabor/Enfunde/EnfundeLoteroList";
 
 export const routes = [
     {
@@ -87,20 +87,20 @@ export const routes = [
         component: FormSeccionLabor
     },
     {
-        path: "/hacienda/avances/labor/empleado/",
-        component: AvanceLabor
+        path: "/hacienda/avances/labor/enfunde",
+        component: EnfundeSemanal
     },
     {
-        path: "/hacienda/avances/labor/empleado/list",
-        component: ListAvances
+        path: "/hacienda/avances/labor/enfunde/semana/detalle/:id",
+        component: EnfundeLoteDetalle
     },
     {
-        path: "/hacienda/avances/labor/empleado/list/detalle/:id",
-        component: ListAvanceDetail
+        path: "/hacienda/avances/labor/enfunde/empleado",
+        component: EnfundeLoteroList
     },
     {
-        path: "/hacienda/avances/labor/empleado/formulario",
-        component: FormAvanceLabor
+        path: "/hacienda/avances/labor/enfunde/empleado/formulario",
+        component: FormEnfunde
     },
     {
         path: "/bodega",

@@ -1,22 +1,23 @@
 import React, {useEffect, useState} from "react";
-import SnackbarComponent from "../../../../components/Snackbar/Snackbar";
-import Buscador from "../../../../components/Buscador";
-import InputSearch from "../../../../components/InputSearch/InputSearch";
-import FormularioBase from "../../../../components/FormularioBase";
-import {API_LINK, idGrupoMaterialEnfunde} from "../../../../utils/constants";
+import SnackbarComponent from "../../../../../components/Snackbar/Snackbar";
+import Buscador from "../../../../../components/Buscador";
+import InputSearch from "../../../../../components/InputSearch/InputSearch";
+import FormularioBase from "../../../../../components/FormularioBase";
+import {API_LINK, idGrupoMaterialEnfunde} from "../../../../../utils/constants";
 import {FormHelperText} from "@material-ui/core";
-import {progressActions} from "../../../../actions/progressActions";
+import {progressActions} from "../../../../../actions/progressActions";
 import {useDispatch, useSelector} from "react-redux";
-import FullScreen from "../../../../components/FullScreen/FullScreen";
-import FormLaborEnfunde from "./Labor/FormLaborEnfunde";
+import FullScreen from "../../../../../components/FullScreen/FullScreen";
+import FormEnfundeDetalle from "./FormEnfundeDetalle";
 
 import moment from "moment";
 import 'moment/locale/es';
 import qs from "qs";
+import CabeceraSemana from "../../../CabeceraSemana";
 
-export default function FormAvanceLabor() {
+export default function FormEnfunde() {
     //-----------------------------------------------------------------------
-    const Regresar = '/hacienda/avances/labor/empleado/list';
+    const Regresar = '/hacienda/avances/labor/enfunde';
     const [disabledElements, setDisabledElements] = useState({
         hacienda: false,
         loteSeccion: true,
@@ -105,42 +106,6 @@ export default function FormAvanceLabor() {
             setReloadComponent(false);
         }
     }, [reloadComponent]);
-
-    useEffect(() => {
-        if (loadCalendar) {
-            (async () => {
-                try {
-                    const url = `${API_LINK}/bansis-app/calendario.php/semanaEnfunde?fecha=${cabeceraEnfunde.fecha}`;
-                    const request = await fetch(url);
-                    const response = await request.json();
-                    const {code, calendario} = response;
-
-                    if (code === 200) {
-
-                        if (changeSemana.status) {
-                            setChangeSemana({
-                                ...changeSemana,
-                                codigo: calendario.presente.codigo
-                            });
-                        }
-
-                        setCabeceraEnfunde({
-                            ...cabeceraEnfunde,
-                            codigoSemana: calendario.presente.codigo,
-                            semana: calendario.presente.semana,
-                            periodo: calendario.presente.periodo,
-                            colorp: calendario.presente.color,
-                            colorf: calendario.futuro.color,
-                        });
-                    }
-
-                } catch (e) {
-                    console.log(e);
-                }
-            })();
-            setLoadCalendar(false);
-        }
-    }, [loadCalendar, cabeceraEnfunde, changeSemana]);
 
     useEffect(() => {
         if (changeURL) {
@@ -427,7 +392,7 @@ export default function FormAvanceLabor() {
     return (
         <FormularioBase
             icon='fas fa-street-view'
-            title={'Formulario Secciones por Labor'}
+            title={'Formulario Secciones por Formulario'}
             nuevo={nuevoAvanceLabor}
             guardar={saveAvanceLabor}
             volver={Regresar}
@@ -437,50 +402,15 @@ export default function FormAvanceLabor() {
                 notificacion={notificacion}
                 setNotificacion={setNotificacion}
             />
-            <div className="row">
-                <div className="col-md-2">
-                    <label>Fecha</label>
-                    <div className="input-group">
-                        <input className="form-control bg-white" type="text" disabled={true}
-                               value={cabeceraEnfunde.fecha}/>
-                    </div>
-                </div>
-                <div className="col-md-1">
-                    <label>Sem.</label>
-                    <div className="input-group">
-                        <input className="form-control bg-white" type="text" disabled={true}
-                               value={cabeceraEnfunde.semana}/>
-                    </div>
-                </div>
-                <div className="col-md-1">
-                    <label>Per.</label>
-                    <div className="input-group">
-                        <input className="form-control bg-white" type="text" disabled={true}
-                               value={cabeceraEnfunde.periodo}/>
-                    </div>
-                </div>
-                <div className="col-md-4">
-                    <label>Detalle</label>
-                    <div className="input-group">
-                        <input className="form-control bg-white" type="text" disabled={true}
-                               value="ENFUNDE SEMANAL POR EMPLEADO"/>
-                    </div>
-                </div>
-                <div className="col-md-2 col-6">
-                    <label>PRE.</label>
-                    <div className="input-group">
-                        <input className="form-control" name={`${cabeceraEnfunde.colorp}-CALENDARIO`} type="text"
-                               disabled={true}/>
-                    </div>
-                </div>
-                <div className="col-md-2 col-6">
-                    <label>FUT.</label>
-                    <div className="input-group">
-                        <input className="form-control" name={`${cabeceraEnfunde.colorf}-CALENDARIO`} type="text"
-                               disabled={true}/>
-                    </div>
-                </div>
-            </div>
+            <CabeceraSemana
+                title="ENFUNDE SEMANAL POR EMPLEADO"
+                loadCalendar={loadCalendar}
+                setLoadCalendar={setLoadCalendar}
+                changeSemana={changeSemana}
+                setChangeSemana={setChangeSemana}
+                data={cabeceraEnfunde}
+                setData={setCabeceraEnfunde}
+            />
             <hr className="mt-3 mb-3"/>
             <div className="row">
                 <div className="col-md-6 mb-3">
@@ -535,7 +465,7 @@ export default function FormAvanceLabor() {
                         open={openFullScreen}
                         setOpen={setOpenFullScreen}
                     >
-                        <FormLaborEnfunde
+                        <FormEnfundeDetalle
                             cabecera={cabeceraEnfunde}
                             hacienda={hacienda}
                             empleado={empleado}

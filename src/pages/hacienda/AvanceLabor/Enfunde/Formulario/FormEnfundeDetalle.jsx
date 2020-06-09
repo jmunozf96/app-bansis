@@ -18,7 +18,7 @@ const style = {
     }
 };
 
-export default function FormLaborEnfunde({cabecera, hacienda, empleado, distribucion, detalles, save, itemsToDelete, setItemsToDelete}) {
+export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distribucion, detalles, save, itemsToDelete, setItemsToDelete}) {
     const [changeStatus, setChangeStatus] = useState(false);
     const [index, setIndex] = useState(0);
     const [semana, setSemana] = useState({

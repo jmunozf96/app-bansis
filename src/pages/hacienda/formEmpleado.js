@@ -118,7 +118,7 @@ export default function FormEmpleado() {
         },
         {
             size: 4,
-            label: 'Labor',
+            label: 'Formulario',
             type: 'select',
             name: 'idlabor',
             value: empleado.idlabor,

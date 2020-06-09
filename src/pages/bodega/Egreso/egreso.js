@@ -283,7 +283,7 @@ function TablaCabecera(props) {
         <TableForm
             dataAPI={egresos}
             onChangePage={onChangePage}
-            columns={['#', 'Calendario', 'Periodo', 'Semana', 'Empleado', 'Labor Emp.', 'Ult. Act.', 'Estado', 'Accion']}
+            columns={['#', 'Calendario', 'Periodo', 'Semana', 'Empleado', 'Formulario Emp.', 'Ult. Act.', 'Estado', 'Accion']}
             pageSize={7}
         >
             {children}

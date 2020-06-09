@@ -612,7 +612,7 @@ export default function FormSeccionLabor() {
     return (
         <FormularioBase
             icon='fas fa-location-arrow'
-            title={'Formulario Secciones por Labor'}
+            title={'Formulario Secciones por Formulario'}
             nuevo={nuevaSeccionLabor}
             guardar={saveSeccionLabor}
             volver={Regresar}

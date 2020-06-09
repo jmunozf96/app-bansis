@@ -70,7 +70,7 @@ export default function Empleado() {
             <TableForm
                 dataAPI={empleados}
                 onChangePage={onChangePage}
-                columns={['#', 'Hacienda', 'Cedula', 'Nombres', 'Labor', 'Ult. Act.', 'Estado', 'Accion']}
+                columns={['#', 'Hacienda', 'Cedula', 'Nombres', 'Formulario', 'Ult. Act.', 'Estado', 'Accion']}
             >
                 {empleados.code !== 400 ?
                     <TableDetail

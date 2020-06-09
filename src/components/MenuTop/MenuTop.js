@@ -48,9 +48,9 @@ export default function MenuTop() {
                                         Lotes - Labor
                                     </NavDropdown.Item>
                                     <NavDropdown.Divider/>
-                                    <NavDropdown.Item disabled>Transaccion</NavDropdown.Item>
-                                    <NavDropdown.Item as={Link} to="/hacienda/avances/labor/empleado">
-                                        Avances - Labor
+                                    <NavDropdown.Item disabled>Avances - Labor</NavDropdown.Item>
+                                    <NavDropdown.Item as={Link} to="/hacienda/avances/labor/enfunde">
+                                        Enfunde
                                     </NavDropdown.Item>
                                     <NavDropdown.Divider/>
                                     <NavDropdown.Item as={Link} to="/hacienda/mapa">Mapa</NavDropdown.Item>
