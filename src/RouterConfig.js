@@ -1,9 +1,10 @@
 import React from "react";
 import {Route, Switch} from "react-router-dom";
-import {routes} from "./router";
+import {routes} from "./Router";
 
 import Login from "./pages/login";
 import VerifyAuthentication from "./components/VerifyAuthentication";
+import VerifyModule from "./components/VerifyModule";
 
 export default function RouterConfig() {
     return (
@@ -14,9 +15,11 @@ export default function RouterConfig() {
                     key={i}
                     path={route.path}
                     exact={true}
-                    render={() => (
+                    render={(props) => (
                         <VerifyAuthentication>
-                            <route.component/>
+                            <VerifyModule>
+                                <route.component/>
+                            </VerifyModule>
                         </VerifyAuthentication>
                     )}
                 />
@@ -24,6 +27,7 @@ export default function RouterConfig() {
         </Switch>
     );
 }
+
 
 
 

@@ -10,14 +10,16 @@ import {useDispatch, useSelector} from "react-redux";
 import FullScreen from "../../../../../components/FullScreen/FullScreen";
 import FormEnfundeDetalle from "./FormEnfundeDetalle";
 
+import {useParams} from "react-router-dom";
 import moment from "moment";
 import 'moment/locale/es';
 import qs from "qs";
 import CabeceraSemana from "../../../CabeceraSemana";
 
 export default function FormEnfunde() {
+    const {idmodulo} = useParams();
     //-----------------------------------------------------------------------
-    const Regresar = '/hacienda/avances/labor/enfunde';
+    const Regresar = `/hacienda/avances/labor/enfunde/${idmodulo}`;
     const [disabledElements, setDisabledElements] = useState({
         hacienda: false,
         loteSeccion: true,

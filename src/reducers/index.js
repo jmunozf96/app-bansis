@@ -8,11 +8,13 @@ import laborReducers from "./hacienda/laborReducers";
 import haciendaReducers from "./hacienda/haciendaReducers";
 import bodegaReducers from "./bodega/bodegaReducers";
 import grupoReducers from "./bodega/grupoReducers";
+import recursosReducers from "./recursosReducers";
 
 export default combineReducers({
     auth: authReducer,
     progressbar: progressNavReducers,
     credential: credentialReducers,
+    recursos: recursosReducers,
     empleado: empleadoReducers,
     dataLabor: laborReducers,
     dataHacienda: haciendaReducers,

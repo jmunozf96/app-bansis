@@ -60,7 +60,7 @@ export default function DataDetail(props) {
                     url: `${url_delete}/${id}`,
                     timeout: 5000,
                     headers: {Authorization: authentication},
-                    onDownloadProgress: function (progressEvent) {
+                    onDownloadProgress: function () {
                         progessbarStatus(false);
                     },
                 };

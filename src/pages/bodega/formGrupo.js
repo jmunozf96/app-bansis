@@ -11,7 +11,7 @@ import DataForm from "../dataForm";
 import {addGrupoFormAction, clearGrupoFormAction} from "../../actions/bodega/grupoActions";
 
 export default function FormGrupo() {
-    const {id} = useParams();
+    const {id, idmodulo} = useParams();
     const [loadData, setLoadData] = useState(true);
     const [redirect, setRedirect] = useState({
         status: false,
@@ -25,7 +25,10 @@ export default function FormGrupo() {
         message: ''
     });
 
-    const [paramsForm, setParamsForm] = useState({method: 'post', url: `${API_LINK}/bansis-app/index.php/bodega-grupos`});
+    const [paramsForm, setParamsForm] = useState({
+        method: 'post',
+        url: `${API_LINK}/bansis-app/index.php/bodega-grupos`
+    });
 
     const history = useHistory();
 
@@ -168,7 +171,7 @@ export default function FormGrupo() {
         }
 
         if (id !== undefined) {
-            setRedirect({status: true, page: "/bodega/grupo/formulario"});
+            setRedirect({status: true, page: `/bodega/grupo/${idmodulo}/formulario`});
         }
     };
 
@@ -184,7 +187,7 @@ export default function FormGrupo() {
             arrayFormulario={arrayFormulario}
             getData={grupo}
             setData={setGrupo}
-            routeReturn="/bodega/grupo"
+            routeReturn={`/bodega/grupo/${idmodulo}`}
         />
     );
 }

@@ -1,10 +1,6 @@
 import {createStore} from "redux";
 import reducer from "./reducers";
-import {
-    getStateLocalStorage,
-    setStateLocalStorage,
-}
-    from "./utils/localStorage";
+import {getStateLocalStorage, setCookie, setCookieRecursos, setStateLocalStorage,} from "./utils/localStorage";
 
 const localStorageStateToken = getStateLocalStorage();
 
@@ -16,10 +12,15 @@ const store = createStore(
 
 
 store.subscribe(() => {
-    setStateLocalStorage({
-        auth: {_token: store.getState().auth._token},
-        credential: {credential: store.getState().credential.credential}
-    });
+    setStateLocalStorage(store.getState().auth._token);
+});
+
+store.subscribe(() => {
+    setCookie(store.getState().credential.credential)
+});
+
+store.subscribe(() => {
+    setCookieRecursos(store.getState().recursos)
 });
 
 export default store;

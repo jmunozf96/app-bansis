@@ -18,14 +18,15 @@ import SnackbarComponent from "../../../../components/Snackbar/Snackbar";
 import InputDialog from "../../../../components/InputDialog";
 
 export default function FormSeccionLabor() {
-    const {id} = useParams();
+    const history = useHistory();
+    const {id, idmodulo} = useParams();
     const [loadSeccionEdit, setLoadSeccionEdit] = useState({
         load: id !== undefined,
         id
     });
     const [editForm, setEditForm] = useState(false);
     //-----------------------------------------------------------------------
-    const Regresar = '/hacienda/lote/seccion/labor';
+    const Regresar = `/hacienda/lote/seccion/labor/${idmodulo}`;
     const [disabledElements, setDisabledElements] = useState({
         hacienda: false,
         loteSeccion: true,
@@ -86,7 +87,6 @@ export default function FormSeccionLabor() {
         message: ''
     });
 
-    const history = useHistory();
     const dispatch = useDispatch();
     const progessbarStatus = (state) => dispatch(progressActions(state));
 
@@ -538,7 +538,7 @@ export default function FormSeccionLabor() {
 
     const nuevaSeccionLabor = () => {
         if (editForm) {
-            history.push('/hacienda/lote/seccion/labor/formulario')
+            history.push(`${history.location.pathname}/formulario`)
         }
         setDisabledElements({
             hacienda: false,

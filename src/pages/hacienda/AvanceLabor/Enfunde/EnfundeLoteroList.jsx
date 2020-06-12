@@ -3,7 +3,7 @@ import {Col, Row} from "react-bootstrap";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
-import {useHistory} from "react-router-dom";
+import {useHistory, useParams} from "react-router-dom";
 import CabeceraSemana from "../../CabeceraSemana";
 import moment from "moment";
 import {API_LINK} from "../../../../utils/constants";
@@ -21,6 +21,7 @@ const style = {
 };
 
 export default function EnfundeLoteroList() {
+    const {idmodulo} = useParams();
     const [page, setPage] = useState(1);
     const [loadCalendar, setLoadCalendar] = useState(true);
     const [changeSemana, setChangeSemana] = useState({
@@ -104,7 +105,7 @@ export default function EnfundeLoteroList() {
                 <div className="btn-group col-5">
                     <button
                         className="btn btn-danger col-1 text-center"
-                        onClick={() => history.push(`/hacienda/avances/labor/enfunde`)}
+                        onClick={() => history.push(`/hacienda/avances/labor/enfunde/${idmodulo}`)}
                     >
                         <i className="fas fa-arrow-circle-left"/>
                     </button>

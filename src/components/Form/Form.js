@@ -30,7 +30,7 @@ export default function FormComponent(props) {
                                     control={control}
                                 />
                             </Col>
-                        )
+                        );
                     default:
                         return (
                             <Col md={control.size} key={i}>

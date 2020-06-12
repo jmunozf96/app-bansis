@@ -90,7 +90,7 @@ export default function EnfundeSemanal() {
                     <div className="btn-group col-5">
                         <button
                             className="btn btn-success col-5"
-                            onClick={() => history.push(`/hacienda/avances/labor/enfunde/empleado`)}
+                            onClick={() => history.push(`${history.location.pathname}/empleado`)}
                         >
                             <i className="fab fa-buffer"/> Registrar Enfunde
                         </button>
@@ -159,7 +159,7 @@ export default function EnfundeSemanal() {
                                             }
                                             <button
                                                 className="btn btn-primary"
-                                                onClick={() => history.push(`/hacienda/avances/labor/enfunde/semana/detalle/${item.id}`)}
+                                                onClick={() => history.push(`${history.location.pathname}/semana/detalle/${item.id}`)}
                                             >
                                                 <i className="fas fa-archive"/>
                                             </button>

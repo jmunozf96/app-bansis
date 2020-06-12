@@ -15,7 +15,7 @@ import DataForm from "../dataForm";
 import {addBodegaFormAction, clearBodegaFormAction} from "../../actions/bodega/bodegaActions";
 
 export default function FormBodega() {
-    const {id} = useParams();
+    const {id, idmodulo} = useParams();
     const [loadData, setLoadData] = useState(true);
     const [redirect, setRedirect] = useState({
         status: false,
@@ -201,7 +201,7 @@ export default function FormBodega() {
         }
 
         if (id !== undefined) {
-            setRedirect({status: true, page: "/bodega/formulario"});
+            setRedirect({status: true, page: `/bodega/${idmodulo}/formulario`});
         }
     };
 
@@ -217,7 +217,7 @@ export default function FormBodega() {
             arrayFormulario={arrayFormulario}
             getData={bodega}
             setData={setBodega}
-            routeReturn="/bodega"
+            routeReturn={`/bodega/${idmodulo}`}
         />
     );
 }

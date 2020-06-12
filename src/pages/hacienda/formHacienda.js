@@ -15,7 +15,7 @@ import {
 } from "../../actions/hacienda/haciendaActions";
 
 export default function FormHacienda() {
-    const {id} = useParams();
+    const {id, idmodulo} = useParams();
     const [loadData, setLoadData] = useState(true);
     const [redirect, setRedirect] = useState({
         status: false,
@@ -169,7 +169,7 @@ export default function FormHacienda() {
         }
 
         if (id !== undefined) {
-            setRedirect({status: true, page: "/hacienda/formulario"});
+            setRedirect({status: true, page: `/hacienda/${idmodulo}/formulario`});
         }
     };
 
@@ -185,7 +185,7 @@ export default function FormHacienda() {
             arrayFormulario={arrayFormulario}
             getData={hacienda}
             setData={setHacienda}
-            routeReturn="/hacienda"
+            routeReturn={`/hacienda/${idmodulo}`}
         />
     );
 }

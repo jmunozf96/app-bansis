@@ -18,7 +18,8 @@ import qs from "qs";
 import SnackbarComponent from "../../../../components/Snackbar/Snackbar";
 
 const FormSeccionLote = () => {
-    const {id} = useParams();
+    const history = useHistory();
+    const {id, idmodulo} = useParams();
     const [loadLoteEdit, setLoadLoteEdit] = useState({
         load: id !== undefined,
         id
@@ -27,7 +28,7 @@ const FormSeccionLote = () => {
     const [loadDataLote, setLoadDataLote] = useState(false);
 
     //-----------------------------------------------------------------------
-    const Regresar = '/hacienda/lote';
+    const Regresar = `/hacienda/lote/${idmodulo}`;
     const [disabledElements, setDisabledElements] = useState({
         hacienda: false,
         lotes: true
@@ -45,7 +46,6 @@ const FormSeccionLote = () => {
         color: ''
     });
 
-    const history = useHistory();
     const dispatch = useDispatch();
     const progessbarStatus = (state) => dispatch(progressActions(state));
 
@@ -569,7 +569,7 @@ const FormSeccionLote = () => {
         if (progressbar)
             progessbarStatus(false);
 
-        history.push('/hacienda/lote/seccion/formulario');
+        history.push(`hacienda/lote/${idmodulo}/seccion/formulario`);
     };
 
     const NuevaSeccion = () => {

@@ -185,7 +185,7 @@ export default function SeccionLoteLabor() {
                             variant="success"
                             className="align-self-end col-10"
                             type="button"
-                            onClick={() => history.push("/hacienda/lote/seccion/labor/formulario")}
+                            onClick={() => history.push(`${history.location.pathname}/formulario`)}
                         >
                             <AddCircleIcon/> Nueva Seccion para labor de Empleado
                         </Button>
@@ -290,7 +290,7 @@ function TableDetalle(props) {
                             </Button>*/}
                             <Button
                                 variant="primary"
-                                onClick={() => history.push(`/hacienda/lote/seccion/labor/formulario/${data.id}`)}
+                                onClick={() => history.push(`${history.location.pathname}/formulario/${data.id}`)}
                             >
                                 <SyncIcon/>
                             </Button>
@@ -340,7 +340,7 @@ function DetailDistribucion(props) {
                     <div className="col-12">
                         <button
                             className="btn btn-primary btn-block"
-                            onClick={() => history.push(`/hacienda/lote/seccion/labor/formulario/${id}`)}
+                            onClick={() => history.push(`${history.location.pathname}/formulario/${id}`)}
                         >
                             <i className="fas fa-external-link-alt"/> Ir al formulario de distribucion
                         </button>

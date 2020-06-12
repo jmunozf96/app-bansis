@@ -3,13 +3,8 @@ import {Alert, Col, Form, Row} from "react-bootstrap";
 import axios from "axios";
 import {
     FormControl,
-    InputLabel,
-    Input,
-    InputAdornment,
-    Button,
+    Button, TextField, FormControlLabel, Checkbox, Grid, Link,
 } from "@material-ui/core";
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import LockIcon from '@material-ui/icons/Lock';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 
 import {useHistory} from "react-router-dom";
@@ -21,6 +16,7 @@ import "./FormLogin.scss"
 import {progressActions} from "../../actions/progressActions";
 
 import {API_LINK} from "../../utils/constants";
+import {recursosAction} from "../../actions/recursosActions";
 
 export default function FormLogin() {
     const history = useHistory();
@@ -47,6 +43,7 @@ export default function FormLogin() {
     const authorization = (state) => dispatch(authVerifyActions(state));
     const progessbarStatus = (state) => dispatch(progressActions(state));
     const credentialCard = (state) => dispatch(credentialAction(state));
+    const recursosUser = (state) => dispatch(recursosAction(state));
 
     useEffect(() => {
         if (credentialStatus) {
@@ -125,7 +122,17 @@ export default function FormLogin() {
             axios.post(`${API_LINK}/bansis/login`, dataCard, null).then((response) => {
                 const {code, credential} = response.data;
                 if (code === 200) {
-                    credentialCard(credential);
+                    const data_user = {
+                        sub: credential.sub,
+                        nick: credential.nick,
+                        nombres: credential.nombres,
+                        apellidos: credential.apellidos,
+                        idhacienda: credential.idhacienda
+                    };
+                    credentialCard(data_user);
+                    if (response.data.recursos) {
+                        recursosUser(response.data.recursos);
+                    }
                 }
             });
         }
@@ -133,7 +140,7 @@ export default function FormLogin() {
 
     async function getUser(url, data, config = null) {
         try {
-            const response = await axios.post(url, data, config)
+            return await axios.post(url, data, config)
                 .then((response) => {
                     progessbarStatus(false);
                     return response.data;
@@ -142,8 +149,6 @@ export default function FormLogin() {
                     progessbarStatus(false);
                     return error;
                 });
-
-            return response;
         } catch (error) {
             console.error(error);
         }
@@ -168,35 +173,37 @@ export default function FormLogin() {
                         )}
 
                     <FormControl>
-                        <InputLabel>Ingrese su usuario</InputLabel>
-                        <Input
-                            name="user"
-                            startAdornment={
-                                <InputAdornment position="start">
-                                    <AccountCircle/>
-                                </InputAdornment>
-                            }
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
                             required
+                            fullWidth
+                            label="Usuario"
+                            name="user"
                             autoComplete="off"
+                            autoFocus
                         />
                     </FormControl>
                 </Col>
                 <Col md={12} className="mt-2">
                     <FormControl>
-                        <InputLabel>Ingrese su contraseña</InputLabel>
-                        <Input
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
                             fullWidth
                             name="password"
+                            label="Contraseña"
                             type="password"
-                            startAdornment={
-                                <InputAdornment position="start">
-                                    <LockIcon/>
-                                </InputAdornment>
-                            }
+                            autoComplete="current-password"
                         />
                     </FormControl>
+                    <FormControlLabel
+                        control={<Checkbox value="remember" color="primary"/>}
+                        label="Recordar"
+                    />
                 </Col>
-                <Col md={12} className="mt-3">
+                <Col md={12} className="">
                     <Button
                         type="submit"
                         variant="contained"
@@ -207,6 +214,18 @@ export default function FormLogin() {
                     >
                         Ingresar
                     </Button>
+                    <Grid container>
+                        <Grid item xs>
+                            <Link href="#" variant="body2">
+                                Olvidaste tu contraseña?
+                            </Link>
+                        </Grid>
+                        <Grid item>
+                            <Link href="#" variant="body2">
+                                {"No tienes una cuenta? Registrarse"}
+                            </Link>
+                        </Grid>
+                    </Grid>
                 </Col>
             </Row>
         </Form>

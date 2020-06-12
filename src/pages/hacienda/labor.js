@@ -30,7 +30,7 @@ export default function Labor(props) {
 
     const editFormLabor = (labor) => {
         setEditForm(true);
-        history.push(`/hacienda/labor/formulario/${labor.id}`);
+        history.push(`${history.location.pathname}/formulario/${labor.id}`);
     };
 
     const setFormulario = () => {
@@ -39,7 +39,7 @@ export default function Labor(props) {
         cleanLabor(true);
         //Evento para que cuando crea un nuevo empleado el status del form edit cambia a false
         setEditForm(false);
-        history.push("/hacienda/labor/formulario");
+        history.push(`${history.location.pathname}/formulario`);
     };
 
     const destroyLaborModal = (labor) => {

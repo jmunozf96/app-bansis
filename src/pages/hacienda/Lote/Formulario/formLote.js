@@ -14,7 +14,7 @@ import {progressActions} from "../../../../actions/progressActions";
 import SnackbarComponent from "../../../../components/Snackbar/Snackbar";
 
 export default function FormularioLote() {
-    const {id} = useParams();
+    const {id, idmodulo} = useParams();
     const [loadLoteEdit, setLoadLoteEdit] = useState({
         load: id !== undefined,
         id
@@ -152,9 +152,9 @@ export default function FormularioLote() {
                         </Button>
                         <Button
                             as={Link}
-                            to={"/hacienda/lote"}
+                            to={`/hacienda/lote/${idmodulo}`}
                             variant="danger"
-                            onClick={() => history.push("/hacienda/lote")}
+                            onClick={() => history.push(`/hacienda/lote/${idmodulo}`)}
                         >
                             <AssignmentReturnIcon/> Cancelar
                         </Button>

@@ -70,7 +70,7 @@ export default function Material() {
     };
 
     const toForm = () => {
-        history.push("/bodega/material/formulario");
+        history.push(`${history.location.pathname}/formulario`);
     };
 
     if (materialsList.length === 0) {

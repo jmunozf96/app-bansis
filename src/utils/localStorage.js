@@ -1,9 +1,28 @@
+import Cookies from "js-cookie"
+
 export const getStateLocalStorage = () => {
-    const auth = localStorage.getItem('_authenticationKey');
+    const auth = localStorage.getItem('_sessionId');
+    const credential = Cookies.get('sessionId');
+    const recursos = Cookies.get('sessionRecursos');
     if (auth === null) return undefined;
-    return JSON.parse(auth);
+    return {
+        "auth": {"_token": JSON.parse(auth)},
+        "credential": {"credential": JSON.parse(credential !== undefined ? credential : null)},
+        "recursos": JSON.parse(recursos)
+    };
 };
 
 export const setStateLocalStorage = (state) => {
-    localStorage.setItem('_authenticationKey', JSON.stringify(state))
+    if (state !== "") {
+        localStorage.setItem('_sessionId', JSON.stringify(state))
+    }
 };
+
+export const setCookie = (state) => {
+    Cookies.set('sessionId', JSON.stringify(state), {expires: 1});
+};
+
+export const setCookieRecursos = (state) => {
+    Cookies.set('sessionRecursos', JSON.stringify(state), {expires: 1});
+};
+

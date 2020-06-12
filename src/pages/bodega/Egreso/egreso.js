@@ -196,7 +196,7 @@ export default function Egreso() {
                             variant="success"
                             className="align-self-end"
                             type="button"
-                            onClick={() => history.push("/bodega/egreso-material/formulario")}
+                            onClick={() => history.push(`${history.location.pathname}/formulario`)}
                         >
                             <AddCircleIcon/> Nuevo despacho
                         </Button>
@@ -341,7 +341,7 @@ function TablaDetalle(props) {
                             </Button>*/}
                             <Button
                                 variant="primary"
-                                onClick={() => history.push(`/bodega/egreso-material/formulario/${data.id}`)}
+                                onClick={() => history.push(`${history.location.pathname}/formulario/${data.id}`)}
                             >
                                 <SyncIcon/>
                             </Button>

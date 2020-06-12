@@ -10,11 +10,13 @@ import "./MenuTop.scss"
 import LinearProgress from "@material-ui/core/LinearProgress";
 import {logoutActions} from "../../actions/authActions";
 import {cleanCredentialAction} from "../../actions/credentialActions";
+import Cookies from "js-cookie";
 
 export default function MenuTop() {
     const authentication = useSelector((state) => state.auth._token);
     const progressbarStatus = useSelector((state) => state.progressbar.loading);
     const credentialCard = useSelector((state) => state.credential.credential);
+    const recursos = useSelector((state) => state.recursos);
 
     const dispatch = useDispatch();
     const logout = (state) => dispatch(logoutActions(state));
@@ -23,6 +25,9 @@ export default function MenuTop() {
     const logoutSite = () => {
         logout('');
         credential(true);
+        localStorage.getItem('_sessionId') !== null && localStorage.removeItem('_sessionId');
+        Cookies.get('sessionId') !== undefined && Cookies.remove('sessionId');
+        Cookies.get('sessionRecursos') !== undefined && Cookies.remove('sessionRecursos');
     };
 
     return (
@@ -37,36 +42,30 @@ export default function MenuTop() {
                         <>
                             <Nav className="mr-auto">
                                 <Nav.Link as={Link} to="/">Inicio</Nav.Link>
-                                <NavDropdown title="Hacienda" id="collasible-nav-dropdown">
-                                    <NavDropdown.Item disabled>Mantenimientos</NavDropdown.Item>
-                                    <NavDropdown.Item as={Link} to="/hacienda">Haciendas</NavDropdown.Item>
-                                    <NavDropdown.Item as={Link} to="/hacienda/labor">Labores</NavDropdown.Item>
-                                    <NavDropdown.Item as={Link} to="/hacienda/empleado">Empleados</NavDropdown.Item>
-                                    <NavDropdown.Divider/>
-                                    <NavDropdown.Item as={Link} to="/hacienda/lote">Lotes</NavDropdown.Item>
-                                    <NavDropdown.Item as={Link} to="/hacienda/lote/seccion/labor">
-                                        Lotes - Labor
-                                    </NavDropdown.Item>
-                                    <NavDropdown.Divider/>
-                                    <NavDropdown.Item disabled>Avances - Labor</NavDropdown.Item>
-                                    <NavDropdown.Item as={Link} to="/hacienda/avances/labor/enfunde">
-                                        Enfunde
-                                    </NavDropdown.Item>
-                                    <NavDropdown.Divider/>
-                                    <NavDropdown.Item as={Link} to="/hacienda/mapa">Mapa</NavDropdown.Item>
-                                    <NavDropdown.Item>Separated link</NavDropdown.Item>
-                                </NavDropdown>
-                                <NavDropdown title="Bodega" id="">
-                                    <NavDropdown.Item disabled>Mantenimientos</NavDropdown.Item>
-                                    <NavDropdown.Item as={Link} to="/bodega">Bodegas</NavDropdown.Item>
-                                    <NavDropdown.Item as={Link} to="/bodega/grupo">Grupos</NavDropdown.Item>
-                                    <NavDropdown.Item as={Link} to="/bodega/material">Materiales</NavDropdown.Item>
-                                    <NavDropdown.Divider/>
-                                    <NavDropdown.Item disabled>Transaccion</NavDropdown.Item>
-                                    <NavDropdown.Item as={Link} to="/bodega/egreso-material">
-                                        Egreso Bodega
-                                    </NavDropdown.Item>
-                                </NavDropdown>
+                                {recursos && recursos.length > 0 && recursos.map((item, index) => (
+                                    <NavDropdown
+                                        title={`${item.recurso.nombre}`}
+                                        id="collasible-nav-dropdown"
+                                        key={index}
+                                    >
+                                        {item.recurso.recurso_hijo.length > 0 && item.recurso.recurso_hijo.map((hijo1, index) => (
+                                            <React.Fragment key={index}>
+                                                <NavDropdown.Item disabled>{hijo1.nombre}</NavDropdown.Item>
+                                                {hijo1.recurso_hijo.length > 0 && hijo1.recurso_hijo.map((hijo2, index) => (
+                                                    <NavDropdown.Item
+                                                        key={index}
+                                                        as={Link}
+                                                        to={{
+                                                            pathname: `${hijo2.ruta}/${(hijo2.id)}`,
+                                                            state: hijo2.id
+                                                        }}
+                                                    >{hijo2.nombre}</NavDropdown.Item>
+                                                ))}
+                                                <NavDropdown.Divider/>
+                                            </React.Fragment>
+                                        ))}
+                                    </NavDropdown>
+                                ))}
                             </Nav>
                             <Nav className="ml-auto">
                                 <NavDropdown title={credentialCard.nick} id="nav-dropdown" drop="left">

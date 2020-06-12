@@ -30,7 +30,7 @@ export default function Bodega(props) {
 
     const editFormBodega = (bodega) => {
         setEditForm(true);
-        history.push(`/bodega/formulario/${bodega.id}`);
+        history.push(`${history.location.pathname}/formulario/${bodega.id}`);
     };
 
     const setFormulario = () => {
@@ -39,7 +39,7 @@ export default function Bodega(props) {
         cleanBodega(true);
         //Evento para que cuando crea un nuevo empleado el status del form edit cambia a false
         setEditForm(false);
-        history.push("/bodega/formulario");
+        history.push(`${history.location.pathname}/formulario`);
     };
 
     const destroyLaborModal = (bodega) => {

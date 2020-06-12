@@ -11,6 +11,8 @@ import DataDetail from "../dataDetail";
 import {editFormAction} from "../../actions/statusFormAction";
 
 export default function Empleado() {
+    const history = useHistory();
+
     const [empleados, setEmpleados] = useState([]);
     const [page, setPage] = useState(1);
     const [reload, setReload] = useState(true);
@@ -18,7 +20,6 @@ export default function Empleado() {
     const [openModal, setOpenModal] = useState(false);
     const [dataModal, setDataModal] = useState(null);
 
-    const history = useHistory();
     const dispatch = useDispatch();
     const progessbarStatus = (state) => dispatch(progressActions(state));
     const setEditForm = (state) => dispatch(editFormAction(state));
@@ -28,7 +29,7 @@ export default function Empleado() {
 
     const editFormEmpleado = (empleado) => {
         setEditForm(true);
-        history.push(`/hacienda/empleado/formulario/${empleado.id}`);
+        history.push(`${history.location.pathname}/formulario/${empleado.id}`);
     };
 
     const setFormulario = () => {
@@ -37,7 +38,7 @@ export default function Empleado() {
         cleanEmpleado(true);
         //Evento para que cuando crea un nuevo empleado el status del form edit cambia a false
         setEditForm(false);
-        history.push("/hacienda/empleado/formulario");
+        history.push(`${history.location.pathname}/formulario`);
     };
 
     const destroyEmpleadoModal = (empleado) => {

@@ -30,7 +30,7 @@ export default function Grupo(props) {
 
     const editFormGrupo = (bodega) => {
         setEditForm(true);
-        history.push(`/bodega/grupo/formulario/${bodega.id}`);
+        history.push(`${history.location.pathname}/formulario/${bodega.id}`);
     };
 
     const setFormulario = () => {
@@ -39,7 +39,7 @@ export default function Grupo(props) {
         cleanGrupo(true);
         //Evento para que cuando crea un nuevo empleado el status del form edit cambia a false
         setEditForm(false);
-        history.push("/bodega/grupo/formulario");
+        history.push(`${history.location.pathname}/formulario`);
     };
 
     const destroyLaborModal = (grupo) => {

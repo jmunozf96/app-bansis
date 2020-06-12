@@ -12,7 +12,7 @@ import DataForm from "../dataForm";
 import {laborAddAction, laborCleanAction} from "../../actions/hacienda/laborActions";
 
 export default function FormLabor() {
-    const {id} = useParams();
+    const {id, idmodulo} = useParams();
     const [loadData, setLoadData] = useState(true);
     const [redirect, setRedirect] = useState({
         status: false,
@@ -166,7 +166,7 @@ export default function FormLabor() {
         }
 
         if (id !== undefined) {
-            setRedirect({status: true, page: "/hacienda/labor/formulario"});
+            setRedirect({status: true, page: `/hacienda/labor/${idmodulo}/formulario`});
         }
     };
 
@@ -182,7 +182,7 @@ export default function FormLabor() {
             arrayFormulario={arrayFormulario}
             getData={labor}
             setData={setLabor}
-            routeReturn="/hacienda/labor"
+            routeReturn={`/hacienda/labor/${idmodulo}`}
         />
     );
 }

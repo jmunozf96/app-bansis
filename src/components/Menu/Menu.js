@@ -5,7 +5,7 @@ import "./Menu.scss";
 
 export default function Menu() {
     return (
-        <Row className="menu" md={12}>
+        <Row className="menu">
             <div className="menu__imagen">
                 <div className="menu__imagen-opacidad"/>
                 {/*<h1 className="icon"><DesktopMacOutlinedIcon/></h1>

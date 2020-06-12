@@ -20,9 +20,10 @@ import WarningIcon from '@material-ui/icons/Warning';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 
 import qs from 'qs';
-import {Link, useHistory} from "react-router-dom";
+import {Link, useHistory, useParams} from "react-router-dom";
 
 export default function FormMaterial() {
+    const {idmodulo} = useParams();
     const [haciendaOrigen, setHaciendaOrigen] = useState('');
     const [openDialogHaciendaOrigenDatos, setOpenDialogHaciendaOrigenDatos] = useState(true);
     const [dataApiHaciendaOrigen, setDataApiHaciendaOrigen] = useState(false);
@@ -399,7 +400,7 @@ export default function FormMaterial() {
                                 <Button type="button" variant="success" onClick={() => onSaveTransaction()}>
                                     <SaveAltIcon/> Guardar
                                 </Button>
-                                <Button as={Link} to="/bodega/material" variant="danger">
+                                <Button as={Link} to={`/bodega/material/${idmodulo}`} variant="danger">
                                     <AssignmentReturnIcon/> Cancelar
                                 </Button>
                             </ButtonGroup>

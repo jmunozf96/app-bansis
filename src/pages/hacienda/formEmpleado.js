@@ -15,7 +15,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import DataForm from "../dataForm";
 
 export default function FormEmpleado() {
-    const {id} = useParams();
+    const {id, idmodulo} = useParams();
     const [loadData, setLoadData] = useState(true);
     const [redirect, setRedirect] = useState({
         status: false,
@@ -238,7 +238,7 @@ export default function FormEmpleado() {
         }
 
         if (id !== undefined) {
-            setRedirect({status: true, page: "/hacienda/empleado/formulario"});
+            setRedirect({status: true, page: `/hacienda/empleado/${idmodulo}/formulario`});
         }
     };
 
@@ -254,7 +254,7 @@ export default function FormEmpleado() {
             arrayFormulario={arrayFormulario}
             getData={empleado}
             setData={setEmpleado}
-            routeReturn="/hacienda/empleado"
+            routeReturn={`/hacienda/empleado/${idmodulo}`}
         />
     );
 }

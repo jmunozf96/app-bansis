@@ -18,7 +18,7 @@ import FullScreen from "../../../../components/FullScreen";
 import {useHistory, useParams} from "react-router-dom";
 
 export default function FormEgreso() {
-    const {id} = useParams();
+    const {id, idmodulo} = useParams();
     const [loadTransacionEdit, setLoadTransaccionEdit] = useState({
         load: id !== undefined,
         id
@@ -288,7 +288,7 @@ export default function FormEgreso() {
                                     <i className="fas fa-save"/> Guardar
                                 </Button>
                                 <Button variant="danger"
-                                        onClick={() => history.push("/bodega/egreso-material")}
+                                        onClick={() => history.push(`/bodega/egreso-material/${idmodulo}`)}
                                 >
                                     <i className="fas fa-home"/> Regresar
                                 </Button>

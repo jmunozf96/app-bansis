@@ -184,7 +184,7 @@ export default function Lote() {
                             variant="success"
                             className="align-self-end"
                             type="button"
-                            onClick={() => history.push("/hacienda/lote/formulario")}
+                            onClick={() => history.push(`${history.location.pathname}/formulario`)}
                         >
                             <AddCircleIcon/> Nuevo Lote
                         </Button>
@@ -192,7 +192,7 @@ export default function Lote() {
                             variant="primary"
                             className="align-self-end"
                             type="button"
-                            onClick={() => history.push("/hacienda/lote/seccion/formulario")}
+                            onClick={() => history.push(`${history.location.pathname}/seccion/formulario`)}
                         >
                             <AddCircleIcon/> Nueva Distribucion
                         </Button>
@@ -294,7 +294,7 @@ function TableDetalle(props) {
                             </Button>*/}
                             <Button
                                 variant="primary"
-                                onClick={() => history.push(`/hacienda/lote/formulario/${data.id}`)}
+                                onClick={() => history.push(`${history.location.pathname}/formulario/${data.id}`)}
                             >
                                 <SyncIcon/>
                             </Button>
@@ -348,7 +348,7 @@ function DetailDistribucion(props) {
                     <div className="col-12">
                         <button
                             className="btn btn-primary btn-block"
-                            onClick={() => history.push(`/hacienda/lote/seccion/formulario/${id}`)}
+                            onClick={() => history.push(`${history.location.pathname}/seccion/formulario/${id}`)}
                         >
                             <i className="fas fa-external-link-alt"/> Ir al formulario de distribucion
                         </button>

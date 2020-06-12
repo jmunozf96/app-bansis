@@ -21,7 +21,6 @@ import Egreso from "./pages/bodega/Egreso";
 import FormularioLote from "./pages/hacienda/Lote/Formulario/formLote";
 import Lote from "./pages/hacienda/Lote";
 import FormSeccionLote from "./pages/hacienda/LoteSeccion/Formulario/FormSeccionLote";
-import SeccionLote from "./pages/hacienda/LoteSeccion";
 import FormSeccionLabor from "./pages/hacienda/LoteSeccionLabor/Formulario/FormSeccionLabor";
 import SeccionLoteLabor from "./pages/hacienda/LoteSeccionLabor";
 import FormEnfunde from "./pages/hacienda/AvanceLabor/Enfunde/Formulario/FormEnfunde";
@@ -35,103 +34,99 @@ export const routes = [
         component: Home,
     },
     {
-        path: "/hacienda/empleado",
+        path: "/hacienda/empleado/:idmodulo",
         component: Empleado,
     },
     {
-        path: "/hacienda/empleado/formulario/:id?",
-        component: FormEmpleado
+        path: "/hacienda/empleado/:idmodulo/formulario/:id?",
+        component: FormEmpleado,
     },
     {
-        path: "/hacienda/labor",
-        component: Labor
+        path: "/hacienda/labor/:idmodulo",
+        component: Labor,
     },
     {
-        path: "/hacienda/labor/formulario/:id?",
-        component: FormLabor
+        path: "/hacienda/labor/:idmodulo/formulario/:id?",
+        component: FormLabor,
     },
     {
-        path: "/hacienda",
+        path: "/hacienda/:idmodulo",
         component: Hacienda
     },
     {
-        path: "/hacienda/formulario/:id?",
-        component: FormHacienda
+        path: "/hacienda/:idmodulo/formulario/:id?",
+        component: FormHacienda,
     },
     {
         path: "/hacienda/mapa",
         component: Maps
     },
     {
-        path: "/hacienda/lote",
+        path: "/hacienda/lote/:idmodulo",
         component: Lote
     },
     {
-        path: "/hacienda/lote/formulario/:id?",
+        path: "/hacienda/lote/:idmodulo/formulario/:id?",
         component: FormularioLote
     },
     {
-        path: "/hacienda/lote/seccion",
-        component: SeccionLote
-    },
-    {
-        path: "/hacienda/lote/seccion/formulario/:id?",
+        path: "/hacienda/lote/:idmodulo/seccion/formulario/:id?",
         component: FormSeccionLote
     },
     {
-        path: "/hacienda/lote/seccion/labor",
+        path: "/hacienda/lote/seccion/labor/:idmodulo",
         component: SeccionLoteLabor
     },
     {
-        path: "/hacienda/lote/seccion/labor/formulario/:id?",
+        path: "/hacienda/lote/seccion/labor/:idmodulo/formulario/:id?",
         component: FormSeccionLabor
     },
     {
-        path: "/hacienda/avances/labor/enfunde",
+        path: "/hacienda/avances/labor/enfunde/:idmodulo",
         component: EnfundeSemanal
     },
     {
-        path: "/hacienda/avances/labor/enfunde/semana/detalle/:id",
+        path: "/hacienda/avances/labor/enfunde/:idmodulo/semana/detalle/:id",
         component: EnfundeLoteDetalle
     },
     {
-        path: "/hacienda/avances/labor/enfunde/empleado",
+        path: "/hacienda/avances/labor/enfunde/:idmodulo/empleado",
         component: EnfundeLoteroList
     },
     {
-        path: "/hacienda/avances/labor/enfunde/empleado/formulario",
+        path: "/hacienda/avances/labor/enfunde/:idmodulo/empleado/formulario",
         component: FormEnfunde
     },
     {
-        path: "/bodega",
+        path: "/bodega/:idmodulo",
         component: Bodega
     },
     {
-        path: "/bodega/formulario/:id?",
+        path: "/bodega/:idmodulo/formulario/:id?",
         component: FormBodega
     },
     {
-        path: "/bodega/grupo",
+        path: "/bodega/grupo/:idmodulo",
         component: Grupo
     },
     {
-        path: "/bodega/grupo/formulario/:id?",
+        path: "/bodega/grupo/:idmodulo/formulario/:id?",
         component: FormGrupo
     },
     {
-        path: "/bodega/material",
+        path: "/bodega/material/:idmodulo",
         component: Material
     },
     {
-        path: "/bodega/material/formulario",
+        path: "/bodega/material/:idmodulo/formulario",
         component: FormMaterial
     },
     {
-        path: "/bodega/egreso-material",
+        path: "/bodega/egreso-material/:idmodulo",
         component: Egreso
     },
     {
-        path: "/bodega/egreso-material/formulario/:id?",
+        path: "/bodega/egreso-material/:idmodulo/formulario/:id?",
         component: FormEgreso
     },
     {

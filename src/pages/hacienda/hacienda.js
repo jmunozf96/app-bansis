@@ -10,7 +10,9 @@ import DataDetail from "../dataDetail";
 import {editFormAction} from "../../actions/statusFormAction";
 import {clearHaciendaFormAction} from "../../actions/hacienda/haciendaActions";
 
-export default function Hacienda(props) {
+export default function Hacienda() {
+    const history = useHistory();
+
     const [haciendas, setHaciendas] = useState([]);
     const [page, setPage] = useState(1);
     const [reload, setReload] = useState(true);
@@ -20,7 +22,6 @@ export default function Hacienda(props) {
     //Variable para enviar datos al modal
     const [dataModal, setDataModal] = useState(null);
 
-    const history = useHistory();
     const dispatch = useDispatch();
     const progessbarStatus = (state) => dispatch(progressActions(state));
     const setEditForm = (state) => dispatch(editFormAction(state));
@@ -30,7 +31,7 @@ export default function Hacienda(props) {
 
     const editFormLabor = (hacienda) => {
         setEditForm(true);
-        history.push(`/hacienda/formulario/${hacienda.id}`);
+        history.push(`${history.location.pathname}/formulario/${hacienda.id}`);
     };
 
     const setFormulario = () => {
@@ -39,7 +40,7 @@ export default function Hacienda(props) {
         cleanHacienda(true);
         //Evento para que cuando crea un nuevo empleado el status del form edit cambia a false
         setEditForm(false);
-        history.push("/hacienda/formulario");
+        history.push(`${history.location.pathname}/formulario`);
     };
 
     const destroyLaborModal = (hacienda) => {

@@ -8,7 +8,7 @@ import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
 
 export function EnfundeLoteDetalle() {
-    const {id} = useParams();
+    const {id, idmodulo} = useParams();
     const [loadData, setLoadData] = useState(true);
     const [secciones, setSecciones] = useState([]);
     const [cabeceraEnfunde, setCabeceraEnfunde] = useState(null);
@@ -82,7 +82,7 @@ export function EnfundeLoteDetalle() {
                     <div className="btn-group col-5">
                         <button
                             className="btn btn-danger col-1 text-center"
-                            onClick={() => history.push(`/hacienda/avances/labor/enfunde`)}
+                            onClick={() => history.push(`/hacienda/avances/labor/enfunde/${idmodulo}`)}
                         >
                             <i className="fas fa-arrow-circle-left"/>
                         </button>
