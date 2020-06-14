@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Button, Card, Col, Form, FormGroup, Row} from "react-bootstrap";
+import {Button, Col, Form, FormGroup, Row} from "react-bootstrap";
 import {API_LINK, focuselement} from "../../../../utils/constants";
 import CustomSelect from "../../../../components/CustomSelect";
 import InputSearch from "../../../../components/InputSearch/InputSearch";
@@ -53,7 +53,7 @@ export default function EgresoCabecera(props) {
             setApiMateriales(`${API_LINK}/bansis-app/index.php/search/materiales?params=${searchMaterial}&bodega=${cabeceraEgreso.bodega}&grupo=${cabeceraEgreso.grupo}`);
             setChangeURL(false);
         }
-    }, [changeURL, setApiEmpleados, setApiMateriales, searchEmpleado, searchMaterial, cabeceraEgreso]);
+    }, [changeURL, setApiEmpleados, setApiMateriales, searchEmpleado, searchMaterial, cabeceraEgreso, setChangeURL]);
 
     useEffect(() => {
         if (searchTransaccionSemana) {

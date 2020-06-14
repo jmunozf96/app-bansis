@@ -24,7 +24,6 @@ export default function MenuTop() {
     const credentialsCookie = Cookies.get('sessionId') === undefined || Cookies.get('sessionId') === null;
     const recursosCookie = Cookies.get('sessionRecursos') === undefined || Cookies.get('sessionRecursos') === null;
     const [checkAuth, setCheckAuth] = useState((localStorageAuth || credentialsCookie || recursosCookie));
-
     const dispatch = useDispatch();
     const logout = (state) => dispatch(logoutActions(state));
     const credential = (state) => dispatch(cleanCredentialAction(state));
@@ -152,18 +151,20 @@ export default function MenuTop() {
                             </Nav>
                         </>
                     ) : (
-                        <>{authentication === '' && !checkAuth && !credentialCard &&
-                        <Nav className="ml-auto">
-                            <Nav.Link as={Link} to="/login">Login</Nav.Link>
-                            <Nav.Link eventKey={2} href="#memes">
-                                Registro
-                            </Nav.Link>
-                        </Nav>
-                        }</>
+                        <>
+                            {authentication === '' && !checkAuth &&
+                            <Nav className="ml-auto">
+                                <Nav.Link as={Link} to="/login">Login</Nav.Link>
+                                <Nav.Link eventKey={2} href="#memes">
+                                    Registro
+                                </Nav.Link>
+                            </Nav>
+                            }</>
                     )}
                 </Navbar.Collapse>
             </Navbar>
-            {progressbarStatus && <LinearProgress color="secondary" style={{marginTop: "3rem", marginBottom: "-5rem"}}/>}
+            {progressbarStatus &&
+            <LinearProgress color="secondary" style={{marginTop: "3rem", marginBottom: "-5rem"}}/>}
         </>
     );
 }

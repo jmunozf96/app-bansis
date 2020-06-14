@@ -7,7 +7,7 @@ import FormLogin from "../components/FormLogin";
 export default function Login() {
 
     return (
-        <Container fluid style={{marginTop: "5.5rem"}}>
+        <Container fluid style={{marginTop: "6.5rem"}}>
             <Spinner/>
             <Row className="justify-content-center">
                 <Col className="" xs={11} sm={8} md={6} lg={3}>
