@@ -10,7 +10,7 @@ import {Link} from "react-router-dom";
 export default function Formulario(props) {
     const {title, notificacion, setNotificacion, children, onClicksubmit, onNuevo, routeReturn} = props;
     return (
-        <Container fluid className="mb-5">
+        <Container fluid className="mb-5" style={{marginTop: "4rem"}}>
             <Row className="mt-3">
                 <SnackbarComponent
                     notificacion={notificacion}

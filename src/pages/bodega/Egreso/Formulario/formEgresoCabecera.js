@@ -20,6 +20,12 @@ export default function EgresoCabecera(props) {
         setReload,
         disabledElements,
         setDisabledElements,
+        searchEmpleado,
+        setSearchEmpleado,
+        searchMaterial,
+        setSearchMaterial,
+        changeURL,
+        setChangeURL,
         searchTransaccionSemana,
         setSearchTransaccionSemana,
         item,
@@ -29,17 +35,12 @@ export default function EgresoCabecera(props) {
         children
     } = props;
 
-    const [searchEmpleado, setSearchEmpleado] = useState('');
-    const [searchMaterial, setSearchMaterial] = useState('');
-
     const api_haciendas = `${API_LINK}/bansis-app/index.php/haciendas-select`;
     const api_bodegas = `${API_LINK}/bansis-app/index.php/bodegas-select`;
     const api_bodegas_grupos = `${API_LINK}/bansis-app/index.php/bodegas-grupos-select`;
-    const api_labores = `${API_LINK}/bansis-app/index.php/labores-select`;
 
     const [api_empleados, setApiEmpleados] = useState(`${API_LINK}/bansis-app/index.php/search/empleados`);
     const [api_materiales, setApiMateriales] = useState(`${API_LINK}/bansis-app/index.php/search/materiales`);
-    const [changeURL, setChangeURL] = useState(false);
 
     const [cantidad, setCantidad] = useState(0);
 
@@ -48,7 +49,7 @@ export default function EgresoCabecera(props) {
 
     useEffect(() => {
         if (changeURL) {
-            setApiEmpleados(`${API_LINK}/bansis-app/index.php/search/empleados?params=${searchEmpleado}&hacienda=${cabeceraEgreso.hacienda}&labor=${cabeceraEgreso.labor}`);
+            setApiEmpleados(`${API_LINK}/bansis-app/index.php/search/empleados?params=${searchEmpleado}&hacienda=${cabeceraEgreso.hacienda}`);
             setApiMateriales(`${API_LINK}/bansis-app/index.php/search/materiales?params=${searchMaterial}&bodega=${cabeceraEgreso.bodega}&grupo=${cabeceraEgreso.grupo}`);
             setChangeURL(false);
         }
@@ -113,7 +114,13 @@ export default function EgresoCabecera(props) {
         //Habilitar componentes segun cambio
         switch (e.target.name) {
             case 'hacienda':
-                setDisabledElements({...disabledElements, change: true, labor: false, hacienda: true});
+                setDisabledElements({
+                    ...disabledElements,
+                    change: true,
+                    bodega: false,
+                    empleado: false,
+                    hacienda: true
+                });
                 break;
             case 'labor':
                 setDisabledElements({...disabledElements, change: true, empleado: false});
@@ -163,10 +170,13 @@ export default function EgresoCabecera(props) {
         if (value) {
             setDisabledElements({...disabledElements, change: true, bodega: false, transfer: false});
             setSearchTransaccionSemana(true);
-            return;
+        } else {
+            setSearchEmpleado('');
+            setSearchMaterial('');
+            setChangeURL(true);
+            setDisabledElements({...disabledElements, change: true, transfer: true});
+            setDetalleEgreso([]);
         }
-        setDisabledElements({...disabledElements, change: true, transfer: true});
-        setDetalleEgreso([]);
     };
 
     const existsMaterial = (material) => {
@@ -217,6 +227,8 @@ export default function EgresoCabecera(props) {
             setItem(null);
             setStock(0);
             document.getElementById('id-cantidad').value = 0;
+            setSearchMaterial('');
+            setChangeURL(true);
         }
     };
 
@@ -279,164 +291,143 @@ export default function EgresoCabecera(props) {
     return (
         <Row>
             <Col md={12}>
-                <Form onChange={onChange}>
-                    <Row>
-                        <Col md={4} className="">
-                            <FormGroup>
-                                <label>Fecha</label>
-                                <input className="form-control bg-white" name="fecha"
-                                       value={cabeceraEgreso.fecha}
-                                       readOnly/>
-                            </FormGroup>
-                        </Col>
-                        <Col md={8} className="">
-                            <FormGroup>
-                                <label>Hacienda</label>
-                                <CustomSelect
-                                    name="hacienda"
-                                    defaultValue={cabeceraEgreso.hacienda}
-                                    placeholder="SELECCIONE UNA HACIENDA..."
-                                    api_url={api_haciendas}
-                                    disabled={disabledElements.hacienda}
-                                />
-                            </FormGroup>
-                        </Col>
-                    </Row>
-                </Form>
+                <Row>
+                    <Col md={12}>
+                        <Form onChange={onChange}>
+                            <Row>
+                                <Col md={2} className="">
+                                    <FormGroup>
+                                        <FormHelperText id="outlined-weight-helper-text">
+                                            Fecha
+                                        </FormHelperText>
+                                        <input className="form-control bg-white" name="fecha"
+                                               value={cabeceraEgreso.fecha}
+                                               readOnly/>
+                                    </FormGroup>
+                                </Col>
+                                <Col md={4} className="">
+                                    <FormGroup>
+                                        <FormHelperText id="outlined-weight-helper-text">
+                                            Hacienda
+                                        </FormHelperText>
+                                        <CustomSelect
+                                            name="hacienda"
+                                            defaultValue={cabeceraEgreso.hacienda}
+                                            placeholder="SELECCIONE UNA HACIENDA..."
+                                            api_url={api_haciendas}
+                                            disabled={disabledElements.hacienda}
+                                        />
+                                    </FormGroup>
+                                </Col>
+                                <Col md={3} className="pb-0">
+                                    <FormHelperText id="outlined-weight-helper-text">
+                                        Bodega
+                                    </FormHelperText>
+                                    <CustomSelect
+                                        name="bodega"
+                                        defaultValue={cabeceraEgreso.bodega}
+                                        placeholder="SELECCIONE..."
+                                        api_url={api_bodegas}
+                                        disabled={disabledElements.bodega}
+                                    />
+                                </Col>
+                                <Col md={3} className="pb-0">
+                                    <FormHelperText id="outlined-weight-helper-text">
+                                        Grupo
+                                    </FormHelperText>
+                                    <CustomSelect
+                                        name="grupo"
+                                        defaultValue={cabeceraEgreso.grupo}
+                                        placeholder="SELECCIONE..."
+                                        api_url={api_bodegas_grupos}
+                                        disabled={disabledElements.grupo}
+                                    />
+                                </Col>
+                            </Row>
+                        </Form>
+                    </Col>
+                </Row>
+                <hr className="mt-0 pt-0"/>
             </Col>
             <Col md={12}>
                 <Row>
-                    <Col md={6}>
+                    <Col md={12}>
                         <Form onChange={onChange}>
-                            <Card>
-                                <Card.Header className="pb-3 pt-1 pl-3">
-                                    <Row>
-                                        <Col md={12} className="pb-0">
-                                            <FormHelperText id="outlined-weight-helper-text">
-                                                Seleccione una labor...
-                                            </FormHelperText>
-                                            <CustomSelect
-                                                name="labor"
-                                                defaultValue={cabeceraEgreso.labor}
-                                                placeholder="SELECCIONE..."
-                                                api_url={api_labores}
-                                                disabled={disabledElements.labor}
-                                            />
-                                        </Col>
-                                    </Row>
-                                </Card.Header>
-                                <Card.Body className="p-3">
-                                    <Row>
-                                        <Col className="mb-0" md={12}>
-                                            <InputSearch
-                                                id="asynchronous-empleado"
-                                                label="Listado de empleados"
-                                                api_url={api_empleados}
-                                                setSearch={setSearchEmpleado}
-                                                onChangeValue={onChangeValueEmpleadoSearch}
-                                                disabled={disabledElements.empleado}
-                                                value={cabeceraEgreso.empleado}
-                                                setChangeURL={setChangeURL}
-                                            />
-                                            <FormHelperText id="outlined-weight-helper-text">
-                                                Puede filtrar los empleados por nombre o numero de cedula
-                                            </FormHelperText>
-                                        </Col>
-                                    </Row>
-                                </Card.Body>
-                            </Card>
+                            <Row>
+                                <Col className="mb-0" md={12}>
+                                    <InputSearch
+                                        id="asynchronous-empleado"
+                                        label="Listado de empleados"
+                                        api_url={api_empleados}
+                                        setSearch={setSearchEmpleado}
+                                        onChangeValue={onChangeValueEmpleadoSearch}
+                                        disabled={disabledElements.empleado}
+                                        value={cabeceraEgreso.empleado}
+                                        setChangeURL={setChangeURL}
+                                    />
+                                    <FormHelperText id="outlined-weight-helper-text">
+                                        Puede filtrar los empleados por nombre o numero de cedula
+                                    </FormHelperText>
+                                </Col>
+                            </Row>
                         </Form>
-                        <hr/>
                     </Col>
-                    <Col md={6}>
-                        <Card>
-                            <Card.Header className="pb-3 pt-1 pl-3">
-                                <Form onChange={onChange}>
-                                    <Row>
-                                        <Col md={6} className="pb-0">
-                                            <FormHelperText id="outlined-weight-helper-text">
-                                                Bodega
-                                            </FormHelperText>
-                                            <CustomSelect
-                                                name="bodega"
-                                                defaultValue={cabeceraEgreso.bodega}
-                                                placeholder="SELECCIONE..."
-                                                api_url={api_bodegas}
-                                                disabled={disabledElements.bodega}
-                                            />
-                                        </Col>
-                                        <Col md={6} className="pb-0">
-                                            <FormHelperText id="outlined-weight-helper-text">
-                                                Grupo
-                                            </FormHelperText>
-                                            <CustomSelect
-                                                name="grupo"
-                                                defaultValue={cabeceraEgreso.grupo}
-                                                placeholder="SELECCIONE..."
-                                                api_url={api_bodegas_grupos}
-                                                disabled={disabledElements.grupo}
-                                            />
-                                        </Col>
-                                    </Row>
-                                </Form>
-                            </Card.Header>
-                            <Card.Body className="p-3">
-                                <form id="id-input-add" onSubmit={onSubmitInputItemAdd}>
-                                    <Row className="pb-0 mb-0">
-                                        <Col md={12}>
-                                            <InputSearch
-                                                id="asynchronous-material"
-                                                label="Listado de Materiales"
-                                                api_url={api_materiales}
-                                                setSearch={setSearchMaterial}
-                                                onChangeValue={onChangeValueMaterialSearch}
-                                                disabled={disabledElements.material}
-                                                value={item}
-                                            />
-                                            <FormHelperText id="outlined-weight-helper-text">
-                                                Puede filtrar los empleados por nombre o numero de cedula
-                                            </FormHelperText>
-                                        </Col>
-                                        <Col md={5} className="">
-                                            <FormGroup className="mb-0 mt-1 mr-0">
-                                                <input
-                                                    className="form-control"
-                                                    type="number"
-                                                    id="id-cantidad"
-                                                    name="cantidad"
-                                                    defaultValue={cantidad}
-                                                    onChange={onChangeCantidadItem}
-                                                    onFocus={(e) => e.target.select()}
-                                                    disabled={disabledElements.cantidad}
-                                                />
-                                                <FormHelperText id="outlined-weight-helper-text">Ingrese la
-                                                    cantidad...</FormHelperText>
-                                            </FormGroup>
-                                        </Col>
-                                        <Col md={4} className="">
-                                            <FormGroup className="mb-0 mt-1 mr-0">
-                                                <input
-                                                    className="form-control bg-white"
-                                                    type="number"
-                                                    id="id-stock"
-                                                    name="stock"
-                                                    value={stock}
-                                                    disabled={true}
-                                                />
-                                                <FormHelperText id="outlined-weight-helper-text">
-                                                    Stock
-                                                </FormHelperText>
-                                            </FormGroup>
-                                        </Col>
-                                        <Col className="pb-0">
-                                            <Button type="submit" className="mt-1" variant="primary">
-                                                <i className="fas fa-plus-circle"/>
-                                            </Button>
-                                        </Col>
-                                    </Row>
-                                </form>
-                            </Card.Body>
-                        </Card>
+                    <Col md={12} className="mt-3">
+                        <form id="id-input-add" onSubmit={onSubmitInputItemAdd}>
+                            <Row className="pb-0 mb-0">
+                                <Col md={7}>
+                                    <InputSearch
+                                        id="asynchronous-material"
+                                        label="Listado de Materiales"
+                                        api_url={api_materiales}
+                                        setSearch={setSearchMaterial}
+                                        onChangeValue={onChangeValueMaterialSearch}
+                                        disabled={disabledElements.material}
+                                        value={item}
+                                        setChangeURL={setChangeURL}
+                                    />
+                                    <FormHelperText id="outlined-weight-helper-text">
+                                        Puede filtrar los materiales por descripcion o codigo
+                                    </FormHelperText>
+                                </Col>
+                                <Col md={2} className="">
+                                    <FormGroup className="mb-0 mt-1 mr-0">
+                                        <input
+                                            className="form-control"
+                                            type="number"
+                                            id="id-cantidad"
+                                            name="cantidad"
+                                            defaultValue={cantidad}
+                                            onChange={onChangeCantidadItem}
+                                            onFocus={(e) => e.target.select()}
+                                            disabled={disabledElements.cantidad}
+                                        />
+                                        <FormHelperText id="outlined-weight-helper-text">Ingrese la
+                                            cantidad...</FormHelperText>
+                                    </FormGroup>
+                                </Col>
+                                <Col md={2} className="">
+                                    <FormGroup className="mb-0 mt-1 mr-0">
+                                        <input
+                                            className="form-control bg-white"
+                                            type="number"
+                                            id="id-stock"
+                                            name="stock"
+                                            value={stock}
+                                            disabled={true}
+                                        />
+                                        <FormHelperText id="outlined-weight-helper-text">
+                                            Stock
+                                        </FormHelperText>
+                                    </FormGroup>
+                                </Col>
+                                <Col className="pb-0">
+                                    <Button type="submit" className="mt-1" variant="primary">
+                                        <i className="fas fa-plus-circle"/>
+                                    </Button>
+                                </Col>
+                            </Row>
+                        </form>
                     </Col>
                 </Row>
             </Col>

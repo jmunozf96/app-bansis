@@ -2,7 +2,7 @@
   &__imagen {
     position: relative;
     width: 100%;
-    height: calc(100vh - 60px);
+    height: calc(100vh - 52px);
     background-image: url("../../assets/img/background.jpg");
     background-repeat: no-repeat;
     background-size: cover;
@@ -10,7 +10,7 @@
     &-opacidad {
       position: relative;
       width: 100%;
-      height: calc(100vh - 60px);
+      height: calc(100vh - 52px);
       background-color: black !important;
       opacity: 0.8;
     }

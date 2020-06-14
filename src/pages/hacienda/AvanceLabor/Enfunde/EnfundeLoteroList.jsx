@@ -89,7 +89,7 @@ export default function EnfundeLoteroList() {
     return (
         <div className="container-fluid mt-3 mb-5">
             <Row>
-                <Col className="mb-3">
+                <Col className="mt-3 mb-3">
                     <Breadcrumbs aria-label="breadcrumb">
                         <Link color="inherit" to="/">
                             Hacienda

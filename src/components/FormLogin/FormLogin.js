@@ -3,7 +3,7 @@ import {Alert, Col, Form, Row} from "react-bootstrap";
 import axios from "axios";
 import {
     FormControl,
-    Button, TextField, FormControlLabel, Checkbox, Grid, Link,
+    Button, TextField, FormControlLabel, Checkbox
 } from "@material-ui/core";
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 
@@ -171,7 +171,6 @@ export default function FormLogin() {
                                 {statusForm.message}.
                             </Alert>
                         )}
-
                     <FormControl>
                         <TextField
                             variant="outlined"
@@ -185,7 +184,7 @@ export default function FormLogin() {
                         />
                     </FormControl>
                 </Col>
-                <Col md={12} className="mt-2">
+                <Col md={12} className="">
                     <FormControl>
                         <TextField
                             variant="outlined"
@@ -214,7 +213,7 @@ export default function FormLogin() {
                     >
                         Ingresar
                     </Button>
-                    <Grid container>
+                    {/*<Grid container>
                         <Grid item xs>
                             <Link href="#" variant="body2">
                                 Olvidaste tu contraseña?
@@ -225,7 +224,7 @@ export default function FormLogin() {
                                 {"No tienes una cuenta? Registrarse"}
                             </Link>
                         </Grid>
-                    </Grid>
+                    </Grid>*/}
                 </Col>
             </Row>
         </Form>

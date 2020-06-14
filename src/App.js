@@ -7,7 +7,7 @@ import RouterConfig from "./RouterConfig";
 
 //Redux
 import store from "./store";
-import {Provider,} from "react-redux";
+import {Provider} from "react-redux";
 
 function App() {
     return (
@@ -16,7 +16,9 @@ function App() {
                 <header>
                     <MenuTop/>
                 </header>
-                <RouterConfig/>
+                <div style={{marginTop: "2.5rem"}}>
+                    <RouterConfig/>
+                </div>
                 {/*<Footer/>*/}
             </Router>
         </Provider>

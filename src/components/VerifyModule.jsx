@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from "react";
-import {Redirect, useHistory, useParams} from "react-router-dom";
+import {useHistory, useParams} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {API_LINK} from "../utils/constants";
 import qs from 'qs';
-import SpinnerLoadingVerify from "./SpinnerLoadingVerify/SpinnerLoadingVerify";
+import Error404 from "./Error/404/404";
+import LinearProgress from "@material-ui/core/LinearProgress";
 
 export default function VerifyModule({children}) {
     const {idmodulo} = useParams();
@@ -43,22 +44,22 @@ export default function VerifyModule({children}) {
                         console.error(response.message);
                     }
                 })();
+            } else {
+                setContinueAccess(true);
             }
             setCheckModule(false);
         }
     }, [checkModule, idmodulo, history, authentication, credentialCard]);
 
-    if (!continueAccess && !goPage) {
-        return (
-            <Redirect
-                to="/error"
-            />
-        );
+    if ((continueAccess && goPage)) {
+        return children;
     }
 
     return (
         <>
-            {goPage ? children : <SpinnerLoadingVerify/>}
+            {!goPage ? <Error404
+                mensaje="Lo sentimos, usted no tiene acceso a este modulo."
+            /> : <LinearProgress color="secondary"/>}
         </>
     )
 }

@@ -5,9 +5,11 @@ import {Container} from "react-bootstrap";
 
 export default function Home() {
     return (
-        <>
+        <div className="mt-5">
             <LinearProgress color="secondary"/>
-            <Container fluid><Menu/>
+            <Container fluid>
+                <Menu/>
             </Container>
-        </>);
+        </div>
+    );
 }

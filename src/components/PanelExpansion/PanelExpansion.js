@@ -22,28 +22,29 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function PanelExpansion(props) {
-    const {icon, contentTabPanel, data, children} = props;
+    const {icon, descripcion, contentTabPanel, data, children} = props;
     const classes = useStyles();
-    const [expanded, setExpanded] = React.useState(false);
+    const [expanded, setExpanded] = React.useState('');
 
     const handleChange = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
     };
 
     return (
-        <ExpansionPanel expanded={expanded === `${data.id}`} onChange={handleChange(`${data.id}`)}>
+        <ExpansionPanel expanded={expanded === `${data.id}`} onChange={handleChange(`${data.id}`)}
+                        style={{display: 'block'}}>
             <ExpansionPanelSummary
                 expandIcon={<ExpandMoreIcon/>}
                 id={`${data.id}-header`}
             >
                 <Typography className={classes.heading}>
-                    {data.descripcion}
+                    {descripcion}
                 </Typography>
                 <Typography className={classes.secondaryHeading}>
                     <i className={icon}/> {contentTabPanel}
                 </Typography>
             </ExpansionPanelSummary>
-            <ExpansionPanelDetails>
+            <ExpansionPanelDetails style={{display: 'block'}}>
                 {children}
             </ExpansionPanelDetails>
         </ExpansionPanel>

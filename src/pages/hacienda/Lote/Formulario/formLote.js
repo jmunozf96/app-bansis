@@ -117,7 +117,7 @@ export default function FormularioLote() {
     };
 
     return (
-        <Container fluid>
+        <Container fluid  style={{marginTop: "4rem"}}>
             <SnackbarComponent
                 notificacion={notificacion}
                 setNotificacion={setNotificacion}

@@ -12,7 +12,7 @@ import FormBodega from "./pages/bodega/formBodega";
 import Grupo from "./pages/bodega/grupo";
 import FormGrupo from "./pages/bodega/formGrupo";
 
-import Error404 from "./components/Error/404/404";
+//import Error404 from "./components/Error/404/404";
 import FormMaterial from "./pages/bodega/formMaterial";
 import Material from "./pages/bodega/material";
 import Maps from "./pages/hacienda/Mapa/maps";
@@ -27,6 +27,9 @@ import FormEnfunde from "./pages/hacienda/AvanceLabor/Enfunde/Formulario/FormEnf
 import EnfundeSemanal from "./pages/hacienda/AvanceLabor/Enfunde/EnfundeSemanal";
 import {EnfundeLoteDetalle} from "./pages/hacienda/AvanceLabor/Enfunde/EnfundeLoteDetalle";
 import EnfundeLoteroList from "./pages/hacienda/AvanceLabor/Enfunde/EnfundeLoteroList";
+import Page404 from "./components/Error/404 Page";
+import FormUsuario from "./pages/seguridad/Usuario/FormUsuario";
+import FormRecursosUsuario from "./pages/seguridad/Recursos/FormRecursosUsuario";
 
 export const routes = [
     {
@@ -130,7 +133,15 @@ export const routes = [
         component: FormEgreso
     },
     {
+        path: "/seguridad/usuario/:idmodulo",
+        component: FormUsuario
+    },
+    {
+        path: "/seguridad/usuario/modulo-acceso/:idmodulo",
+        component: FormRecursosUsuario
+    },
+    {
         path: "*",
-        component: Error404
+        component: Page404
     }
 ];

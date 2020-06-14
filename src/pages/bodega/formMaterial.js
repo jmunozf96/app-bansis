@@ -267,7 +267,7 @@ export default function FormMaterial() {
     };
 
     return (
-        <Container className="mt-3 mb-5" fluid>
+        <Container className="mb-3" fluid style={{marginTop: "4rem"}}>
             <SnackbarComponent
                 notificacion={notificacion}
                 setNotificacion={setNotificacion}

@@ -118,10 +118,10 @@ export function EnfundeLoteDetalle() {
                     </div>
                 </div>
                 <hr/>
-                <div className="row">
+                <div className="row p-0 m-0">
                     {secciones.length > 0 &&
                     secciones.map((data, index) => (
-                        <div className="col-md-2 col-6 p-0 text-center" key={index}>
+                        <div className="col-md-2 col-6 p-0 m-0 text-center" key={index}>
                             <ApexChart
                                 data={data.seccion}
                                 type="radialBar"

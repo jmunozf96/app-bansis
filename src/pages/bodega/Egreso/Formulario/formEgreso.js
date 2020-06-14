@@ -24,6 +24,10 @@ export default function FormEgreso() {
         id
     });
 
+    const [searchEmpleado, setSearchEmpleado] = useState('');
+    const [searchMaterial, setSearchMaterial] = useState('');
+    const [changeURL, setChangeURL] = useState(false);
+
     const [searchTransaccionSemana, setSearchTransaccionSemana] = useState(false);
     const [cabeceraEgreso, setCabeceraEgreso] = useState({
         fecha: moment().format("DD/MM/YYYY"),
@@ -157,6 +161,9 @@ export default function FormEgreso() {
                 ...cabeceraEgreso,
                 empleado: null
             });
+            setSearchEmpleado('');
+            setSearchMaterial('');
+            setChangeURL(true);
             setReload(true);
             setDisabledElements({
                 ...disabledElements,
@@ -192,7 +199,7 @@ export default function FormEgreso() {
     };
 
     return (
-        <Container className="mt-3" fluid>
+        <Container className="mb-3" fluid style={{marginTop: "4rem"}}>
             <SnackbarComponent
                 notificacion={notificacion}
                 setNotificacion={setNotificacion}
@@ -210,6 +217,12 @@ export default function FormEgreso() {
                         setReload={setReload}
                         disabledElements={disabledElements}
                         setDisabledElements={setDisabledElements}
+                        searchEmpleado={searchEmpleado}
+                        setSearchEmpleado={setSearchEmpleado}
+                        searchMaterial={searchMaterial}
+                        setSearchMaterial={setSearchMaterial}
+                        changeURL={changeURL}
+                        setChangeURL={setChangeURL}
                         searchTransaccionSemana={searchTransaccionSemana}
                         setSearchTransaccionSemana={setSearchTransaccionSemana}
                         item={material}

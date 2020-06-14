@@ -46,6 +46,7 @@ export default function EgresoTransferencia(props) {
                             icon="fas fa-exchange-alt"
                             contentTabPanel="Transferencia de saldo"
                             data={empleado}
+                            descripcion={empleado.descripcion}
                         >
                             <Container fluid className="p-0 m-0">
                                 {empleado.hasOwnProperty('inventario') && empleado.inventario.map((inv, index) =>

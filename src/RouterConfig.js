@@ -4,7 +4,6 @@ import {routes} from "./Router";
 
 import Login from "./pages/login";
 import VerifyAuthentication from "./components/VerifyAuthentication";
-import VerifyModule from "./components/VerifyModule";
 
 export default function RouterConfig() {
     return (
@@ -15,11 +14,9 @@ export default function RouterConfig() {
                     key={i}
                     path={route.path}
                     exact={true}
-                    render={(props) => (
+                    render={() => (
                         <VerifyAuthentication>
-                            <VerifyModule>
-                                <route.component/>
-                            </VerifyModule>
+                            <route.component/>
                         </VerifyAuthentication>
                     )}
                 />

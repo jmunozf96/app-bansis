@@ -229,7 +229,7 @@ function TableCabecera(props) {
         <TableForm
             dataAPI={data}
             onChangePage={onChangePage}
-            columns={['#', 'Hacienda', 'Empleado', 'Formulario', 'Has.', 'Distribucion', 'Ult. Act.', 'Estado', 'Accion']}
+            columns={['Hacienda', 'Empleado', 'Labor', 'Has.', 'Distribucion', 'Ult. Act.', 'Estado', 'Accion']}
             pageSize={7}
         >
             {children}
@@ -243,8 +243,7 @@ function TableDetalle(props) {
         <>
             {data.length > 0 && data.map((data, index) =>
                 <tr key={data.id}>
-                    <td className="text-center" width="5%">{index + 1}</td>
-                    <td className="text-center" width="20%">
+                    <td className="text-center" width="25%">
                         <small>{data.empleado.hacienda.detalle}</small>
                     </td>
                     <td className="text-center" width="17%">

@@ -8,7 +8,7 @@ export const getStateLocalStorage = () => {
     return {
         "auth": {"_token": JSON.parse(auth)},
         "credential": {"credential": JSON.parse(credential !== undefined ? credential : null)},
-        "recursos": JSON.parse(recursos)
+        "recursos": JSON.parse(recursos !== undefined ? recursos : null)
     };
 };
 
