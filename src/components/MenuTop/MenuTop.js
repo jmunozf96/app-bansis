@@ -164,7 +164,7 @@ export default function MenuTop() {
                 </Navbar.Collapse>
             </Navbar>
             {progressbarStatus &&
-            <LinearProgress color="secondary" style={{marginTop: "3rem", marginBottom: "-5rem"}}/>}
+            <LinearProgress color="secondary" style={{marginTop: "3rem", marginBottom: "-3rem"}}/>}
         </>
     );
 }

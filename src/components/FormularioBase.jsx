@@ -6,7 +6,7 @@ const FormularioBase = (props) => {
     const history = useHistory();
 
     return (
-        <div className="container-fluid mb-5" style={{marginTop: "4rem"}}>
+        <div className="container-fluid mb-3" style={{marginTop: "4rem"}}>
             <div className="card">
                 <div className="card-header">
                     <i className={icon}/> {title}

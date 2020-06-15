@@ -214,160 +214,164 @@ export default function FormRecursoUsuario() {
     };
 
     return (
-        <div className="container-fluid"  style={{marginTop: "-2.5rem"}}>
-            <SnackbarComponent
-                notificacion={notificacion}
-                setNotificacion={setNotificacion}
-            />
+        <FormularioBase
+            icon='far fa-address-card'
+            title={'Formulario de asignacion de rol a usuarios'}
+            nuevo={nuevoRolUsuario}
+            guardar={guardarRolUsuario}
+            volver={Regresar}
+            disabledElements={disabledBtn}
+        >
             <div className="row">
-                <div className="col-md-6 p-0">
-                    <FormularioBase
-                        icon='far fa-address-card'
-                        title={'Formulario de asignacion de rol a usuarios'}
-                        nuevo={nuevoRolUsuario}
-                        guardar={guardarRolUsuario}
-                        volver={Regresar}
-                        disabledElements={disabledBtn}
-                    >
-                        <div className="row">
-                            <div className="col-md-12">
-                                <div className="form-group">
-                                    <Buscador
-                                        api={api_buscador}
-                                        change={changeHacienda}
-                                        disabled={disabledElements.hacienda}
-                                        id="id-hacienda-search"
-                                        label="Hacienda"
-                                        setData={setHacienda}
-                                        variant="outlined"
-                                        value={hacienda}
-                                    />
-                                </div>
-                            </div>
-                            <div className="col-md-12">
-                                <InputSearch
-                                    id="asynchronous-empleado"
-                                    label="Listado de empleados"
-                                    api_url={apiEmpleado}
-                                    setSearch={setSearchEmpleado}
-                                    onChangeValue={changeEmpleado}
-                                    disabled={disabledElements.empleado}
-                                    value={empleado}
-                                    setChangeURL={setChangeURL}
+                <SnackbarComponent
+                    notificacion={notificacion}
+                    setNotificacion={setNotificacion}
+                />
+                <div className="col-md-6">
+                    <div className="row">
+                        <div className="col-md-12">
+                            <div className="form-group">
+                                <Buscador
+                                    api={api_buscador}
+                                    change={changeHacienda}
+                                    disabled={disabledElements.hacienda}
+                                    id="id-hacienda-search"
+                                    label="Hacienda"
+                                    setData={setHacienda}
+                                    variant="outlined"
+                                    value={hacienda}
                                 />
-                                <FormHelperText id="outlined-weight-helper-text">
-                                    Puede filtrar los empleados por nombre o numero de cedula
-                                </FormHelperText>
                             </div>
-                            <div className="col-md-12">
-                                {empleado && empleado.user ?
-                                    <div className="card mt-3">
-                                        <div className="card-body">
-                                            <div className="row">
-                                                <div className="col-12 mb-3">
-                                                    <div className="input-group">
-                                                        <div className="input-group-prepend">
+                        </div>
+                        <div className="col-md-12">
+                            <InputSearch
+                                id="asynchronous-empleado"
+                                label="Listado de empleados"
+                                api_url={apiEmpleado}
+                                setSearch={setSearchEmpleado}
+                                onChangeValue={changeEmpleado}
+                                disabled={disabledElements.empleado}
+                                value={empleado}
+                                setChangeURL={setChangeURL}
+                            />
+                            <FormHelperText id="outlined-weight-helper-text">
+                                Puede filtrar los empleados por nombre o numero de cedula
+                            </FormHelperText>
+                        </div>
+                        <div className="col-md-12">
+                            {empleado && empleado.user ?
+                                <div className="card mt-3">
+                                    <div className="card-body">
+                                        <div className="row">
+                                            <div className="col-12 mb-3">
+                                                <div className="input-group">
+                                                    <div className="input-group-prepend">
                                                     <span className="input-group-text" id="basic-addon1">
                                                     <i className="fas fa-info-circle"/>
                                                     </span>
-                                                        </div>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control bg-white"
-                                                            disabled={true}
-                                                            defaultValue={empleado.user.descripcion}
-                                                        />
                                                     </div>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control bg-white"
+                                                        disabled={true}
+                                                        defaultValue={empleado.user.descripcion}
+                                                    />
                                                 </div>
-                                                <div className="col-12">
-                                                    <div className="input-group">
-                                                        <div className="input-group-prepend">
+                                            </div>
+                                            <div className="col-12">
+                                                <div className="input-group">
+                                                    <div className="input-group-prepend">
                                                     <span className="input-group-text" id="basic-addon1">
                                                         <i className="fas fa-user-circle"/>
                                                     </span>
-                                                        </div>
-                                                        <input
-                                                            type="text" className="form-control bg-white"
-                                                            disabled={true}
-                                                            defaultValue={empleado.user.nick}
-                                                        />
                                                     </div>
+                                                    <input
+                                                        type="text" className="form-control bg-white"
+                                                        disabled={true}
+                                                        defaultValue={empleado.user.nick}
+                                                    />
                                                 </div>
-                                                <div className="col-12 mt-3">
-                                                    <div className="input-group">
-                                                        <div className="input-group-prepend">
+                                            </div>
+                                            <div className="col-12 mt-3">
+                                                <div className="input-group">
+                                                    <div className="input-group-prepend">
                                                     <span className="input-group-text" id="basic-addon1">
                                                         <i className="fas fa-at"/>
                                                     </span>
-                                                        </div>
-                                                        <input
-                                                            type="text" className="form-control bg-white"
-                                                            disabled={true}
-                                                            defaultValue={empleado.user.correo}
-                                                        />
                                                     </div>
+                                                    <input
+                                                        type="text" className="form-control bg-white"
+                                                        disabled={true}
+                                                        defaultValue={empleado.user.correo}
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    :
-                                    <>
-                                        {empleado &&
-                                        <div className="alert alert-info mt-3">
-                                            <i className="fas fa-info-circle"/> Empleado no tiene usuario
-                                            registrado.
+                                </div>
+                                :
+                                <>
+                                    {empleado &&
+                                    <div className="alert alert-info mt-3">
+                                        <i className="fas fa-info-circle"/> Empleado no tiene usuario
+                                        registrado.
+                                    </div>
+                                    }
+                                </>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div className="col-md-6">
+                    <div className="row">
+                        <div className="col-md-12 p-0 mb-5">
+                            <div className="row p-0 mr-3">
+                                {loadRecursos && recursos.length === 0 ?
+                                    <div className="col-md-12 text-center mt-5">
+                                        <div className="spinner-border" role="status">
+                                            <span className="sr-only">Loading...</span>
                                         </div>
+                                    </div>
+                                    :
+                                    <div className="col-md-12 mr-0 pr-0"
+                                         style={{height: "600px", overflowY: "scroll"}}>
+                                        {recursos.length > 0 &&
+                                        recursos.map((recurso, index) => (
+                                            <RecursoExpand recurso={recurso} key={index} col={12}>
+                                                <div className="row">
+                                                    {recurso.recurso_hijo.length > 0 &&
+                                                    recurso.recurso_hijo.map((recursoHijo, index) => (
+                                                        <RecursoExpand recurso={recursoHijo} key={index}
+                                                                       col={12}>
+                                                            <div className="row p-0">
+                                                                {recursoHijo.recurso_hijo.length > 0 &&
+                                                                recursoHijo.recurso_hijo.map((recursoHijo2, index) => (
+                                                                    <div className="col-md-6" key={index}>
+                                                                        <FormControlLabel
+                                                                            aria-label="Acknowledge"
+                                                                            control={<Checkbox
+                                                                                checked={consultaRol(recursoHijo2.id)}
+                                                                                onChange={(e) => addUserRol(e, [recurso.id, recursoHijo.id, recursoHijo2.id], recursoHijo.recurso_hijo)}
+                                                                            />}
+                                                                            label={`Acceso: ${recursoHijo2.nombre}`}
+                                                                        />
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </RecursoExpand>
+                                                    ))}
+                                                </div>
+                                            </RecursoExpand>
+                                        ))
                                         }
-                                    </>
+                                    </div>
                                 }
                             </div>
                         </div>
-                    </FormularioBase>
-                </div>
-                <div className="col-md-6 p-0 mb-5" style={{marginTop: "4rem"}}>
-                    <div className="row p-0 mr-3">
-                        {loadRecursos && recursos.length === 0 ?
-                            <div className="col-md-12 text-center mt-5">
-                                <div className="spinner-border" role="status">
-                                    <span className="sr-only">Loading...</span>
-                                </div>
-                            </div>
-                            :
-                            <div className="col-md-12 mr-0 pr-0" style={{height: "500px", overflowY: "scroll"}}>
-                                {recursos.length > 0 &&
-                                recursos.map((recurso, index) => (
-                                    <RecursoExpand recurso={recurso} key={index} col={12}>
-                                        <div className="row">
-                                            {recurso.recurso_hijo.length > 0 &&
-                                            recurso.recurso_hijo.map((recursoHijo, index) => (
-                                                <RecursoExpand recurso={recursoHijo} key={index} col={12}>
-                                                    <div className="row p-0">
-                                                        {recursoHijo.recurso_hijo.length > 0 &&
-                                                        recursoHijo.recurso_hijo.map((recursoHijo2, index) => (
-                                                            <div className="col-md-6" key={index}>
-                                                                <FormControlLabel
-                                                                    aria-label="Acknowledge"
-                                                                    control={<Checkbox
-                                                                        checked={consultaRol(recursoHijo2.id)}
-                                                                        onChange={(e) => addUserRol(e, [recurso.id, recursoHijo.id, recursoHijo2.id], recursoHijo.recurso_hijo)}
-                                                                    />}
-                                                                    label={`Acceso: ${recursoHijo2.nombre}`}
-                                                                />
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </RecursoExpand>
-                                            ))}
-                                        </div>
-                                    </RecursoExpand>
-                                ))
-                                }
-                            </div>
-                        }
                     </div>
                 </div>
             </div>
-        </div>
+        </FormularioBase>
     );
 }
 

@@ -10,7 +10,7 @@ import {Col, Row} from "react-bootstrap";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
-import EnfundePeriodo from "./EnfundePeriodo";
+//import EnfundePeriodo from "./EnfundePeriodo";
 
 const style = {
     table: {
@@ -97,10 +97,11 @@ export default function EnfundeSemanal() {
                     </div>
                 </div>
                 <hr/>
-                <div className="row">
+                {/*<div className="row">
+                    //Enfunde grafico
                     <EnfundePeriodo/>
                 </div>
-                <hr/>
+                <hr/>*/}
                 <div className="row">
                     <div className="col-12 table-responsive">
                         <table className="table table-bordered table-hover">

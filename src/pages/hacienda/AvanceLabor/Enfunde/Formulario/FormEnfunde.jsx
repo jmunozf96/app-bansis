@@ -10,16 +10,21 @@ import {useDispatch, useSelector} from "react-redux";
 import FullScreen from "../../../../../components/FullScreen/FullScreen";
 import FormEnfundeDetalle from "./FormEnfundeDetalle";
 
-import {useParams} from "react-router-dom";
+import {useHistory, useParams} from "react-router-dom";
 import moment from "moment";
 import 'moment/locale/es';
 import qs from "qs";
 import CabeceraSemana from "../../../CabeceraSemana";
+import Page404 from "../../../../../components/Error/404 Page/Page404";
 
 export default function FormEnfunde() {
     const {idmodulo} = useParams();
+    const history = useHistory();
+    //console.log(history.location.state !== null);
+
     //-----------------------------------------------------------------------
-    const Regresar = `/hacienda/avances/labor/enfunde/${idmodulo}`;
+
+    const Regresar = `/hacienda/avances/labor/enfunde/${idmodulo}/empleado`;
     const [disabledElements, setDisabledElements] = useState({
         hacienda: false,
         loteSeccion: true,
@@ -33,30 +38,28 @@ export default function FormEnfunde() {
     });
 
     const [cabeceraEnfunde, setCabeceraEnfunde] = useState({
-        fecha: moment().format("DD/MM/YYYY"),
-        hacienda: null,
-        labor: null,
-        empleado: null,
-        codigoSemana: 0,
-        semana: 0,
-        periodo: 0,
-        colorp: '',
-        colorf: ''
+        fecha: history.location.state ? history.location.state.calendario.fecha : moment().format("DD/MM/YYYY"),
+        hacienda: history.location.state ? history.location.state.hacienda : null,
+        labor: {id: 3},
+        empleado: history.location.state ? history.location.state.empleado : null,
+        codigoSemana: history.location.state ? history.location.state.calendario.codigoSemana : 0,
+        semana: history.location.state ? history.location.state.calendario.semana : 0,
+        periodo: history.location.state ? history.location.state.calendario.periodo : 0,
+        colorp: history.location.state ? history.location.state.calendario.colorp : '',
+        colorf: history.location.state ? history.location.state.calendario.colorf : ''
     });
 
     /*const [detalleEnfunde, setDetalleEnfunde] = useState({
         empleado: null,
         seccion: [],
     });*/
-
-    const [loadCalendar, setLoadCalendar] = useState(true);
-
+    const [loadCalendar, setLoadCalendar] = useState(!history.location.state);
     //Configuracion para buscador
     const api_buscador = `${API_LINK}/bansis-app/index.php/haciendas-select`;
-    const [hacienda, setHacienda] = useState(null);
+    const [hacienda, setHacienda] = useState(history.location.state ? history.location.state.hacienda : null);
     const [searchEmpleado, setSearchEmpleado] = useState('');
     const [apiEmpleado, setApiEmpleado] = useState(`${API_LINK}/bansis-app/index.php/search/empleados`);
-    const [empleado, setEmpleado] = useState(null);
+    const [empleado, setEmpleado] = useState(history.location.state ? history.location.state.empleado : null);
     const [apiLabor, setApiLabor] = useState('');
     const [labor, setLabor] = useState(null);
     const [changeURL, setChangeURL] = useState(false);
@@ -79,29 +82,28 @@ export default function FormEnfunde() {
     const [distribucionSelect, setDistribucionSelect] = useState(null); //Variable para ecpecificar el lote de registro de avance por labor
     const [detalleDistribucion, setDetalleDistribucion] = useState([]);
     const [apiSearchDetalles, setApiSearchDetalles] = useState('');
-    const [searchDetallesDistribucion, setSearchDetallesDistribucion] = useState(false);
+    const [searchDetallesDistribucion, setSearchDetallesDistribucion] = useState(!!history.location.state);
 
     const [reloadComponent, setReloadComponent] = useState(false);
 
     //Eliminar enfundes
     const [itemsToDelete, setItemsToDelete] = useState([]);
 
+    const [changeSemanaBuutton, setChangeSemanaButton] = useState(false);
     const [changeSemana, setChangeSemana] = useState({
         status: false,
         codigoSemana: 0
     });
 
     useEffect(() => {
-        if (changeSemana.status) {
-            setDetalleDistribucion([]);
-            setApiSearchDetalles(`${API_LINK}/bansis-app/index.php/get-data/lote-seccion-labor?labor=${labor.id}&empleado=${empleado.id}&activo=true&calendario=${changeSemana.codigo}`);
+        if (!loadCalendar && !changeSemana.status && changeSemanaBuutton) {
+            //setDetalleDistribucion([]);
+            //La labor de enfunde es 3 en el codigo de la BD queda quemada por el momento, ya que este formulario es solo para esta labor
+            setApiSearchDetalles(`${API_LINK}/bansis-app/index.php/get-data/lote-seccion-labor?labor=3&empleado=${empleado.id}&activo=true&calendario=${changeSemana.codigoSemana}`);
+            setChangeSemanaButton(false);
             setSearchDetallesDistribucion(true);
-            setChangeSemana({
-                ...changeSemana,
-                status: false
-            });
         }
-    }, [changeSemana, labor, empleado, cabeceraEnfunde]);
+    }, [changeSemana, labor, empleado, cabeceraEnfunde, loadCalendar, changeSemanaBuutton]);
 
     useEffect(() => {
         if (reloadComponent) {
@@ -117,11 +119,15 @@ export default function FormEnfunde() {
     }, [changeURL, searchEmpleado, hacienda, labor]);
 
     useEffect(() => {
-        if (searchDetallesDistribucion) {
+        if (searchDetallesDistribucion && !changeSemanaBuutton) {
             (async () => {
+                let url = '';
+                if (history.location.state) {
+                    const {empleado} = history.location.state;
+                    url = `${API_LINK}/bansis-app/index.php/get-data/lote-seccion-labor?labor=3&empleado=${empleado.id}&activo=true&calendario=${cabeceraEnfunde.codigoSemana}`;
+                }
                 const progessbarStatus = (state) => dispatch(progressActions(state));
                 await progessbarStatus(true);
-                const url = apiSearchDetalles;
                 const config = {
                     method: 'GET',
                     headers: {'Authorization': authentication}
@@ -193,7 +199,7 @@ export default function FormEnfunde() {
         }
     }, [dispatch, searchDetallesDistribucion,
         authentication, apiSearchDetalles, disabledBtn,
-        cabeceraEnfunde, empleado, hacienda]);
+        cabeceraEnfunde, empleado, hacienda, history, loadCalendar, changeSemanaBuutton]);
 
     const changeHacienda = (e, value) => {
         setHacienda(value);
@@ -249,7 +255,7 @@ export default function FormEnfunde() {
                 ...disabledElements,
                 labor: false
             });
-            setApiSearchDetalles(`${API_LINK}/bansis-app/index.php/get-data/lote-seccion-labor?labor=${labor.id}&empleado=${value.id}&activo=true&calendario=${cabeceraEnfunde.codigoSemana}`);
+            setApiSearchDetalles(`${API_LINK}/bansis-app/index.php/get-data/lote-seccion-labor?labor=3&empleado=${value.id}&activo=true&calendario=${cabeceraEnfunde.codigoSemana}`);
             setSearchDetallesDistribucion(true);
         } else {
             clearDistribuciones();
@@ -275,6 +281,7 @@ export default function FormEnfunde() {
             ...cabeceraEnfunde,
             fecha: moment(cabeceraEnfunde.fecha, "DD-MM-YYYY").subtract(7, 'days').format('DD/MM/YYYY')
         });
+        setChangeSemanaButton(true);
         setLoadCalendar(true);
         setChangeSemana({...changeSemana, status: true});
     };
@@ -284,6 +291,7 @@ export default function FormEnfunde() {
             ...cabeceraEnfunde,
             fecha: moment(cabeceraEnfunde.fecha, "DD-MM-YYYY").add(7, 'days').format('DD/MM/YYYY')
         });
+        setChangeSemanaButton(true);
         setLoadCalendar(true);
         setChangeSemana({...changeSemana, status: true});
     };
@@ -391,6 +399,14 @@ export default function FormEnfunde() {
         })
     };
 
+    if (!history.location.state) {
+        return <Page404
+            code1={5}
+            code2={0}
+            mensaje="Lo sentimos, pero debe volver al listado de los loteros."
+        />
+    }
+
     return (
         <FormularioBase
             icon='fas fa-street-view'
@@ -417,7 +433,7 @@ export default function FormEnfunde() {
             <div className="row">
                 <div className="col-md-6 mb-3">
                     <div className="row">
-                        <div className="col-md-12">
+                        <div className="col-md-12 d-none">
                             <div className="form-group">
                                 <Buscador
                                     api={api_buscador}
@@ -431,7 +447,7 @@ export default function FormEnfunde() {
                                 />
                             </div>
                         </div>
-                        <div className="col-md-12">
+                        <div className="col-md-12 d-none">
                             <div className="form-group">
                                 <Buscador
                                     api={apiLabor}

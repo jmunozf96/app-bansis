@@ -13,14 +13,12 @@ export default function CabeceraSemana(props) {
                     const {code, calendario} = response;
 
                     if (code === 200) {
-
                         if (changeSemana.status) {
                             setChangeSemana({
-                                ...changeSemana,
-                                codigo: calendario.presente.codigo
+                                status: false,
+                                codigoSemana: calendario.presente.codigo
                             });
                         }
-
                         setData({
                             ...data,
                             codigoSemana: calendario.presente.codigo,
@@ -30,7 +28,6 @@ export default function CabeceraSemana(props) {
                             colorf: calendario.futuro.color,
                         });
                     }
-
                 } catch (e) {
                     console.log(e);
                 }
