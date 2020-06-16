@@ -5,11 +5,13 @@ import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import PaginationForm from "../../../../components/Pagination/Pagination";
 import {useHistory} from "react-router-dom";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {Col, Row} from "react-bootstrap";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
+import AlertDialog from "../../../../components/AlertDialog/AlertDialog";
+import {progressActions} from "../../../../actions/progressActions";
 //import EnfundePeriodo from "./EnfundePeriodo";
 
 const style = {
@@ -25,7 +27,14 @@ export default function EnfundeSemanal() {
     const [enfundes, setEnfundes] = useState(null);
     const [page, setPage] = useState(1);
     const history = useHistory();
+    const dispatch = useDispatch();
+    const progessbarStatus = (state) => dispatch(progressActions(state));
     const authentication = useSelector((state) => state.auth._token);
+
+    //Variable para abrir y cerrar el modal para eliminar el registro
+    const [openModal, setOpenModal] = useState(false);
+    //Variable para enviar datos al modal
+    const [dataModal, setDataModal] = useState(null);
 
     const [reload, setReload] = useState(true);
 
@@ -44,6 +53,16 @@ export default function EnfundeSemanal() {
     const onChangePage = (page) => {
         setPage(page);
         setReload(true);
+    };
+
+    const onCerrarEnfunde = (data) => {
+        progessbarStatus(true);
+        setOpenModal(true);
+        setDataModal({
+            title: `${data.hacienda.detalle}`,
+            content: `¿Esta seguro de cerrar el enfunde de la Semana ${data.semana}?.`,
+            id: data.id
+        })
     };
 
     const cerrarEnfunde = (id) => {
@@ -74,6 +93,16 @@ export default function EnfundeSemanal() {
         <>
             {!reload &&
             <div className="container-fluid mt-3 mb-5">
+                {dataModal &&
+                <AlertDialog
+                    title={dataModal.title}
+                    content={dataModal.content}
+                    open={openModal}
+                    setOpen={setOpenModal}
+                    actionDestroy={cerrarEnfunde}
+                    id={dataModal.id}
+                />
+                }
                 <Row>
                     <Col className="mt-3 mb-3">
                         <Breadcrumbs aria-label="breadcrumb">
@@ -154,7 +183,7 @@ export default function EnfundeSemanal() {
                                                 </button>
                                                 :
                                                 <button className="btn btn-success"
-                                                        onClick={() => cerrarEnfunde(item.id)}>
+                                                        onClick={() => onCerrarEnfunde(item)}>
                                                     <i className="fas fa-lock-open"/>
                                                 </button>
                                             }

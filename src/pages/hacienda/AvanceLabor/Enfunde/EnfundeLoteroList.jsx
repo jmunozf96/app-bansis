@@ -13,6 +13,7 @@ import PaginationForm from "../../../../components/Pagination/Pagination";
 import {useDispatch} from "react-redux";
 import {progressActions} from "../../../../actions/progressActions";
 import Buscador from "../../../../components/Buscador";
+import {useSelector} from "react-redux";
 
 const style = {
     table: {
@@ -41,13 +42,14 @@ export default function EnfundeLoteroList() {
         colorf: ''
     });
 
-    const [loadLoteros, setLoadLoteros] = useState(false);
+    const credential = useSelector((state) => state.credential.credential);
+    const [loadLoteros, setLoadLoteros] = useState(!!credential.idhacienda);
     const [loterosSemanal, setLoterosSemanal] = useState(null);
     const [loterosSemanaPendiente, setLoterosSemanaPendiente] = useState([]);
 
     const [changeURL, setChangeURL] = useState(false);
     const api_buscador = `${API_LINK}/bansis-app/index.php/haciendas-select`;
-    const [hacienda, setHacienda] = useState(null);
+    const [hacienda, setHacienda] = useState(credential.idhacienda ? credential.idhacienda : null);
     const [searchEmpleado, setSearchEmpleado] = useState('');
     const [apiEmpleado, setApiEmpleado] = useState(`${API_LINK}/bansis-app/index.php/search/empleados`);
     const [empleado, setEmpleado] = useState(null);
@@ -215,12 +217,12 @@ export default function EnfundeLoteroList() {
                 <div className="row mt-3 mb-3">
                     <div className="col-md-2">
                         <button className="btn btn-danger btn-block" onClick={() => irSemanaAnterior()}>
-                            <i className="fas fa-arrow-alt-circle-left"/> -1 Semana
+                            <i className="fas fa-arrow-alt-circle-left"/> -1 Sem.
                         </button>
                     </div>
                     <div className="offset-8 col-md-2">
                         <button className="btn btn-primary btn-block" onClick={() => irSemanaSiguiente()}>
-                            +1 Semana <i className="fas fa-arrow-alt-circle-right"/>
+                            +1 Sem. <i className="fas fa-arrow-alt-circle-right"/>
                         </button>
                     </div>
                 </div>

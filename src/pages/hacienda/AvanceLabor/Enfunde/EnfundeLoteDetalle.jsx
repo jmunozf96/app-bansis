@@ -161,15 +161,22 @@ export function EnfundeLoteDetalle() {
                         <div className="row">
                             {secciones.length > 0 &&
                             secciones.map((data, index) => (
-                                <div className="col-md-2 col-6 text-center" key={index}>
-                                    <ApexChart
-                                        data={data.seccion}
-                                        type="radialBar"
-                                        height={200}
-                                    />
-                                    <button className="btn btn-primary mt-n4" onClick={() => openModalDetalle(data)}>
-                                        <i className="fas fa-list"/> Detalles {data.item.alias}
-                                    </button>
+                                <div className="col-md-2 col-6" key={index}>
+                                    <div className="row">
+                                        <div className="col-12">
+                                            <ApexChart
+                                                data={data.seccion}
+                                                type="radialBar"
+                                                height={200}
+                                            />
+                                        </div>
+                                        <div className="col-12 text-center">
+                                            <button className="btn btn-primary mt-n4"
+                                                    onClick={() => openModalDetalle(data)}>
+                                                <i className="fas fa-list"/> Detalles {data.item.alias}
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             ))
                             }
@@ -223,97 +230,107 @@ function ModalDetalleEnfundeSeccionSemana(props) {
                 save={() => null}
                 cancel={cancelar}
             >
-                <div className="row">
-                    <div className="col-md-4">
-                        <div className="row">
-                            <div className="col-6">
-                                <label>Presente</label>
-                                <div className="input-group">
-                                    <input type="text" className="form-control bg-white" disabled={true}
-                                           defaultValue={data.seccion.item.cant_pre}/>
+                <>
+                    {enfunde ?
+                        <>
+                            <div className="row">
+                                <div className="col-md-4">
+                                    <div className="row">
+                                        <div className="col-6">
+                                            <label>Presente</label>
+                                            <div className="input-group">
+                                                <input type="text" className="form-control bg-white" disabled={true}
+                                                       defaultValue={data.seccion.item.cant_pre}/>
+                                            </div>
+                                        </div>
+                                        <div className="col-6">
+                                            <label>Futuro</label>
+                                            <div className="input-group">
+                                                <input type="text" className="form-control bg-white" disabled={true}
+                                                       defaultValue={data.seccion.item.cant_fut}/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-md-8">
+                                    <div className="row">
+                                        <div className="col-3">
+                                            <label>Variedad</label>
+                                            <div className="input-group">
+                                                <input type="text" className="form-control bg-white" disabled={true}
+                                                       defaultValue={`${enfunde.seccion.seccion_lote.variedad}`}/>
+                                            </div>
+                                        </div>
+                                        <div className="col-3">
+                                            <label>Edad</label>
+                                            <div className="input-group">
+                                                <input type="text" className="form-control bg-white" disabled={true}
+                                                       defaultValue={`${enfunde.seccion.seccion_lote.fecha_siembra}`}/>
+                                            </div>
+                                        </div>
+                                        <div className="col-3">
+                                            <label>Suelo</label>
+                                            <div className="input-group">
+                                                <input type="text" className="form-control bg-white" disabled={true}
+                                                       defaultValue={`${enfunde.seccion.seccion_lote.tipo_suelo}`}/>
+                                            </div>
+                                        </div>
+                                        <div className="col-3">
+                                            <label>Has</label>
+                                            <div className="input-group">
+                                                <input type="text" className="form-control bg-white" disabled={true}
+                                                       defaultValue={`${(+enfunde.seccion.seccion_lote.has).toFixed(2)}`}/>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="col-6">
-                                <label>Futuro</label>
-                                <div className="input-group">
-                                    <input type="text" className="form-control bg-white" disabled={true}
-                                           defaultValue={data.seccion.item.cant_fut}/>
+                            <hr/>
+                            <div className="row p-0">
+                                <div className="col-md-12 table-responsive">
+                                    <table className="table table-bordered table-hover">
+                                        <thead className="text-center">
+                                        <tr>
+                                            <th>Empleado</th>
+                                            <th width="13%">Has</th>
+                                            <th width="13%">Presente</th>
+                                            <th width="13%">Futuro</th>
+                                            <th width="13%">Total</th>
+                                            <th width="13%">...</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {enfunde && enfunde.detalleSemana.length > 0 &&
+                                        enfunde.detalleSemana.map((item, i) => (
+                                            <tr key={i} className="table-sm text-center">
+                                                <td style={style.table.textCenter}>{item.seccion['cab_seccion_labor'].empleado.nombres}</td>
+                                                <td style={style.table.textCenter}>{(+item.seccion.has).toFixed(2)}</td>
+                                                <td style={style.table.textCenter}>{+item.cant_pre}</td>
+                                                <td style={style.table.textCenter}>{+item.cant_fut}</td>
+                                                <td style={style.table.textCenter}>{+item.cant_pre + +item.cant_fut}</td>
+                                                <td>
+                                                    <button className="btn btn-info">
+                                                        Enfunde
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                        }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </>
+                        :
+                        <div className="row">
+                            <div className="col-12 text-center">
+                                <div className="spinner-border" role="status">
+                                    <span className="sr-only">Loading...</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="col-md-8">
-                        <div className="row">
-                            {enfunde &&
-                            <>
-                                <div className="col-3">
-                                    <label>Variedad</label>
-                                    <div className="input-group">
-                                        <input type="text" className="form-control bg-white" disabled={true}
-                                               defaultValue={`${enfunde.seccion.seccion_lote.variedad}`}/>
-                                    </div>
-                                </div>
-                                <div className="col-3">
-                                    <label>Edad</label>
-                                    <div className="input-group">
-                                        <input type="text" className="form-control bg-white" disabled={true}
-                                               defaultValue={`${enfunde.seccion.seccion_lote.fecha_siembra}`}/>
-                                    </div>
-                                </div>
-                                <div className="col-3">
-                                    <label>Suelo</label>
-                                    <div className="input-group">
-                                        <input type="text" className="form-control bg-white" disabled={true}
-                                               defaultValue={`${enfunde.seccion.seccion_lote.tipo_suelo}`}/>
-                                    </div>
-                                </div>
-                                <div className="col-3">
-                                    <label>Has</label>
-                                    <div className="input-group">
-                                        <input type="text" className="form-control bg-white" disabled={true}
-                                               defaultValue={`${(+enfunde.seccion.seccion_lote.has).toFixed(2)}`}/>
-                                    </div>
-                                </div>
-                            </>
-                            }
-                        </div>
-                    </div>
-                </div>
-                <hr/>
-                <div className="row p-0">
-                    <div className="col-md-12 table-responsive">
-                        <table className="table table-bordered table-hover">
-                            <thead className="text-center">
-                            <tr>
-                                <th>Empleado</th>
-                                <th width="13%">Has</th>
-                                <th width="13%">Presente</th>
-                                <th width="13%">Futuro</th>
-                                <th width="13%">Total</th>
-                                <th width="13%">...</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {enfunde && enfunde.detalleSemana.length > 0 &&
-                            enfunde.detalleSemana.map((item, i) => (
-                                <tr key={i} className="table-sm text-center">
-                                    <td style={style.table.textCenter}>{item.seccion['cab_seccion_labor'].empleado.nombres}</td>
-                                    <td style={style.table.textCenter}>{(+item.seccion.has).toFixed(2)}</td>
-                                    <td style={style.table.textCenter}>{+item.cant_pre}</td>
-                                    <td style={style.table.textCenter}>{+item.cant_fut}</td>
-                                    <td style={style.table.textCenter}>{+item.cant_pre + +item.cant_fut}</td>
-                                    <td>
-                                        <button className="btn btn-info">
-                                            Enfunde
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                            }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                    }
+                </>
             </ModalForm>
             }
         </>

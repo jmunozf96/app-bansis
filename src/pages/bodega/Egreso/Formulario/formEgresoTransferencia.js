@@ -25,7 +25,7 @@ export default function EgresoTransferencia(props) {
     }
 
     const {result} = response;
-
+    console.log(result)
     if (empleados.length === 0 && loadData) {
         if (result.length === 0) {
             setOpen(false);

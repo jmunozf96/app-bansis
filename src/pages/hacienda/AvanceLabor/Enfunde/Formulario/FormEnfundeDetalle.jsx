@@ -55,6 +55,21 @@ export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distri
     const [reloadComponent, setReloadComponent] = useState(false);
     const [loadAlertEmptyMateriales, setLoadAlertEmptyMateriales] = useState(false);
 
+    const [presente, setPresente] = useState(distribucion.total_presente > 0);
+
+    useEffect(() => {
+        if (presente) {
+            setIndex(1);
+            setSemana({
+                presente: {status: false, index: 0},
+                futuro: {status: true, index: 1}
+            });
+            setChangeStatus(true);
+            setReloadComponent(true);
+            setPresente(false);
+        }
+    }, [presente]);
+
     useEffect(() => {
         if (reloadComponent) {
             setReloadComponent(false);
@@ -604,6 +619,7 @@ function SemanaPresente(props) {
                         type="number"
                         min={0}
                         defaultValue={cantidad}
+                        autoFocus={true}
                         onKeyDown={(e) => e.keyCode === 13 && addCantidad()}
                         onFocus={(e) => e.target.select()}
                         onChange={(e) => changeValue(e)}
@@ -686,6 +702,7 @@ function SemanaFuturo(props) {
                         type="number"
                         min={0}
                         defaultValue={cantidad}
+                        autoFocus={true}
                         onKeyDown={(e) => e.keyCode === 13 && addCantidad()}
                         onFocus={(e) => e.target.select()}
                         onChange={(e) => changeValue(e)}
@@ -966,8 +983,20 @@ function MaterialesInventario(props) {
         materiales, setMaterialSelect, setSaldo, setValue,
         setLoadDataDetalle, reloadProressbar, cantidadUsada, cantidadEditada, reelevo
     } = props;
+    const [index, setIndex] = useState(0);
 
-    const onSetValue = (e, value) => {
+    useEffect(() => {
+        if (index === 0 && materiales.length > 0) {
+            setMaterialSelect(materiales[index]);
+            setLoadDataDetalle(true);
+            setSaldo((parseInt(materiales[index]['sld_final']) - +cantidadUsada(materiales[index].material, reelevo)) - cantidadEditada(materiales[index].material, reelevo));
+            setValue((parseInt(materiales[index]['sld_final']) - +cantidadUsada(materiales[index].material, reelevo)) - cantidadEditada(materiales[index].material, reelevo));
+            reloadProressbar(true);
+            setIndex(1);
+        }
+    }, [index, materiales, cantidadUsada, cantidadEditada, reelevo, reloadProressbar, setValue, setSaldo, setLoadDataDetalle, setMaterialSelect]);
+
+    const onSetValue = (value) => {
         setMaterialSelect(value);
         setLoadDataDetalle(true);
         setSaldo((parseInt(value['sld_final']) - +cantidadUsada(value.material, reelevo)) - cantidadEditada(value.material, reelevo));
@@ -977,14 +1006,15 @@ function MaterialesInventario(props) {
 
     return (
         <div className="row">
-            {materiales.map((item) => (
+            {materiales.map((item, i) => (
                 <div className="input-group col-md-12 mb-3" key={item.id}>
                     <div className="input-group-prepend">
                         <div className="input-group-text">
                             <input
                                 type="radio"
                                 name="materiales"
-                                onChange={(e) => onSetValue(e, item)}
+                                defaultChecked={i === 0}
+                                onChange={() => onSetValue(item)}
                             />
                         </div>
                     </div>

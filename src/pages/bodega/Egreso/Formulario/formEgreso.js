@@ -24,6 +24,7 @@ export default function FormEgreso() {
         id
     });
 
+    const credential = useSelector((state) => state.credential.credential);
     const [searchEmpleado, setSearchEmpleado] = useState('');
     const [searchMaterial, setSearchMaterial] = useState('');
     const [changeURL, setChangeURL] = useState(false);
@@ -31,7 +32,7 @@ export default function FormEgreso() {
     const [searchTransaccionSemana, setSearchTransaccionSemana] = useState(false);
     const [cabeceraEgreso, setCabeceraEgreso] = useState({
         fecha: moment().format("DD/MM/YYYY"),
-        hacienda: "",
+        hacienda: credential.idhacienda ? credential.idhacienda.id : "",
         labor: "",
         bodega: "",
         grupo: "",
@@ -40,10 +41,10 @@ export default function FormEgreso() {
 
     const [disabledElements, setDisabledElements] = useState({
         change: true,
-        hacienda: false,
+        hacienda: true,
         labor: true,
-        empleado: true,
-        bodega: true,
+        empleado: false,
+        bodega: false,
         grupo: true,
         material: true,
         cantidad: true,
@@ -124,7 +125,6 @@ export default function FormEgreso() {
         const data = qs.stringify({
             json: JSON.stringify(transaction)
         });
-
         progressbarStatus(true);
         (async () => {
             const url = `${API_LINK}/bansis-app/index.php/egreso-bodega`;

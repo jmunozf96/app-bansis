@@ -9,7 +9,7 @@ import moment from "moment";
 import 'moment/locale/es';
 import {v4 as uuidv4} from 'uuid';
 import {progressActions} from "../../../../actions/progressActions";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 
 export default function EgresoCabecera(props) {
     const {
@@ -46,6 +46,7 @@ export default function EgresoCabecera(props) {
 
     const dispatch = useDispatch();
     //const progressbarStatus = (state) => dispatch(progressActions(state));
+    const credential = useSelector((state) => state.credential.credential);
 
     useEffect(() => {
         if (changeURL) {
@@ -58,7 +59,7 @@ export default function EgresoCabecera(props) {
     useEffect(() => {
         if (searchTransaccionSemana) {
             const progressbarStatus = (state) => dispatch(progressActions(state));
-            progressbarStatus(true);
+            progressbarStatus(false);
             const detalles = [];
             (async () => {
                 const url = `${API_LINK}/bansis-app/index.php/search-egreso?empleado=${cabeceraEgreso.empleado.id}&fecha=${cabeceraEgreso.fecha}`;
@@ -312,7 +313,7 @@ export default function EgresoCabecera(props) {
                                         </FormHelperText>
                                         <CustomSelect
                                             name="hacienda"
-                                            defaultValue={cabeceraEgreso.hacienda}
+                                            defaultValue={credential.idhacienda.id}
                                             placeholder="SELECCIONE UNA HACIENDA..."
                                             api_url={api_haciendas}
                                             disabled={disabledElements.hacienda}
