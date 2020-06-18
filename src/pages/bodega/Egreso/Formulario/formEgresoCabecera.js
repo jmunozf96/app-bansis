@@ -137,8 +137,8 @@ export default function EgresoCabecera(props) {
         }
 
         setChangeURL(true);
-        setItem(null);
-        document.getElementById('id-cantidad').value = 0;
+        //setItem(null);
+        //document.getElementById('id-cantidad').value = 0;
     };
 
     const onChangeCantidadItem = (e) => {
@@ -171,13 +171,18 @@ export default function EgresoCabecera(props) {
         if (value) {
             setDisabledElements({...disabledElements, change: true, bodega: false, transfer: false});
             setSearchTransaccionSemana(true);
+
+            if (item) {
+                document.getElementById('id-cantidad').value = 0;
+                focuselement('id-cantidad');
+            }
+
         } else {
-            setSearchEmpleado('');
-            setSearchMaterial('');
-            setChangeURL(true);
             setDisabledElements({...disabledElements, change: true, transfer: true});
             setDetalleEgreso([]);
         }
+        setSearchEmpleado('');
+        setChangeURL(true);
     };
 
     const existsMaterial = (material) => {
@@ -228,9 +233,9 @@ export default function EgresoCabecera(props) {
             setItem(null);
             setStock(0);
             document.getElementById('id-cantidad').value = 0;
-            setSearchMaterial('');
-            setChangeURL(true);
         }
+        setSearchMaterial('');
+        setChangeURL(true);
     };
 
     const onSubmitInputItemAdd = (e) => {

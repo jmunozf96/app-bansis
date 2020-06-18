@@ -52,6 +52,7 @@ export default function FormMaterial() {
     const [arrayArticulosNew, setArrayArticulosNew] = useState([]);
     const [errorsStoreArticles, setErrorsStoreArticles] = useState([]);
 
+
     const [notificacion, setNotificacion] = useState({
         open: false,
         message: ''
@@ -136,8 +137,8 @@ export default function FormMaterial() {
             setArticulo(value);
         } else {
             setArticulo(null);
-            setSearch('');
         }
+        setSearch('');
         setChangeSelect(true);
     };
 
@@ -335,6 +336,7 @@ export default function FormMaterial() {
                                         setSearch={setSearch}
                                         onChangeValue={onChangeValueArticulo}
                                         disabled={false}
+                                        setChangeURL={setChangeSelect}
                                         value={articulo}
                                     />
                                     <small>Buscar un articulo del inventario de XASS para agregar a las bodegas.</small>

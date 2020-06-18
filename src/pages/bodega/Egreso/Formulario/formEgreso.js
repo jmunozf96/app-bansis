@@ -73,7 +73,6 @@ export default function FormEgreso() {
     //Estados de transferencia de saldo
     const [openFullScreen, setOpenFullScreen] = useState(false);
 
-
     useEffect(() => {
         if (loadTransacionEdit.load) {
             (async () => {
@@ -145,11 +144,11 @@ export default function FormEgreso() {
                         btnnuevo: false,
                         btnsave: true,
                         material: false,
-                        cantidad: true
+                        cantidad: false
                     });
                 }
-                setMaterial(null);
-                setStock(0);
+                /*setMaterial(null);
+                setStock(0);*/
             }
             setSearchTransaccionSemana(true);
         })();
