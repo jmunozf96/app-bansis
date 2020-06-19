@@ -30,6 +30,7 @@ import EnfundeLoteroList from "./pages/hacienda/AvanceLabor/Enfunde/EnfundeLoter
 import Page404 from "./components/Error/404 Page";
 import FormUsuario from "./pages/seguridad/Usuario/FormUsuario";
 import FormRecursosUsuario from "./pages/seguridad/Recursos/FormRecursosUsuario";
+import ReporteEnfunde from "./pages/hacienda/Informes/RepEnfunde";
 
 export const routes = [
     {
@@ -61,7 +62,7 @@ export const routes = [
         component: FormHacienda,
     },
     {
-        path: "/hacienda/mapa",
+        path: "/hacienda/mapa/:idmodulo",
         component: Maps
     },
     {
@@ -99,6 +100,10 @@ export const routes = [
     {
         path: "/hacienda/avances/labor/enfunde/:idmodulo/empleado/formulario",
         component: FormEnfunde
+    },
+    {
+        path: "/hacienda/reporte/labor/enfunde/:idmodulo",
+        component: ReporteEnfunde
     },
     {
         path: "/bodega/:idmodulo",
