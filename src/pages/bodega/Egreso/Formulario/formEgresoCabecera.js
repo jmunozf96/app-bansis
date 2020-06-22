@@ -39,7 +39,7 @@ export default function EgresoCabecera(props) {
     const api_bodegas = `${API_LINK}/bansis-app/index.php/bodegas-select`;
     const api_bodegas_grupos = `${API_LINK}/bansis-app/index.php/bodegas-grupos-select`;
 
-    const [api_empleados, setApiEmpleados] = useState(`${API_LINK}/bansis-app/index.php/search/empleados`);
+    const [api_empleados, setApiEmpleados] = useState(`${API_LINK}/bansis-app/index.php/search/empleados${cabeceraEgreso.hacienda !== "" ? "?hacienda=" + cabeceraEgreso.hacienda : ''}`);
     const [api_materiales, setApiMateriales] = useState(`${API_LINK}/bansis-app/index.php/search/materiales`);
 
     const [cantidad, setCantidad] = useState(0);
@@ -62,7 +62,8 @@ export default function EgresoCabecera(props) {
             progressbarStatus(false);
             const detalles = [];
             (async () => {
-                const url = `${API_LINK}/bansis-app/index.php/search-egreso?empleado=${cabeceraEgreso.empleado.id}&fecha=${cabeceraEgreso.fecha}`;
+                let url = `${API_LINK}/bansis-app/index.php/search-egreso?empleado=${cabeceraEgreso.empleado.id}&fecha=${cabeceraEgreso.fecha}`;
+
                 const request = await fetch(url).then(
                     (response) => response.json(),
                     (error) => error.response
@@ -318,7 +319,7 @@ export default function EgresoCabecera(props) {
                                         </FormHelperText>
                                         <CustomSelect
                                             name="hacienda"
-                                            defaultValue={credential.idhacienda.id}
+                                            defaultValue={cabeceraEgreso.hacienda}
                                             placeholder="SELECCIONE UNA HACIENDA..."
                                             api_url={api_haciendas}
                                             disabled={disabledElements.hacienda}

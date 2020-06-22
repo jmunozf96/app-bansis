@@ -9,7 +9,7 @@ import AddCircleIcon from "@material-ui/icons/AddCircle";
 import {API_LINK} from "../../../utils/constants";
 import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {progressActions} from "../../../actions/progressActions";
 import TableForm from "../../../components/Table";
 import moment from "moment";
@@ -24,11 +24,17 @@ import InputSearch from "../../../components/InputSearch/InputSearch";
 import {FormHelperText} from "@material-ui/core";
 
 export default function Egreso() {
+    const history = useHistory();
+    const dispatch = useDispatch();
+    const progessbarStatus = (state) => dispatch(progressActions(state));
+    const credential = useSelector((state) => state.credential.credential);
+    //const authentication = useSelector((state) => state.auth._token);
+
     const [openDrawer, setOpenDrawer] = useState(false);
     const [egresos, setEgresos] = useState({});
     const [page, setPage] = useState(1);
     const [reload, setReload] = useState(true);
-    const [filter, setFilter] = useState("");
+    const [filter, setFilter] = useState((credential && credential.idhacienda) ? `&hacienda=${credential.idhacienda.id}` : "");
     const [notificacion, setNotificacion] = useState({
         open: false,
         message: '',
@@ -36,34 +42,26 @@ export default function Egreso() {
 
     const [searchEmpleado, setSearchEmpleado] = useState('');
     const [changeURL, setChangeURL] = useState(false);
-    const api_origen_empleados = `${API_LINK}/bansis-app/index.php/search/empleados`;
+    const api_origen_empleados = `${API_LINK}/bansis-app/index.php/search/empleados${(credential && credential.idhacienda) ? "?hacienda=" + credential.idhacienda.id : ''}`;
     const [api_empleados, setApiEmpleados] = useState(`${api_origen_empleados}`);
     const [empleado, setEmpleado] = useState(null);
     const api_haciendas = `${API_LINK}/bansis-app/index.php/haciendas-select`;
-    const [hacienda, setHacienda] = useState(null);
+    const [hacienda, setHacienda] = useState((credential && credential.idhacienda) ? credential.idhacienda : null);
     const api_labores = `${API_LINK}/bansis-app/index.php/labores-select`;
     const [labor, setLabor] = useState(null);
-
-    const history = useHistory();
-    const dispatch = useDispatch();
-    const progessbarStatus = (state) => dispatch(progressActions(state));
-    //const authentication = useSelector((state) => state.auth._token);
 
     useEffect(() => {
         if (changeURL) {
             setApiEmpleados(`${API_LINK}/bansis-app/index.php/search/empleados?params=${searchEmpleado}`);
-
             if (hacienda) {
                 setApiEmpleados(`${API_LINK}/bansis-app/index.php/search/empleados?params=${searchEmpleado}&hacienda=${hacienda.id}`);
             }
             if (labor) {
                 setApiEmpleados(`${API_LINK}/bansis-app/index.php/search/empleados?params=${searchEmpleado}&labor=${labor.id}`);
             }
-
             if (hacienda && labor) {
                 setApiEmpleados(`${API_LINK}/bansis-app/index.php/search/empleados?params=${searchEmpleado}&hacienda=${hacienda.id}&labor=${labor.id}`);
             }
-
             setChangeURL(false);
         }
     }, [changeURL, setApiEmpleados, searchEmpleado, hacienda, labor]);
@@ -72,10 +70,12 @@ export default function Egreso() {
         if (reload) {
             (async () => {
                 const progessbarStatus = (state) => dispatch(progressActions(state));
-                const api_egresos = `${API_LINK}/bansis-app/index.php/egreso-bodega?page=${page}${filter}`;
+                let api_egresos = `${API_LINK}/bansis-app/index.php/egreso-bodega?page=${page}${filter}`;
+
                 const response = await fetch(api_egresos).then(
                     (response) => response.json()
                 );
+
                 if (response.code === 200) {
                     setEgresos(response);
                 } else {
@@ -89,7 +89,7 @@ export default function Egreso() {
             })();
             setReload(false);
         }
-    }, [reload, page, dispatch, egresos, filter]);
+    }, [reload, page, dispatch, egresos, filter, credential, hacienda]);
 
     if (Object.entries(egresos).length === 0) {
         return (
@@ -184,7 +184,7 @@ export default function Egreso() {
                 </Col>
             </Row>
             <Row className="mb-0 pb-0">
-                <Col className="col-12 col-md-3 mb-3 p-0">
+                <Col className="col-12 col-md-4 mb-3 p-0">
                     <ButtonGroup className="col-12">
                         <Button className="" variant="danger" onClick={() => unFilter()}>
                             <i className="fas fa-sync fa-1x"/>
@@ -222,6 +222,7 @@ export default function Egreso() {
                                         api_url={api_haciendas}
                                         onChangeValue={onChangeValueHaciendaSearch}
                                         value={hacienda}
+                                        disabled={!!credential && credential.idhacienda}
                                     />
                                 </FormGroup>
                             </Col>

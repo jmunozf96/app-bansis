@@ -421,10 +421,10 @@ export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distri
                                     />}
                                 </div>
                                 <button
-                                    className={`btn btn-success btn-block`}
+                                    className={`btn btn-success btn-block btn-lg`}
                                     onClick={() => saveEnfunde()}
                                 >
-                                    <i className="fas fa-save"/> Guardar Enfunde
+                                    <i className="fas fa-plus-circle"/> Agregar
                                 </button>
                             </>
                             }
@@ -432,7 +432,7 @@ export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distri
                                 className={`btn btn-${!searchReelevo ? 'primary' : 'danger'} btn-block mb-2`}
                                 onClick={() => onChangeReelevo()}
                             >
-                                <i className="fas fa-search"/> {!searchReelevo ? 'Buscar Reelevo' : 'Cancelar Busqueda'}
+                                <i className="fas fa-search"/> {!searchReelevo ? 'Buscar Reelevo' : 'Regresar'}
                             </button>
                             {empleadoReelevo && !searchReelevo &&
                             <button

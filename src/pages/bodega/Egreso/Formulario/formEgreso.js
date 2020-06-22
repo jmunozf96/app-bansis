@@ -41,7 +41,7 @@ export default function FormEgreso() {
 
     const [disabledElements, setDisabledElements] = useState({
         change: true,
-        hacienda: true,
+        hacienda: !!credential && credential.idhacienda,
         labor: true,
         empleado: false,
         bodega: false,

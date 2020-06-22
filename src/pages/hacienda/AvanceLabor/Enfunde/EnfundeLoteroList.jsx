@@ -51,7 +51,7 @@ export default function EnfundeLoteroList() {
     const api_buscador = `${API_LINK}/bansis-app/index.php/haciendas-select`;
     const [hacienda, setHacienda] = useState(credential.idhacienda ? credential.idhacienda : null);
     const [searchEmpleado, setSearchEmpleado] = useState('');
-    const [apiEmpleado, setApiEmpleado] = useState(`${API_LINK}/bansis-app/index.php/search/empleados`);
+    const [apiEmpleado, setApiEmpleado] = useState(`${API_LINK}/bansis-app/index.php/search/empleados${(credential && credential.idhacienda) ? "?hacienda=" + credential.idhacienda.id : ''}`);
     const [empleado, setEmpleado] = useState(null);
 
     const history = useHistory();
@@ -83,11 +83,12 @@ export default function EnfundeLoteroList() {
                 let url = `${API_LINK}/bansis-app/index.php/getLotero?calendario=${cabeceraSemana.codigoSemana}&hacienda=${hacienda.id}&page=${page}`;
 
                 if (empleado) {
-                    url = `${API_LINK}/bansis-app/index.php/getLotero?calendario=${cabeceraSemana.codigoSemana}&hacienda=${hacienda.id}&empleado=${empleado.id}&page=${page}`;
+                    url = `${API_LINK}/bansis-app/index.php/getLotero?calendario=${cabeceraSemana.codigoSemana}&hacienda=${hacienda.id}&empleado=${empleado.id}&page=1`;
                 }
 
                 const request = await fetch(url);
                 const response = await request.json();
+
                 const {code} = response;
                 await progessbarStatus(false);
 
@@ -182,12 +183,12 @@ export default function EnfundeLoteroList() {
             />
             <hr/>
             <div className="row mt-4">
-                <div className="col-md-4">
+                <div className={`${credential && !credential.idhacienda ? "col-md-4" : "d-none"}`}>
                     <div className="form-group">
                         <Buscador
                             api={api_buscador}
                             change={changeHacienda}
-                            disabled={false}
+                            disabled={credential && credential.idhacienda}
                             id="id-hacienda-search"
                             label="Hacienda"
                             setData={setHacienda}
@@ -196,7 +197,7 @@ export default function EnfundeLoteroList() {
                         />
                     </div>
                 </div>
-                <div className="col-md-8">
+                <div className={`col-md-${credential && !credential.idhacienda ? "8" : "12"}`}>
                     <InputSearch
                         id="asynchronous-empleado"
                         label="Listado de empleados"
@@ -268,20 +269,21 @@ export default function EnfundeLoteroList() {
                                             <i className="fas fa-times"/>}
                                     </td>
                                     <td>
-                                        <div className="btn-group"
-                                             onClick={() => history.push({
-                                                 pathname: `/hacienda/avances/labor/enfunde/${idmodulo}/empleado/formulario`,
-                                                 state: {
-                                                     hacienda: loterosSemanal.data[item].hacienda,
-                                                     empleado: {
-                                                         id: loterosSemanal.data[item].id,
-                                                         descripcion: loterosSemanal.data[item].nombres
-                                                     },
-                                                     calendario: cabeceraSemana
-                                                 }
-                                             })}
-                                        >
-                                            <button className="btn btn-primary">
+                                        <div className="btn-group">
+                                            <button
+                                                className="btn btn-success btn-lg"
+                                                onClick={() => history.push({
+                                                    pathname: `/hacienda/avances/labor/enfunde/${idmodulo}/empleado/formulario`,
+                                                    state: {
+                                                        hacienda: loterosSemanal.data[item].hacienda,
+                                                        empleado: {
+                                                            id: loterosSemanal.data[item].id,
+                                                            descripcion: loterosSemanal.data[item].nombres
+                                                        },
+                                                        calendario: cabeceraSemana
+                                                    }
+                                                })}
+                                            >
                                                 <i className="fas fa-external-link-alt"/>
                                             </button>
                                         </div>

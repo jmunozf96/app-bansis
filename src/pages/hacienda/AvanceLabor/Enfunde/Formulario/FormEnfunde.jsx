@@ -519,7 +519,7 @@ export default function FormEnfunde() {
                                     <td>
                                         <div className="btn-group">
                                             <button
-                                                className="btn btn-primary"
+                                                className="btn btn-success btn-lg"
                                                 onClick={() => openModal(item)}
                                             >
                                                 <i className="fas fa-external-link-square-alt"/>

@@ -30,6 +30,7 @@ export default function EnfundeSemanal() {
     const dispatch = useDispatch();
     const progessbarStatus = (state) => dispatch(progressActions(state));
     const authentication = useSelector((state) => state.auth._token);
+    const credential = useSelector((state) => state.credential.credential);
 
     //Variable para abrir y cerrar el modal para eliminar el registro
     const [openModal, setOpenModal] = useState(false);
@@ -41,14 +42,19 @@ export default function EnfundeSemanal() {
     useEffect(() => {
         if (reload) {
             (async () => {
-                const url = `${API_LINK}/bansis-app/index.php/getEnfunde/semanal?page=${page}`;
+                let url = `${API_LINK}/bansis-app/index.php/getEnfunde/semanal?page=${page}`;
+
+                if (credential && credential.idhacienda) {
+                    url = `${API_LINK}/bansis-app/index.php/getEnfunde/semanal?page=${page}&hacienda=${credential.idhacienda.id}`;
+                }
+
                 const request = await fetch(url);
                 const response = await request.json();
                 setEnfundes(response);
             })();
             setReload(false);
         }
-    }, [reload, page]);
+    }, [reload, page, credential]);
 
     const onChangePage = (page) => {
         setPage(page);
@@ -66,17 +72,18 @@ export default function EnfundeSemanal() {
     };
 
     const cerrarEnfunde = (id) => {
+        setOpenModal(false);
         if (id !== undefined) {
             (async () => {
                 const url = `${API_LINK}/bansis-app/index.php/endunde/cerrar/semana/${id}`;
                 const configuracion = {method: 'POST', headers: {'Authorization': authentication}};
                 const request = await fetch(url, configuracion);
                 const response = await request.json();
-                console.log(response);
+                await progessbarStatus(false);
+                setPage(1);
                 if (response.code === 200) {
                     setReload(true);
                 }
-                setPage(1);
             })();
         }
     };
@@ -177,18 +184,18 @@ export default function EnfundeSemanal() {
                                     <td width="8%" style={style.table.textCenter}>{item.desbunche}</td>
                                     <td>
                                         <div className="btn-group">
-                                            {item.cerrado !== "0" ?
-                                                <button className="btn btn-danger">
+                                            {item.cerrado === "3" ?
+                                                <button className="btn btn-danger btn-lg">
                                                     <i className="fas fa-lock"/>
                                                 </button>
                                                 :
-                                                <button className="btn btn-success"
+                                                <button className="btn btn-success btn-lg"
                                                         onClick={() => onCerrarEnfunde(item)}>
                                                     <i className="fas fa-lock-open"/>
                                                 </button>
                                             }
                                             <button
-                                                className="btn btn-primary"
+                                                className="btn btn-primary btn-lg"
                                                 onClick={() => history.push(`${history.location.pathname}/semana/detalle/${item.id}`)}
                                             >
                                                 <i className="fas fa-archive"/>
