@@ -9,7 +9,9 @@ const ModalForm = ({show, icon, title, children, ...config}) => {
             backdrop={config.backdrop}
             size={config.size}
             centered={config.centered}
-            scrollable={config.scrollable}>
+            scrollable={config.scrollable}
+            dialogClassName="modal-90w"
+        >
             <Modal.Header>
                 <Modal.Title><i className={icon}/> <small>{title}</small></Modal.Title>
             </Modal.Header>

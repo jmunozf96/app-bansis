@@ -9,7 +9,7 @@ import moment from "moment";
 import 'moment/locale/es';
 import {v4 as uuidv4} from 'uuid';
 import {progressActions} from "../../../../actions/progressActions";
-import {useDispatch, useSelector} from "react-redux";
+import {useDispatch} from "react-redux";
 
 export default function EgresoCabecera(props) {
     const {
@@ -46,7 +46,7 @@ export default function EgresoCabecera(props) {
 
     const dispatch = useDispatch();
     //const progressbarStatus = (state) => dispatch(progressActions(state));
-    const credential = useSelector((state) => state.credential.credential);
+    //const credential = useSelector((state) => state.credential.credential);
 
     useEffect(() => {
         if (changeURL) {

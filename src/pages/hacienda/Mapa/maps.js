@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {Map, Marker, Polygon, TileLayer} from "react-leaflet";
+import {Map, Polygon, TileLayer} from "react-leaflet";
 import EditControlWrapper from './EditorControlWrapper';
 
 export default function Maps() {

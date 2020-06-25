@@ -146,12 +146,13 @@ export default function EnfundeSemanal() {
                                 <th>...</th>
                                 <th>Año</th>
                                 <th>Color</th>
-                                <th>Semana</th>
-                                <th>Periodo</th>
+                                <th>Sem.</th>
+                                <th>Per.</th>
                                 <th>Hacienda</th>
-                                <th>Has.</th>
+                                <th>Pres.</th>
+                                <th>Fut.</th>
                                 <th>Total</th>
-                                <th>Desbunche</th>
+                                <th>Desb.</th>
                                 <th>Accion</th>
                             </tr>
                             </thead>
@@ -165,25 +166,24 @@ export default function EnfundeSemanal() {
                                     <td style={style.table.textCenter}>
                                         <b>{item.year}</b>
                                     </td>
-                                    <td width="8%" style={style.table.textCenter}>
+                                    <td width="7%" style={style.table.textCenter}>
                                         <div className="input-group">
                                             <input className="form-control" name={`${item.color}-CALENDARIO`}
                                                    type="text"
                                                    disabled={true}/>
                                         </div>
                                     </td>
-                                    <td style={style.table.textCenter}>{item.semana}</td>
-                                    <td style={style.table.textCenter}>{item.periodo}</td>
+                                    <td width="7%" style={style.table.textCenter}>{item.semana}</td>
+                                    <td width="7%" style={style.table.textCenter}>{item.periodo}</td>
                                     <td style={style.table.textCenter}>
-                                        <small>{item.hacienda.detalle}</small>
+                                        {item.hacienda.detalle}
                                     </td>
-                                    <td style={style.table.textCenter}>
-                                        <b>{(+item.has).toFixed(2)}</b>
-                                    </td>
-                                    <td style={style.table.textCenter}>{item.total}</td>
-                                    <td width="8%" style={style.table.textCenter}>{item.desbunche}</td>
+                                    <td style={style.table.textCenter}>{item.presente}</td>
+                                    <td style={style.table.textCenter}>{item.futuro}</td>
+                                    <td style={style.table.textCenter}><b>{item.total}</b></td>
+                                    <td width="6%" style={style.table.textCenter}>{item.desbunche}</td>
                                     <td>
-                                        <div className="btn-group">
+                                        <div className="btn-group d-none">
                                             {item.cerrado === "3" ?
                                                 <button className="btn btn-danger btn-lg">
                                                     <i className="fas fa-lock"/>

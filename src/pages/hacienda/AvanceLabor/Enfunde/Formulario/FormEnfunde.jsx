@@ -17,6 +17,15 @@ import qs from "qs";
 import CabeceraSemana from "../../../CabeceraSemana";
 import Page404 from "../../../../../components/Error/404 Page/Page404";
 
+const style = {
+    table: {
+        textCenter: {
+            textAlign: "center",
+            verticalAlign: "middle"
+        }
+    }
+};
+
 export default function FormEnfunde() {
     const {idmodulo} = useParams();
     const history = useHistory();
@@ -511,11 +520,11 @@ export default function FormEnfunde() {
                         <>
                             {detalleDistribucion.map((item) => (
                                 <tr key={item.id} className="text-center table-sm">
-                                    <td>{item.loteSeccion.alias}</td>
-                                    <td><small><b>{(item.has).toFixed(2)}</b></small></td>
-                                    <td>{item.hasOwnProperty('total_presente') ? item.total_presente : '0'}</td>
-                                    <td>{item.hasOwnProperty('total_futuro') ? item.total_futuro : '0'}</td>
-                                    <td>{item.hasOwnProperty('total_desbunchados') ? item.total_desbunchados : '0'}</td>
+                                    <td style={style.table.textCenter}>{item.loteSeccion.alias}</td>
+                                    <td style={style.table.textCenter}><small><b>{(item.has).toFixed(2)}</b></small></td>
+                                    <td style={style.table.textCenter}>{item.hasOwnProperty('total_presente') ? item.total_presente : '0'}</td>
+                                    <td style={style.table.textCenter}>{item.hasOwnProperty('total_futuro') ? item.total_futuro : '0'}</td>
+                                    <td style={style.table.textCenter}>{item.hasOwnProperty('total_desbunchados') ? item.total_desbunchados : '0'}</td>
                                     <td>
                                         <div className="btn-group">
                                             <button

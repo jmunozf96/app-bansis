@@ -7,6 +7,7 @@ import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
 import ModalForm from "../../../../components/ModalForm";
+import moment from "moment";
 
 const style = {
     table: {
@@ -102,6 +103,7 @@ export function EnfundeLoteDetalle() {
                     cancelar={cancelar}
                     loadDataLote={loadDataLote}
                     setLoadDataLote={setLoadDataLote}
+                    idenfunde={id}
                 />
                 <Row>
                     <Col className="mb-3">
@@ -137,17 +139,12 @@ export function EnfundeLoteDetalle() {
                         <label>Enfunde Total Semana {cabeceraEnfunde.semana}: </label>
                         <input className="form-control bg-white" disabled={true} value={cabeceraEnfunde.total}/>
                     </div>
-                    <div className="col-md-2">
-                        <label>Has. Total: </label>
-                        <input className="form-control bg-white" disabled={true}
-                               value={(+cabeceraEnfunde.has).toFixed(2)}/>
-                    </div>
                     <div className="col-md-4">
                         <label>Hacienda: </label>
                         <input className="form-control bg-white" disabled={true}
                                value={cabeceraEnfunde.hacienda.detalle}/>
                     </div>
-                    <div className="col-md-1">
+                    <div className="offset-2 col-md-1">
                         <label>... </label>
                         <input
                             className={`form-control ${cabeceraEnfunde.cerrado !== "0" ? 'bg-danger' : 'bg-success'}`}
@@ -190,7 +187,7 @@ export function EnfundeLoteDetalle() {
 }
 
 function ModalDetalleEnfundeSeccionSemana(props) {
-    const {open, setOpen, data, setData, loadDataLote, setLoadDataLote} = props;
+    const {open, setOpen, data, setData, loadDataLote, setLoadDataLote, idenfunde} = props;
     const [enfunde, setEnfunde] = useState(null);
 
     const cancelar = () => {
@@ -203,7 +200,7 @@ function ModalDetalleEnfundeSeccionSemana(props) {
     useEffect(() => {
         if (loadDataLote) {
             (async () => {
-                const url = `${API_LINK}/bansis-app/index.php/getEnfundeSeccion?calendario=${data.enfunde.codigo}&seccion=${data.seccion.item.idlote_sec}`;
+                const url = `${API_LINK}/bansis-app/index.php/getEnfundeSeccion?calendario=${data.enfunde.codigo}&seccion=${data.seccion.item.idlote_sec}&idenfunde=${idenfunde}`;
                 const request = await fetch(url);
                 const response = await request.json();
                 const {code} = response;
@@ -213,7 +210,19 @@ function ModalDetalleEnfundeSeccionSemana(props) {
             })();
             setLoadDataLote(false);
         }
-    }, [loadDataLote, data, setEnfunde, setLoadDataLote]);
+    }, [loadDataLote, data, setEnfunde, setLoadDataLote, idenfunde]);
+
+    const sumHas = () => {
+        return enfunde.detalleSemana.reduce((total, item) => +total + +item.seccion.has, 0)
+    };
+
+    const sumPresente = () => {
+        return enfunde.detalleSemana.reduce((total, item) => +total + +item.cant_pre, 0)
+    };
+
+    const sumFuturo = () => {
+        return enfunde.detalleSemana.reduce((total, item) => +total + +item.cant_fut, 0)
+    };
 
     return (
         <>
@@ -265,7 +274,7 @@ function ModalDetalleEnfundeSeccionSemana(props) {
                                             <label>Edad</label>
                                             <div className="input-group">
                                                 <input type="text" className="form-control bg-white" disabled={true}
-                                                       defaultValue={`${enfunde.seccion.seccion_lote.fecha_siembra}`}/>
+                                                       defaultValue={((moment().diff(moment(enfunde.seccion.seccion_lote.fecha_siembra), 'days')) / 352).toFixed(0)}/>
                                             </div>
                                         </div>
                                         <div className="col-3">
@@ -316,6 +325,14 @@ function ModalDetalleEnfundeSeccionSemana(props) {
                                             </tr>
                                         ))
                                         }
+                                        <tr className="text-center" style={{backgroundColor: '#E6ECF5'}}>
+                                            <td><b>TOTAL SEMANA</b></td>
+                                            <td><b>{sumHas()}</b></td>
+                                            <td><b>{sumPresente()}</b></td>
+                                            <td><b>{sumFuturo()}</b></td>
+                                            <td><b>{sumPresente() + sumFuturo()}</b></td>
+                                            <td/>
+                                        </tr>
                                         </tbody>
                                     </table>
                                 </div>

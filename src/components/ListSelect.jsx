@@ -28,7 +28,7 @@ export default function ListSelect({data, index, setStatusData, setChange}) {
                         <ListItemIcon>
                             <InboxIcon/>
                         </ListItemIcon>
-                        <ListItemText primary={item}/>
+                        <b><ListItemText primary={item} style={{fontWeight: "bold"}}/></b>
                     </ListItem>
                 ))}
             </List>

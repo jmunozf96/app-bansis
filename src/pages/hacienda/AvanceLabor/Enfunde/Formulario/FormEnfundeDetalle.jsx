@@ -8,7 +8,8 @@ import shortid from "shortid";
 import moment from "moment";
 import 'moment/locale/es';
 
-const statusAvanceSemana = ['Presente', 'Futuro'];
+const statusAvanceSemana = ['PRESENTE', 'FUTURO'];
+
 const style = {
     table: {
         textCenter: {
@@ -103,6 +104,10 @@ export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distri
                 const response = await request.json();
                 if (response.length > 0) {
                     setMaterialesInventario(response[0]['inventario']);
+                    if (response[0]['inventario'][0] !== undefined) {
+                        setMaterialSelect(response[0]['inventario'][0]);
+                        setSaldo(+response[0]['inventario'][0]['sld_final']);
+                    }
                 } else {
                     setLoadAlertEmptyMateriales(true);
                 }
@@ -155,9 +160,10 @@ export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distri
         clearFormulario();
         setChangeStatus(true);
         setMaterialesInventarioReelevo([]);
-        reloadProressbar(true);
         setValue(0);
         setSaldo(0);
+        reloadProressbar(true);
+        setLoadMaterialesInventario(true);
     };
 
     const clearFormulario = () => {
@@ -176,12 +182,14 @@ export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distri
     };
 
     const canChangeCantidad = (cantidad) => {
-        if (parseInt(cantidad) <= saldo) {
-            setValue(saldo - parseInt(cantidad));
-            return true;
-        } else {
-            setValue(saldo);
-            return false;
+        if (cantidad !== undefined) {
+            if (parseInt(cantidad) <= saldo) {
+                setValue(saldo - parseInt(cantidad));
+                return true;
+            } else {
+                setValue(saldo);
+                return false;
+            }
         }
     };
 
@@ -205,7 +213,6 @@ export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distri
             reelevo: empleadoReelevo,
             desbunche
         };
-
         const itemExists = existeItemtoSemana(itemSemana);
 
         if (!itemExists.length > 0) {
@@ -234,11 +241,10 @@ export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distri
         setLoadDataDetalle(true);
     };
 
-    const existeItemtoSemana = ({detalle: {material}, reelevo}) => {
+    const existeItemtoSemana = ({detalle: {material}, reelevo, distribucion}) => {
         let arrayFilter = [];
-
-        if (!reelevo) {
-            arrayFilter = getArrayFilter().filter((item) => item.detalle.material.id === material.id && item.distribucion.id === distribucion.id);
+        if (reelevo === null) {
+            arrayFilter = getArrayFilter().filter((item) => item.detalle.material.id === material.id && item.distribucion.id === distribucion.id && item.reelevo === null);
         } else {
             arrayFilter = getArrayFilter().filter((item) => item.detalle.material.id === material.id && item.distribucion.id === distribucion.id && (item.reelevo && item.reelevo.id === reelevo.id));
         }
@@ -358,7 +364,7 @@ export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distri
         if (empleadoReelevo) {
             return reelevo && (reelevo.id === empleadoReelevo.id);
         } else {
-            return true;
+            return false;
         }
     };
 
@@ -432,7 +438,7 @@ export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distri
                                 className={`btn btn-${!searchReelevo ? 'primary' : 'danger'} btn-block mb-2`}
                                 onClick={() => onChangeReelevo()}
                             >
-                                <i className="fas fa-search"/> {!searchReelevo ? 'Buscar Reelevo' : 'Regresar'}
+                                <i className={!searchReelevo ? "fas fa-search" : "fas fa-undo-alt"}/> {!searchReelevo ? 'Buscar Reelevo' : 'Regresar'}
                             </button>
                             {empleadoReelevo && !searchReelevo &&
                             <button
@@ -576,8 +582,9 @@ function SemanaPresente(props) {
     const [cantidad, setCantidad] = useState(0);
 
     const changeValue = (e) => {
+        console.log(e.target.value)
         const cantidad = parseInt((e.target.value));
-        if (e.target.value !== undefined) {
+        if (e.target.value !== undefined && e.target.value !== "") {
             if (canChange(cantidad)) {
                 setCantidad(cantidad);
             } else {

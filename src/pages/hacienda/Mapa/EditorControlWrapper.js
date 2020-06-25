@@ -3,7 +3,6 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import {FeatureGroup} from 'react-leaflet';
 import {EditControl} from 'react-leaflet-draw';
 
-import L from "leaflet";
 export default class CustomEditControl extends React.Component {
     render() {
         return (
