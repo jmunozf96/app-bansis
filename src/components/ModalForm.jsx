@@ -1,5 +1,6 @@
 import React from "react";
 import {Button, Modal} from "react-bootstrap";
+import "./ModalForm.scss"
 
 const ModalForm = ({show, icon, title, children, ...config}) => {
     return (
@@ -10,7 +11,7 @@ const ModalForm = ({show, icon, title, children, ...config}) => {
             size={config.size}
             centered={config.centered}
             scrollable={config.scrollable}
-            dialogClassName="modal-90w"
+            dialogClassName={`custom-dialog-${config.dialogSize}`}
         >
             <Modal.Header>
                 <Modal.Title><i className={icon}/> <small>{title}</small></Modal.Title>

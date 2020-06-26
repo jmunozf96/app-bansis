@@ -1,8 +1,6 @@
 import React, {useEffect, useState} from "react";
 import ListSelect from "../../../../../components/ListSelect";
 import {API_LINK, focuselement} from "../../../../../utils/constants";
-import InputSearch from "../../../../../components/InputSearch/InputSearch";
-import {FormHelperText} from "@material-ui/core";
 
 import shortid from "shortid";
 import moment from "moment";
@@ -19,7 +17,13 @@ const style = {
     }
 };
 
-export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distribucion, detalles, save, itemsToDelete, setItemsToDelete}) {
+export default function FormEnfundeDetalle(props) {
+    const {
+        cabecera, hacienda, empleado, distribucion,
+        detalles, save, itemsToDelete, setItemsToDelete,
+        searchReelevo, setSearchReelevo, empleadoReelevo, setEmpleadoReelevo,
+        materialesInventarioReelevo, setMaterialesInventarioReelevo
+    } = props;
     const [changeStatus, setChangeStatus] = useState(false);
     const [index, setIndex] = useState(0);
     const [semana, setSemana] = useState({
@@ -34,8 +38,7 @@ export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distri
     const [detallesEnfundeFuturo, setDetallesEnfundeFuturo] = useState([]);
 
     const [loadDataDetalle, setLoadDataDetalle] = useState(false);
-
-    const [loadMaterialesInventario, setLoadMaterialesInventario] = useState(true);
+    const [loadMaterialesInventario, setLoadMaterialesInventario] = useState(materialesInventarioReelevo.length === 0 && !empleadoReelevo);
     const [materialesInventario, setMaterialesInventario] = useState([]);
     const [materialSelect, setMaterialSelect] = useState(null);
     const [value, setValue] = useState(0);
@@ -44,19 +47,31 @@ export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distri
     const [progressStatus, setprogressStatus] = useState({
         reload: true,
         color: 'success',
-        porcentaje: 0
+        porcentaje: 100
     });
-
-    //Empleado reelevo
-    const [searchReelevo, setSearchReelevo] = useState(false);
-    const [empleadoReelevo, setEmpleadoReelevo] = useState(null);
-    const [apiSearchEmpleadoReelevo, setApiSearchEmpleadoReelevo] = useState(`${API_LINK}/bansis-app/index.php/search/empleados?params=&hacienda=${hacienda.id}`);
-    const [materialesInventarioReelevo, setMaterialesInventarioReelevo] = useState([]);
 
     const [reloadComponent, setReloadComponent] = useState(false);
     const [loadAlertEmptyMateriales, setLoadAlertEmptyMateriales] = useState(false);
 
     const [presente, setPresente] = useState(distribucion.total_presente > 0);
+
+    const [loadDataReelevo, setLoadDataReelevo] = useState(materialesInventarioReelevo.length > 0);
+
+    useEffect(() => {
+        if (loadDataReelevo) {
+            setMaterialesInventario(materialesInventarioReelevo);
+
+            const material = materialesInventarioReelevo[0];
+            setMaterialSelect(material);
+            setValue(+material['sld_final']);
+
+            let arrayFilterP = detallesEnfundePresente.filter((item) => item.detalle.material.id === material.id && !item.reelevo && !item.hasOwnProperty('contabilizar'));
+            let arrayFilterF = detallesEnfundeFuturo.filter((item) => item.detalle.material.id === material.id && !item.reelevo && !item.hasOwnProperty('contabilizar'));
+            let total = arrayFilterP.reduce((total, item) => +total + +item.cantidad, 0) + arrayFilterF.reduce((total, item) => +total + +item.cantidad, 0);
+            setSaldo(+materialesInventarioReelevo[0]['sld_final'] - total);
+            setLoadDataReelevo(false);
+        }
+    }, [detallesEnfundeFuturo, detallesEnfundePresente, loadDataReelevo, materialesInventarioReelevo]);
 
     useEffect(() => {
         if (presente) {
@@ -124,18 +139,6 @@ export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distri
                     futuro: {...semana.futuro, status: true}
                 });
                 setColorSemana(cabecera.colorf);
-
-                //Si primero deben reportar el enfunde presente, pero queda abierto
-                /*if (distribucion.status_futuro) {
-                    setSemana({
-                        presente: {...semana.presente, status: false},
-                        futuro: {...semana.futuro, status: true}
-                    });
-                    setColorSemana(cabecera.colorf);
-                } else {
-                    setIndex(0);
-                    setReloadComponent(true);
-                }*/
             } else {
                 setSemana({
                     presente: {...semana.presente, status: true},
@@ -148,11 +151,6 @@ export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distri
         }
     }, [changeStatus, semana, index, cabecera, distribucion]);
 
-    const onChangeReelevo = () => {
-        setSearchReelevo(!searchReelevo);
-        clearFormulario();
-        setLoadDataDetalle(true);
-    };
 
     const destroyReelevo = () => {
         setEmpleadoReelevo(null);
@@ -317,10 +315,22 @@ export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distri
 
     const destroyItemtoSemana = (data) => {
         const newArray = getArrayFilter().filter((item) => item.id !== data.id);
+
         if (semana.presente.status) {
             setDetallesEnfundePresente(newArray);
         } else {
             setDetallesEnfundeFuturo(newArray);
+        }
+
+        if (data.reelevo) {
+            materialesInventario.map((item) => {
+                if (item.material.id === data.detalle.material.id) {
+                    item.sld_final = +item.sld_final + +data.detalle.sld_final
+                }
+                return true;
+            })
+        } else {
+
         }
 
         if (reloadProgressBarofItemSelect(data.detalle.material.id)) {
@@ -427,133 +437,116 @@ export default function FormEnfundeDetalle({cabecera, hacienda, empleado, distri
                                     />}
                                 </div>
                                 <button
-                                    className={`btn btn-success btn-block btn-lg`}
+                                    className={`btn btn-primary btn-block btn-lg`}
                                     onClick={() => saveEnfunde()}
                                 >
-                                    <i className="fas fa-plus-circle"/> Agregar
+                                    <i className="fas fa-check-circle"/> Confirmar
                                 </button>
                             </>
-                            }
-                            <button
-                                className={`btn btn-${!searchReelevo ? 'primary' : 'danger'} btn-block mb-2`}
-                                onClick={() => onChangeReelevo()}
-                            >
-                                <i className={!searchReelevo ? "fas fa-search" : "fas fa-undo-alt"}/> {!searchReelevo ? 'Buscar Reelevo' : 'Regresar'}
-                            </button>
-                            {empleadoReelevo && !searchReelevo &&
-                            <button
-                                className={`btn btn-danger btn-block mb-2`}
-                                onClick={() => destroyReelevo()}
-                            >
-                                <i className="fas fa-times"/> Eliminar Reelevo
-                            </button>
                             }
                         </div>
                     </div>
                 </div>
                 <div className="col-md-10">
                     <div className="row">
-                        {!searchReelevo ?
-                            <>
-                                <div className="col-md-6">
-                                    {(materialesInventario.length > 0 && !loadMaterialesInventario) ?
-                                        <MaterialesInventario
-                                            materiales={materialesInventario}
-                                            setMaterialSelect={setMaterialSelect}
-                                            setSaldo={setSaldo}
-                                            setValue={setValue}
-                                            setLoadDataDetalle={setLoadDataDetalle}
-                                            cantidadUsada={searchTotalUsadoItem}
-                                            cantidadEditada={searchTotalEditadoItem}
-                                            reloadProressbar={reloadProressbar}
-                                            reelevo={empleadoReelevo}
-                                        />
-                                        :
-                                        <>
-                                            {loadAlertEmptyMateriales &&
-                                            <div className="alert alert-info">
-                                                <i className="fas fa-exclamation-circle"/> <b>Advertencia!</b> El
-                                                empleado
-                                                no tiene saldo disponible.
-                                            </div>
-                                            }
-                                        </>
+                        <div className="col-md-12">
+                            <div className="alert alert-info">
+                                <b><i className="fas fa-info-circle"/> Informacioón: </b> Antes de salir, debe confirmar
+                                (<i
+                                className="fas fa-check-circle"/>) el enfunde para aplicar los cambios, ya sea en
+                                enfunde presente o futuro.
+                            </div>
+                        </div>
+                        <div className="col-md-6">
+                            {(materialesInventario.length > 0 && !loadMaterialesInventario) ?
+                                <MaterialesInventario
+                                    materiales={materialesInventario}
+                                    setMaterialSelect={setMaterialSelect}
+                                    setSaldo={setSaldo}
+                                    setValue={setValue}
+                                    setLoadDataDetalle={setLoadDataDetalle}
+                                    cantidadUsada={searchTotalUsadoItem}
+                                    cantidadEditada={searchTotalEditadoItem}
+                                    reloadProressbar={reloadProressbar}
+                                    reelevo={empleadoReelevo}
+                                />
+                                :
+                                <>
+                                    {loadAlertEmptyMateriales &&
+                                    <div className="alert alert-info">
+                                        <i className="fas fa-exclamation-circle"/> <b>Advertencia!</b> El
+                                        empleado
+                                        no tiene saldo disponible.
+                                    </div>
+                                    }
+                                </>
+                            }
+                        </div>
+                        <div className="col-md-6">
+                            <div className="row">
+                                {empleadoReelevo &&
+                                <div className="col-md-12 mb-2">
+                                    <ProfileReelevo
+                                        empleado={empleadoReelevo}
+                                    />
+                                    {empleadoReelevo && !searchReelevo &&
+                                    <button
+                                        className={`btn btn-danger btn-block mb-2 mt-3 btn-lg`}
+                                        onClick={() => destroyReelevo()}
+                                    >
+                                        <i className="fas fa-times"/> Quitar reelevo
+                                    </button>
                                     }
                                 </div>
-                                <div className="col-md-6">
-                                    <div className="row">
-                                        {empleadoReelevo &&
-                                        <div className="col-md-12 mb-2">
-                                            <ProfileReelevo
-                                                empleado={empleadoReelevo}
-                                            />
-                                        </div>
-                                        }
-                                        <div className={`col-md-12`}>
-                                            <StatusSaldoMaterial
-                                                material={materialSelect}
-                                                value={value}
-                                                saldo={saldo}
-                                                progressStatus={progressStatus}
-                                                setprogressStatus={setprogressStatus}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                {materialSelect &&
-                                <>
-                                    <div className="col-md-12 mt-0 mb-3">
-                                        <AvanceSemana
-                                            semana={semana}
-                                        >
-                                            {semana.presente.status ?
-                                                <SemanaPresente
-                                                    setValue={setValue}
-                                                    saldo={saldo}
-                                                    reloadProressbar={reloadProressbar}
-                                                    addItemtoSemana={addItemtoSemana}
-                                                    canChange={canChangeCantidad}
-                                                /> :
-                                                <SemanaFuturo
-                                                    setValue={setValue}
-                                                    saldo={saldo}
-                                                    reloadProressbar={reloadProressbar}
-                                                    addItemtoSemana={addItemtoSemana}
-                                                    canChange={canChangeCantidad}
-                                                />
-                                            }
-                                        </AvanceSemana>
-                                    </div>
-                                </>
                                 }
-                                <div className="col-md-12 table-responsive">
-                                    <DetalleEnfunde
-                                        semana={semana}
-                                        distribucion={distribucion}
-                                        detalles={getArrayFilter}
-                                        loadDataDetalle={loadDataDetalle}
-                                        setLoadDataDetalle={setLoadDataDetalle}
-                                        destroy={destroyItemtoSemana}
-                                        edition={editItemtoSemanaDirect}
+                                <div className={`col-md-12`}>
+                                    <StatusSaldoMaterial
+                                        material={materialSelect}
+                                        value={value}
+                                        saldo={saldo}
+                                        progressStatus={progressStatus}
+                                        setprogressStatus={setprogressStatus}
                                     />
                                 </div>
-                            </>
-                            :
-                            <BuscarReelevos
-                                codigoSemana={cabecera.codigoSemana}
-                                hacienda={hacienda}
-                                apiEmpleado={apiSearchEmpleadoReelevo}
-                                setApiEmpleado={setApiSearchEmpleadoReelevo}
-                                empPrincipal={empleado}
-                                empleado={empleadoReelevo}
-                                setEmpleado={setEmpleadoReelevo}
-                                setMaterialesInventario={setMaterialesInventario}
-                                setLoadMaterialesInventario={setLoadMaterialesInventario}
-                                materialesInventarioReelevo={materialesInventarioReelevo}
-                                setMaterialesInventarioReelevo={setMaterialesInventarioReelevo}
-                            />
+                            </div>
+                        </div>
+                        {materialSelect &&
+                        <>
+                            <div className="col-md-12 mt-0 mb-3">
+                                <AvanceSemana
+                                    semana={semana}
+                                >
+                                    {semana.presente.status ?
+                                        <SemanaPresente
+                                            setValue={setValue}
+                                            saldo={saldo}
+                                            reloadProressbar={reloadProressbar}
+                                            addItemtoSemana={addItemtoSemana}
+                                            canChange={canChangeCantidad}
+                                        /> :
+                                        <SemanaFuturo
+                                            setValue={setValue}
+                                            saldo={saldo}
+                                            reloadProressbar={reloadProressbar}
+                                            addItemtoSemana={addItemtoSemana}
+                                            canChange={canChangeCantidad}
+                                        />
+                                    }
+                                </AvanceSemana>
+                            </div>
+                        </>
                         }
-
+                        <div className="col-md-12 table-responsive">
+                            <DetalleEnfunde
+                                semana={semana}
+                                distribucion={distribucion}
+                                detalles={getArrayFilter}
+                                loadDataDetalle={loadDataDetalle}
+                                setLoadDataDetalle={setLoadDataDetalle}
+                                destroy={destroyItemtoSemana}
+                                edition={editItemtoSemanaDirect}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -582,7 +575,6 @@ function SemanaPresente(props) {
     const [cantidad, setCantidad] = useState(0);
 
     const changeValue = (e) => {
-        console.log(e.target.value)
         const cantidad = parseInt((e.target.value));
         if (e.target.value !== undefined && e.target.value !== "") {
             if (canChange(cantidad)) {
@@ -613,6 +605,12 @@ function SemanaPresente(props) {
 
     return (
         <div className="row">
+            <div className="col-md-12">
+                <div className="alert alert-warning">
+                    <i className="fas fa-info-circle"/> Debe agregar una cantidad mayor a 0 y que no se pase del saldo
+                    del material seleccionado
+                </div>
+            </div>
             <div className="col-md-9">
                 <div className="input-group">
                     <div className="input-group-prepend">
@@ -641,7 +639,7 @@ function SemanaPresente(props) {
             </div>
             <div className="col-md-auto">
                 <button type="button" className="btn btn-success" onClick={() => addCantidad()}>
-                    Agregar
+                    Agregar enfunde
                 </button>
             </div>
         </div>
@@ -658,7 +656,7 @@ function SemanaFuturo(props) {
 
     const changeValue = (e) => {
         const cantidad = parseInt((e.target.value));
-        if (e.target.value !== undefined) {
+        if (e.target.value !== undefined && e.target.value !== "") {
             if (canChange(cantidad)) {
                 setCantidad(cantidad);
             } else {
@@ -696,6 +694,12 @@ function SemanaFuturo(props) {
     };
     return (
         <div className="row">
+            <div className="col-md-12">
+                <div className="alert alert-warning">
+                    <i className="fas fa-info-circle"/> Debe agregar una cantidad mayor a 0 y que no se pase del saldo
+                    del material seleccionado
+                </div>
+            </div>
             <div className="col-md-6">
                 <div className="input-group">
                     <div className="input-group-prepend">
@@ -743,7 +747,7 @@ function SemanaFuturo(props) {
             </div>
             <div className="col-md-auto">
                 <button type="button" className="btn btn-success" onClick={() => addCantidad()}>
-                    Agregar
+                    Agregar enfunde
                 </button>
             </div>
         </div>
@@ -893,98 +897,6 @@ function ProfileReelevo({empleado}) {
     )
 }
 
-function BuscarReelevos(props) {
-    const {
-        codigoSemana, hacienda, labor, empPrincipal, apiEmpleado, setApiEmpleado,
-        empleado, setEmpleado, setMaterialesInventario, setLoadMaterialesInventario,
-        materialesInventarioReelevo, setMaterialesInventarioReelevo
-    } = props;
-
-    const [loadInventario, setLoadInventario] = useState(false);
-    const [searchEmpleado, setSearchEmpleado] = useState('');
-    const [changeURL, setChangeURL] = useState(false);
-
-    useEffect(() => {
-        if (changeURL) {
-            setApiEmpleado(`${API_LINK}/bansis-app/index.php/search/empleados?params=${searchEmpleado}&hacienda=${hacienda.id}`);
-            setChangeURL(false);
-        }
-    }, [changeURL, searchEmpleado, hacienda, setApiEmpleado]);
-
-    useEffect(() => {
-        if (loadInventario) {
-            (async () => {
-                const url = `${API_LINK}/bansis-app/index.php/search/empleados/${hacienda.id}/${empleado.id}/inventario?indirecto=true&calendario=${codigoSemana}`;
-                const request = await fetch(url);
-                const response = await request.json();
-                if (response.length > 0) {
-                    await setMaterialesInventario(response[0]['inventario']);
-                    await setMaterialesInventarioReelevo(response[0]['inventario']);
-                } else {
-                    alert("No se encuentran saldos para este empleado");
-                    await setEmpleado(null);
-                }
-            })();
-            setLoadInventario(false);
-        }
-    }, [loadInventario, hacienda, labor, empleado, setMaterialesInventario, setMaterialesInventarioReelevo, setEmpleado, codigoSemana]);
-
-    const changeEmpleado = (e, value) => {
-        setEmpleado(value);
-        if (value) {
-            if (value.id !== empPrincipal.id) {
-                setLoadInventario(true);
-            } else {
-                alert("No puede seleccionar al mismo empleado");
-                setEmpleado(null);
-            }
-        } else {
-            //En caso de no escoger un reelevo, se debe regresar el inventario del empleado de origen.
-            setLoadMaterialesInventario(true);
-            setMaterialesInventarioReelevo([]);
-        }
-    };
-
-    return (
-        <>
-            <div className="col-md-12">
-                <InputSearch
-                    id="asynchronous-empleado"
-                    label="Listado de empleados"
-                    api_url={apiEmpleado}
-                    setSearch={setSearchEmpleado}
-                    onChangeValue={changeEmpleado}
-                    value={empleado}
-                    setChangeURL={setChangeURL}
-                />
-                <FormHelperText id="outlined-weight-helper-text">
-                    Puede filtrar los empleados por nombre o numero de cedula
-                </FormHelperText>
-            </div>
-            <div className="col-md-12 table-responsive mt-3">
-                {materialesInventarioReelevo.length > 0 &&
-                <table className="table table-bordered table-hover">
-                    <thead className="text-center">
-                    <tr>
-                        <th>Material</th>
-                        <th>Saldo</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {materialesInventarioReelevo.map((item) => (
-                        <tr key={item.material.id}>
-                            <td>{item.material.descripcion}</td>
-                            <td className="text-center"><b>{parseFloat(item['sld_final']).toFixed(2)}</b></td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-                }
-            </div>
-        </>
-    )
-}
-
 function MaterialesInventario(props) {
     const {
         materiales, setMaterialSelect, setSaldo, setValue,
@@ -1004,6 +916,7 @@ function MaterialesInventario(props) {
     }, [index, materiales, cantidadUsada, cantidadEditada, reelevo, reloadProressbar, setValue, setSaldo, setLoadDataDetalle, setMaterialSelect]);
 
     const onSetValue = (value) => {
+        console.log(value);
         setMaterialSelect(value);
         setLoadDataDetalle(true);
         setSaldo((parseInt(value['sld_final']) - +cantidadUsada(value.material, reelevo)) - cantidadEditada(value.material, reelevo));
@@ -1037,7 +950,6 @@ function MaterialesInventario(props) {
 }
 
 function StatusSaldoMaterial({value, saldo, progressStatus, setprogressStatus}) {
-
     useEffect(() => {
         if (progressStatus.reload) {
             let color;
@@ -1068,7 +980,6 @@ function StatusSaldoMaterial({value, saldo, progressStatus, setprogressStatus}) 
             setprogressStatus({
                 reload: false,
                 color,
-                porcentaje: 0
             });
         }
     }, [progressStatus, value, saldo, setprogressStatus]);
@@ -1086,7 +997,6 @@ function StatusSaldoMaterial({value, saldo, progressStatus, setprogressStatus}) 
                              aria-valuenow="0"
                              aria-valuemin="0"
                              aria-valuemax="100"
-                             style={{width: `${progressStatus.porcentaje}%`}}
                         />
                     </div>
                 </li>

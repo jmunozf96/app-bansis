@@ -139,6 +139,7 @@ export default function ReporteEnfunde() {
                 size={configModal.size}
                 centered={configModal.centered}
                 scrollable={configModal.scrollable}
+                dialogSize={'80'}
                 cancel={onHideModal}
             >
                 {(showMaterial && !showEmpleados) && <SwhowMaterial id={configModal.dataId}/>}
@@ -168,6 +169,10 @@ function SwhowMaterial(props) {
     console.log(response);
     const {loading, result, error} = response;
 
+    const total = (data, tipo) => {
+        return data.reduce((total, item) => total + +item[tipo], 0);
+    };
+
     if (loading) {
         return (<Spinner1/>)
     }
@@ -189,17 +194,30 @@ function SwhowMaterial(props) {
                         </tr>
                         </thead>
                         <tbody>
-                        {result.length > 0 && !error && result.map((body, i) => (
-                            <tr className="text-center" key={i}>
-                                <td className="text-left">{body.descripcion}</td>
-                                <td><b>{body.inicial}</b></td>
-                                <td><b>{body.despacho}</b></td>
-                                <td>{body.presente}</td>
-                                <td>{body.futuro}</td>
-                                <td><b>{+body.presente + +body.futuro}</b></td>
-                                <td style={{color: "red"}}><b>{body.final}</b></td>
+                        {result.length > 0 &&
+                        <>
+                            {!error && result.map((body, i) => (
+                                <tr className="text-center" key={i}>
+                                    <td className="text-left">{body.descripcion}</td>
+                                    <td><b>{body.inicial}</b></td>
+                                    <td><b>{body.despacho}</b></td>
+                                    <td>{body.presente}</td>
+                                    <td>{body.futuro}</td>
+                                    <td><b>{+body.presente + +body.futuro}</b></td>
+                                    <td style={{color: "red"}}><b>{body.final}</b></td>
+                                </tr>
+                            ))}
+                            <tr className="text-center" style={{backgroundColor: "#E6ECF5"}}>
+                                <td/>
+                                <td><b>{total(result, 'inicial')}</b></td>
+                                <td><b>{total(result, 'despacho')}</b></td>
+                                <td><b>{total(result, 'presente')}</b></td>
+                                <td><b>{total(result, 'futuro')}</b></td>
+                                <td><b>{total(result, 'presente') + total(result, 'futuro')}</b></td>
+                                <td><b>{total(result, 'final')}</b></td>
                             </tr>
-                        ))}
+                        </>
+                        }
                         </tbody>
                     </table>
                 </div>
@@ -284,6 +302,10 @@ function ShowEmpleados(props) {
         }
     };
 
+    const total = (empleados, tipo) => {
+        return empleados.reduce((total, empleado) => total + +empleado[tipo], 0)
+    };
+
     if (loading) {
         return (<Spinner1/>)
     }
@@ -300,6 +322,7 @@ function ShowEmpleados(props) {
                     size="lg"
                     centered={true}
                     scrollable={true}
+                    dialogSize={'65'}
                     cancel={onHideModal}
                 >
                     <div className="container-fluid">
@@ -338,25 +361,35 @@ function ShowEmpleados(props) {
                         </tr>
                         </thead>
                         <tbody>
-                        {result.length > 0 && !error && result.map((body, i) => (
-                            <tr className="text-center table-sm" key={i}>
-                                <td style={style.table.textCenter}>{body.codigo}</td>
-                                <td style={style.table.textCenter}>{body.nombres}</td>
-                                <td>
-                                    <button className="btn btn-primary" onClick={() => onShowMateriales(body)}>
-                                        <i className="fas fa-bars"/>
-                                    </button>
-                                </td>
-                                <td>
-                                    <button className="btn btn-info" onClick={() => onShowReelevos(body)}>
-                                        <i className="fas fa-user-plus"/>
-                                    </button>
-                                </td>
-                                <td style={style.table.textCenter}>{body.presente}</td>
-                                <td style={style.table.textCenter}>{body.futuro}</td>
-                                <td style={style.table.textCenter}><b>{+body.presente + +body.futuro}</b></td>
+                        {result.length > 0 && !error &&
+                        <>
+                            {result.map((body, i) => (
+                                <tr className="text-center table-sm" key={i}>
+                                    <td style={style.table.textCenter}>{body.codigo}</td>
+                                    <td style={style.table.textCenter}>{body.nombres}</td>
+                                    <td>
+                                        <button className="btn btn-primary" onClick={() => onShowMateriales(body)}>
+                                            <i className="fas fa-bars"/>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <button className="btn btn-info" onClick={() => onShowReelevos(body)}>
+                                            <i className="fas fa-user-plus"/>
+                                        </button>
+                                    </td>
+                                    <td style={style.table.textCenter}>{body.presente}</td>
+                                    <td style={style.table.textCenter}>{body.futuro}</td>
+                                    <td style={style.table.textCenter}><b>{+body.presente + +body.futuro}</b></td>
+                                </tr>
+                            ))}
+                            <tr className="text-center" style={{backgroundColor: "#E6ECF5"}}>
+                                <td colSpan={4}/>
+                                <td><b>{total(result, 'presente')}</b></td>
+                                <td><b>{total(result, 'futuro')}</b></td>
+                                <td><b>{total(result, 'presente') + total(result, 'futuro')}</b></td>
                             </tr>
-                        ))}
+                        </>
+                        }
                         </tbody>
                     </table>
                 </div>
@@ -365,6 +398,15 @@ function ShowEmpleados(props) {
     );
 
     function MaterialesEmpleado() {
+
+        const total = (data, tipo) => {
+            return data.reduce((total, item) => total + +item[tipo], 0);
+        };
+
+        const totalInventario = (data, tipo) => {
+            return data.reduce((total, item) => total + +item.inventario[tipo], 0);
+        };
+
         return (
             <div className="container-fluid">
                 <div className="row">
@@ -384,20 +426,31 @@ function ShowEmpleados(props) {
                                 </thead>
                                 <tbody>
                                 {dataMaterial.length > 0 &&
-                                dataMaterial.map((material, i) => (
-                                    <tr className="text-center" key={i}>
-                                        <td className="text-left"
-                                            style={style.table.textCenter}>{material.descripcion}</td>
-                                        <td style={style.table.textCenter}>{material.inventario.sld_inicial}</td>
-                                        <td style={style.table.textCenter}>{material.despacho}</td>
-                                        <td style={style.table.textCenter}>{+material.presente + +material.futuro}</td>
-                                        <td style={style.table.textCenter}>{checkSaldoFinal(material).result}</td>
-                                        <td style={style.table.textCenter}>
-                                            <i className={`fas ${checkSaldoFinal(material).status ? "fa-check-circle" : "fa-exclamation-circle"} fa-lg`}
-                                               style={{color: `${checkSaldoFinal(material).status ? "green" : "red"}`}}/>
+                                <>
+                                    {dataMaterial.map((material, i) => (
+                                        <tr className="text-center" key={i}>
+                                            <td className="text-left"
+                                                style={style.table.textCenter}>{material.descripcion}</td>
+                                            <td style={style.table.textCenter}>{material.inventario.sld_inicial}</td>
+                                            <td style={style.table.textCenter}>{material.despacho}</td>
+                                            <td style={style.table.textCenter}>{+material.presente + +material.futuro}</td>
+                                            <td style={style.table.textCenter}>{checkSaldoFinal(material).result}</td>
+                                            <td style={style.table.textCenter}>
+                                                <i className={`fas ${checkSaldoFinal(material).status ? "fa-check-circle" : "fa-exclamation-circle"} fa-lg`}
+                                                   style={{color: `${checkSaldoFinal(material).status ? "green" : "red"}`}}/>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    <tr className="text-center" style={{backgroundColor: "#E6ECF5"}}>
+                                        <td/>
+                                        <td><b>{totalInventario(dataMaterial, ['sld_inicial'])}</b></td>
+                                        <td><b>{total(dataMaterial, 'despacho')}</b></td>
+                                        <td><b>{total(dataMaterial, 'presente') + total(dataMaterial, 'futuro')}</b>
                                         </td>
+                                        <td><b>{totalInventario(dataMaterial, ['sld_final'])}</b></td>
+                                        <td/>
                                     </tr>
-                                ))
+                                </>
                                 }
                                 </tbody>
                             </table>
@@ -409,6 +462,13 @@ function ShowEmpleados(props) {
     }
 
     function ReelevosEmpleado() {
+        const total = (data, tipo) => {
+            return data.reduce((total, item) => total + +item[tipo], 0);
+        };
+
+        const totalInventario = (data, tipo) => {
+            return data.reduce((total, item) => total + +item.inventario[tipo], 0);
+        };
         return (
             <div className="col-12 table-responsive">
                 {dataReelevo.length === 0 ? loadingData ? <Spinner1/> :
@@ -427,22 +487,34 @@ function ShowEmpleados(props) {
                         </thead>
                         <tbody>
                         {dataReelevo.length > 0 &&
-                        dataReelevo.map((reelevo, i) => (
-                            <tr className="text-center" key={i}>
-                                <td className="text-left"
-                                    style={style.table.textCenter}>{reelevo.nombres}</td>
-                                <td className="text-left"
-                                    style={style.table.textCenter}>{reelevo.descripcion}</td>
-                                <td style={style.table.textCenter}>{reelevo.inventario.sld_inicial}</td>
-                                <td style={style.table.textCenter}>{reelevo.despacho}</td>
-                                <td style={style.table.textCenter}>{+reelevo.presente + +reelevo.futuro}</td>
-                                <td style={style.table.textCenter}>{checkSaldoFinal(reelevo).result}</td>
-                                <td style={style.table.textCenter}>
-                                    <i className={`fas ${checkSaldoFinal(reelevo).status ? "fa-check-circle" : "fa-exclamation-circle"} fa-lg`}
-                                       style={{color: `${checkSaldoFinal(reelevo).status ? "green" : "red"}`}}/>
+                        <>
+                            {dataReelevo.map((reelevo, i) => (
+                                <tr className="text-center" key={i}>
+                                    <td className="text-left"
+                                        style={style.table.textCenter}>{reelevo.nombres}</td>
+                                    <td className="text-left"
+                                        style={style.table.textCenter}>{reelevo.descripcion}</td>
+                                    <td style={style.table.textCenter}>{reelevo.inventario.sld_inicial}</td>
+                                    <td style={style.table.textCenter}>{reelevo.despacho}</td>
+                                    <td style={style.table.textCenter}>{+reelevo.presente + +reelevo.futuro}</td>
+                                    <td style={style.table.textCenter}>{checkSaldoFinal(reelevo).result}</td>
+                                    <td style={style.table.textCenter}>
+                                        <i className={`fas ${checkSaldoFinal(reelevo).status ? "fa-check-circle" : "fa-exclamation-circle"} fa-lg`}
+                                           style={{color: `${checkSaldoFinal(reelevo).status ? "green" : "red"}`}}/>
+                                    </td>
+                                </tr>
+                            ))}
+                            <tr className="text-center" style={{backgroundColor: "#E6ECF5"}}>
+                                <td/>
+                                <td/>
+                                <td><b>{totalInventario(dataReelevo, ['sld_inicial'])}</b></td>
+                                <td><b>{total(dataReelevo, 'despacho')}</b></td>
+                                <td><b>{total(dataReelevo, 'presente') + total(dataMaterial, 'presente')}</b>
                                 </td>
+                                <td><b>{totalInventario(dataReelevo, ['sld_final'])}</b></td>
+                                <td/>
                             </tr>
-                        ))
+                        </>
                         }
                         </tbody>
                     </table>

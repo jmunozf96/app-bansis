@@ -104,6 +104,12 @@ export default function FormEnfunde() {
         codigoSemana: 0
     });
 
+    //Empleado reelevo
+    const [searchReelevo, setSearchReelevo] = useState(false);
+    const [empleadoReelevo, setEmpleadoReelevo] = useState(null);
+    const [apiSearchEmpleadoReelevo, setApiSearchEmpleadoReelevo] = useState(`${API_LINK}/bansis-app/index.php/search/empleados?params=&hacienda=${hacienda.id}`);
+    const [materialesInventarioReelevo, setMaterialesInventarioReelevo] = useState([]);
+
     useEffect(() => {
         if (!loadCalendar && !changeSemana.status && changeSemanaBuutton) {
             //setDetalleDistribucion([]);
@@ -394,6 +400,11 @@ export default function FormEnfunde() {
                 const response = await request.json();
                 const {message} = response;
                 openNotificacion(message);
+
+                setEmpleadoReelevo(null);
+                setSearchReelevo(false);
+                setMaterialesInventarioReelevo([]);
+
                 setSearchDetallesDistribucion(true);
             } catch (e) {
                 console.log(e);
@@ -470,7 +481,7 @@ export default function FormEnfunde() {
                                 />
                             </div>
                         </div>
-                        <div className="col-md-12">
+                        <div className="col-md-12 mb-3">
                             <InputSearch
                                 id="asynchronous-empleado"
                                 label="Listado de empleados"
@@ -485,6 +496,17 @@ export default function FormEnfunde() {
                                 Puede filtrar los empleados por nombre o numero de cedula
                             </FormHelperText>
                         </div>
+                        <BuscarReelevos
+                            codigoSemana={cabeceraEnfunde.codigoSemana}
+                            hacienda={hacienda}
+                            apiEmpleado={apiSearchEmpleadoReelevo}
+                            setApiEmpleado={setApiSearchEmpleadoReelevo}
+                            empPrincipal={empleado}
+                            empleado={empleadoReelevo}
+                            setEmpleado={setEmpleadoReelevo}
+                            materialesInventarioReelevo={materialesInventarioReelevo}
+                            setMaterialesInventarioReelevo={setMaterialesInventarioReelevo}
+                        />
                     </div>
                 </div>
                 <div className="col-md-6 table-responsive">
@@ -502,6 +524,12 @@ export default function FormEnfunde() {
                             save={saveDistribucionLabor}
                             itemsToDelete={itemsToDelete}
                             setItemsToDelete={setItemsToDelete}
+                            searchReelevo={searchReelevo}
+                            setSearchReelevo={setSearchReelevo}
+                            empleadoReelevo={empleadoReelevo}
+                            setEmpleadoReelevo={setEmpleadoReelevo}
+                            materialesInventarioReelevo={materialesInventarioReelevo}
+                            setMaterialesInventarioReelevo={setMaterialesInventarioReelevo}
                         />
                     </FullScreen>
                     <table className="table table-hover table-bordered">
@@ -521,7 +549,8 @@ export default function FormEnfunde() {
                             {detalleDistribucion.map((item) => (
                                 <tr key={item.id} className="text-center table-sm">
                                     <td style={style.table.textCenter}>{item.loteSeccion.alias}</td>
-                                    <td style={style.table.textCenter}><small><b>{(item.has).toFixed(2)}</b></small></td>
+                                    <td style={style.table.textCenter}><small><b>{(item.has).toFixed(2)}</b></small>
+                                    </td>
                                     <td style={style.table.textCenter}>{item.hasOwnProperty('total_presente') ? item.total_presente : '0'}</td>
                                     <td style={style.table.textCenter}>{item.hasOwnProperty('total_futuro') ? item.total_futuro : '0'}</td>
                                     <td style={style.table.textCenter}>{item.hasOwnProperty('total_desbunchados') ? item.total_desbunchados : '0'}</td>
@@ -568,3 +597,99 @@ export default function FormEnfunde() {
         </FormularioBase>
     );
 }
+
+function BuscarReelevos(props) {
+    const {
+        codigoSemana, hacienda, labor, empPrincipal, apiEmpleado, setApiEmpleado,
+        empleado, setEmpleado, materialesInventarioReelevo, setMaterialesInventarioReelevo
+    } = props;
+
+    const [loadInventario, setLoadInventario] = useState(false);
+    const [searchEmpleado, setSearchEmpleado] = useState('');
+    const [changeURL, setChangeURL] = useState(false);
+
+    useEffect(() => {
+        if (changeURL) {
+            setApiEmpleado(`${API_LINK}/bansis-app/index.php/search/empleados?params=${searchEmpleado}&hacienda=${hacienda.id}`);
+            setChangeURL(false);
+        }
+    }, [changeURL, searchEmpleado, hacienda, setApiEmpleado]);
+
+    useEffect(() => {
+        if (loadInventario) {
+            (async () => {
+                const url = `${API_LINK}/bansis-app/index.php/search/empleados/${hacienda.id}/${empleado.id}/inventario?indirecto=true&calendario=${codigoSemana}`;
+                const request = await fetch(url);
+                const response = await request.json();
+                if (response.length > 0) {
+                    await setMaterialesInventarioReelevo(response[0]['inventario']);
+                } else {
+                    alert("No se encuentran saldos para este empleado");
+                    await setEmpleado(null);
+                }
+            })();
+            setLoadInventario(false);
+        }
+    }, [loadInventario, hacienda, labor, empleado, setMaterialesInventarioReelevo, setEmpleado, codigoSemana]);
+
+    const changeEmpleado = (e, value) => {
+        setEmpleado(value);
+        if (value) {
+            if (value.id !== empPrincipal.id) {
+                setLoadInventario(true);
+            } else {
+                alert("No puede seleccionar al mismo empleado");
+                setEmpleado(null);
+            }
+        } else {
+            //En caso de no escoger un reelevo, se debe regresar el inventario del empleado de origen.
+            setMaterialesInventarioReelevo([]);
+        }
+    };
+
+    return (
+        <>
+            <div className="col-md-12">
+                <div className="alert alert-warning">
+                    <b><i className="fas fa-info-circle"/> Información:</b> En caso de ser reemplazo <i className="fas fa-exchange-alt"/>, buscar el empleado.
+                </div>
+            </div>
+            <div className="col-md-12">
+                <InputSearch
+                    id="asynchronous-empleado-reelevo"
+                    label="Listado de empleados"
+                    api_url={apiEmpleado}
+                    setSearch={setSearchEmpleado}
+                    onChangeValue={changeEmpleado}
+                    value={empleado}
+                    setChangeURL={setChangeURL}
+                />
+                <FormHelperText id="outlined-weight-helper-text">
+                    Puede filtrar los empleados por nombre
+                </FormHelperText>
+            </div>
+            <div className="col-md-12 table-responsive mt-3">
+                {materialesInventarioReelevo.length > 0 &&
+                <table className="table table-bordered table-hover">
+                    <thead className="text-center">
+                    <tr>
+                        <th>Material</th>
+                        <th>Saldo</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {materialesInventarioReelevo.map((item) => (
+                        <tr key={item.material.id}>
+                            <td>{item.material.descripcion}</td>
+                            <td className="text-center">
+                                <b>{parseFloat(item['sld_final']).toFixed(2)}</b></td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+                }
+            </div>
+        </>
+    )
+}
+
