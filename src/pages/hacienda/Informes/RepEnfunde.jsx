@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import InformeComponent from "../../../components/InformesComponent";
 import InformeEnfundeSemanal from "../../../components/Informes/Enfunde/InformeEnfundeSemanal";
 import {API_LINK} from "../../../utils/constants";
@@ -166,7 +166,7 @@ function SwhowMaterial(props) {
     const {id} = props;
     const url = `${API_LINK}/bansis-app/index.php/informe/enfunde/semanal-material?id=${id}`;
     const response = useFetch(url);
-    console.log(response);
+
     const {loading, result, error} = response;
 
     const total = (data, tipo) => {
@@ -257,6 +257,14 @@ function ShowEmpleados(props) {
     const [dataMaterial, setDataMaterial] = useState([]);
     const [dataReelevo, setDataReelevo] = useState([]);
 
+    const [empleadosArray, setEmpleadosArray] = useState([]);
+
+    useEffect(() => {
+        if (empleadosArray.length === 0 && !loading) {
+            setEmpleadosArray(result);
+        }
+    }, [empleadosArray, loading, result]);
+
     const onShowMateriales = (data) => {
         setMaterial(true);
         setShowModal(true);
@@ -306,6 +314,17 @@ function ShowEmpleados(props) {
         return empleados.reduce((total, empleado) => total + +empleado[tipo], 0)
     };
 
+    const filterEmpleado = (e) => {
+        const arrayFilter = result;
+        const empleado = e.target.value;
+        if (empleado.trim()) {
+            const empleados_search = arrayFilter.filter(item => item.nombres.toLowerCase().indexOf(empleado) > -1);
+            setEmpleadosArray(empleados_search);
+        } else {
+            setEmpleadosArray(result);
+        }
+    };
+
     if (loading) {
         return (<Spinner1/>)
     }
@@ -347,6 +366,14 @@ function ShowEmpleados(props) {
                         </div>
                     </div>
                 </ModalForm>
+                <div className="col-12 mb-3">
+                    <input
+                        className="form-control form-control-lg"
+                        type="text"
+                        placeholder="Filtrar empleado por nombre"
+                        onKeyUp={(e) => filterEmpleado(e)}
+                    />
+                </div>
                 <div className="col-md-12 table-responsive">
                     <table className="table table-bordered table-hover">
                         <thead>
@@ -361,9 +388,9 @@ function ShowEmpleados(props) {
                         </tr>
                         </thead>
                         <tbody>
-                        {result.length > 0 && !error &&
+                        {empleadosArray.length > 0 && !error &&
                         <>
-                            {result.map((body, i) => (
+                            {empleadosArray.map((body, i) => (
                                 <tr className="text-center table-sm" key={i}>
                                     <td style={style.table.textCenter}>{body.codigo}</td>
                                     <td style={style.table.textCenter}>{body.nombres}</td>
@@ -384,9 +411,9 @@ function ShowEmpleados(props) {
                             ))}
                             <tr className="text-center" style={{backgroundColor: "#E6ECF5"}}>
                                 <td colSpan={4}/>
-                                <td><b>{total(result, 'presente')}</b></td>
-                                <td><b>{total(result, 'futuro')}</b></td>
-                                <td><b>{total(result, 'presente') + total(result, 'futuro')}</b></td>
+                                <td><b>{total(empleadosArray, 'presente')}</b></td>
+                                <td><b>{total(empleadosArray, 'futuro')}</b></td>
+                                <td><b>{total(empleadosArray, 'presente') + total(result, 'futuro')}</b></td>
                             </tr>
                         </>
                         }

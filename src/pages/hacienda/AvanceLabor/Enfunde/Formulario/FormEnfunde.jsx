@@ -69,6 +69,7 @@ export default function FormEnfunde() {
     const [searchEmpleado, setSearchEmpleado] = useState('');
     const [apiEmpleado, setApiEmpleado] = useState(`${API_LINK}/bansis-app/index.php/search/empleados`);
     const [empleado, setEmpleado] = useState(history.location.state ? history.location.state.empleado : null);
+    const [saldoEmpleado, setSaldoEmpleado] = useState(0);
     const [apiLabor, setApiLabor] = useState('');
     const [labor, setLabor] = useState(null);
     const [changeURL, setChangeURL] = useState(false);
@@ -107,7 +108,7 @@ export default function FormEnfunde() {
     //Empleado reelevo
     const [searchReelevo, setSearchReelevo] = useState(false);
     const [empleadoReelevo, setEmpleadoReelevo] = useState(null);
-    const [apiSearchEmpleadoReelevo, setApiSearchEmpleadoReelevo] = useState(`${API_LINK}/bansis-app/index.php/search/empleados?params=&hacienda=${hacienda.id}`);
+    const [apiSearchEmpleadoReelevo, setApiSearchEmpleadoReelevo] = useState(`${API_LINK}/bansis-app/index.php/search/empleados?params=&hacienda=${hacienda && hacienda.id}`);
     const [materialesInventarioReelevo, setMaterialesInventarioReelevo] = useState([]);
 
     useEffect(() => {
@@ -160,15 +161,16 @@ export default function FormEnfunde() {
                                 const request = await fetch(apiEnfunde);
                                 const response = await request.json();
                                 const detallesDB = [];
-                                detalle_seccion_labor.map(seccion => {
-                                    const distribucion = {
-                                        id: seccion['id'],
-                                        loteSeccion: seccion['seccion_lote'],
-                                        has: +(seccion['has']),
-                                        status_presente: true,
-                                        status_futuro: false,
-                                    };
-                                    if (response.code === 200) {
+                                if (response.code === 200) {
+                                    setSaldoEmpleado(+response.saldoEmpleado.saldo);
+                                    detalle_seccion_labor.map(seccion => {
+                                        const distribucion = {
+                                            id: seccion['id'],
+                                            loteSeccion: seccion['seccion_lote'],
+                                            has: +(seccion['has']),
+                                            status_presente: true,
+                                            status_futuro: false,
+                                        };
                                         if (response.dataArray.length > 0) {
                                             const arrayFilter = response.dataArray.filter((item) => item['idseccion'] === seccion.id);
                                             if (arrayFilter.length > 0) {
@@ -189,10 +191,10 @@ export default function FormEnfunde() {
                                                 });
                                             }
                                         }
-                                    }
-                                    detallesDB.push(distribucion);
-                                    return true;
-                                });
+                                        detallesDB.push(distribucion);
+                                        return true;
+                                    });
+                                }
                                 await setDetalleDistribucion(detallesDB);
                             } catch (e) {
                                 console.log(e)
@@ -351,65 +353,73 @@ export default function FormEnfunde() {
 
     };
 
-    const saveAvanceLabor = () => {
-        //Eliminar registros
-        if (itemsToDelete.length > 0) {
-            (async () => {
-                try {
-                    const url = `${API_LINK}/bansis-app/index.php/deleteEnfunde/empleado`;
-                    const configuracion = {
-                        method: 'DELETE',
-                        body: qs.stringify({
-                            json: JSON.stringify({eliminar: itemsToDelete})
-                        }),
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'Authorization': authentication
-                        }
-                    };
-                    const request = await fetch(url, configuracion);
-                    const response = await request.json();
-                    const {message} = response;
-                    openNotificacion(message);
-                } catch (e) {
-                    console.log(e)
-                }
-            })();
-        }
-        setItemsToDelete([]);
-
-        //Guardar enfunde
-        (async () => {
-            try {
-                const url = `${API_LINK}/bansis-app/index.php/enfunde`;
-                const data = qs.stringify({
-                    json: JSON.stringify({
-                        cabecera: cabeceraEnfunde,
-                        detalle: detalleDistribucion
-                    })
-                });
-                const configuracion = {
-                    method: 'POST',
-                    body: data,
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'Authorization': authentication
-                    }
-                };
-                const request = await fetch(url, configuracion);
-                const response = await request.json();
-                const {message} = response;
-                openNotificacion(message);
-
-                setEmpleadoReelevo(null);
-                setSearchReelevo(false);
-                setMaterialesInventarioReelevo([]);
-
-                setSearchDetallesDistribucion(true);
-            } catch (e) {
-                console.log(e);
+    const deleteEnfunde = async (data) => {
+        const url = `${API_LINK}/bansis-app/index.php/deleteEnfunde/empleado`;
+        const configuracion = {
+            method: 'DELETE',
+            body: qs.stringify({
+                json: JSON.stringify({eliminar: data})
+            }),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': authentication
             }
-        })();
+        };
+        const request = await fetch(url, configuracion);
+        return request.json();
+    };
+
+    const saveEnfunde = async (enfunde) => {
+        const url = `${API_LINK}/bansis-app/index.php/enfunde`;
+        const data = qs.stringify({
+            json: JSON.stringify(enfunde)
+        });
+        const configuracion = {
+            method: 'POST',
+            body: data,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': authentication
+            }
+        };
+        const request = await fetch(url, configuracion);
+        return await request.json();
+    };
+
+    const clearDataAfterSave = () => {
+        setEmpleadoReelevo(null);
+        setSearchReelevo(false);
+        setMaterialesInventarioReelevo([]);
+        setSearchDetallesDistribucion(true);
+    };
+
+    const saveAvanceLabor = () => {
+        const prepareEnfunde = {
+            cabecera: cabeceraEnfunde,
+            detalle: detalleDistribucion
+        };
+
+        if (itemsToDelete.length > 0) {
+            deleteEnfunde(itemsToDelete).then(
+                (response) => {
+                    const {message, code} = response;
+                    openNotificacion(message);
+                    if (code === 200) {
+                        setItemsToDelete([]);
+                        //Guardar enfunde
+                        saveEnfunde(prepareEnfunde).then(({message}) => {
+                            openNotificacion(message);
+                            clearDataAfterSave();
+                        })
+                    }
+                }
+            )
+        } else {
+            saveEnfunde(prepareEnfunde).then(({message}) => {
+                openNotificacion(message);
+                clearDataAfterSave();
+            })
+        }
     };
 
     const openNotificacion = (message) => {
@@ -453,6 +463,11 @@ export default function FormEnfunde() {
             <div className="row">
                 <div className="col-md-6 mb-3">
                     <div className="row">
+                        <div className="col-12">
+                            <div className="alert alert-info">
+                                <b>Saldo de {empleado.descripcion}: </b> {saldoEmpleado}
+                            </div>
+                        </div>
                         <div className="col-md-12 d-none">
                             <div className="form-group">
                                 <Buscador
@@ -481,7 +496,7 @@ export default function FormEnfunde() {
                                 />
                             </div>
                         </div>
-                        <div className="col-md-12 mb-3">
+                        <div className="col-md-12 mb-3 d-none">
                             <InputSearch
                                 id="asynchronous-empleado"
                                 label="Listado de empleados"
@@ -510,88 +525,93 @@ export default function FormEnfunde() {
                     </div>
                 </div>
                 <div className="col-md-6 table-responsive">
-                    <FullScreen
-                        open={openFullScreen}
-                        setOpen={setOpenFullScreen}
-                    >
-                        <FormEnfundeDetalle
-                            cabecera={cabeceraEnfunde}
-                            hacienda={hacienda}
-                            empleado={empleado}
-                            labor={labor}
-                            distribucion={distribucionSelect}
-                            detalles={detalleDistribucion}
-                            save={saveDistribucionLabor}
-                            itemsToDelete={itemsToDelete}
-                            setItemsToDelete={setItemsToDelete}
-                            searchReelevo={searchReelevo}
-                            setSearchReelevo={setSearchReelevo}
-                            empleadoReelevo={empleadoReelevo}
-                            setEmpleadoReelevo={setEmpleadoReelevo}
-                            materialesInventarioReelevo={materialesInventarioReelevo}
-                            setMaterialesInventarioReelevo={setMaterialesInventarioReelevo}
-                        />
-                    </FullScreen>
-                    <table className="table table-hover table-bordered">
-                        <thead>
-                        <tr className="text-center">
-                            <th>Lote</th>
-                            <th>Has</th>
-                            <th width="15%">Presente</th>
-                            <th width="15%">Futuro</th>
-                            <th width="15%">Desbunche</th>
-                            <th width="10%">Accion</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {detalleDistribucion.length > 0 && !reloadComponent &&
-                        <>
-                            {detalleDistribucion.map((item) => (
-                                <tr key={item.id} className="text-center table-sm">
-                                    <td style={style.table.textCenter}>{item.loteSeccion.alias}</td>
-                                    <td style={style.table.textCenter}><small><b>{(item.has).toFixed(2)}</b></small>
-                                    </td>
-                                    <td style={style.table.textCenter}>{item.hasOwnProperty('total_presente') ? item.total_presente : '0'}</td>
-                                    <td style={style.table.textCenter}>{item.hasOwnProperty('total_futuro') ? item.total_futuro : '0'}</td>
-                                    <td style={style.table.textCenter}>{item.hasOwnProperty('total_desbunchados') ? item.total_desbunchados : '0'}</td>
-                                    <td>
-                                        <div className="btn-group">
-                                            <button
-                                                className="btn btn-success btn-lg"
-                                                onClick={() => openModal(item)}
-                                            >
-                                                <i className="fas fa-external-link-square-alt"/>
-                                            </button>
-                                        </div>
-                                    </td>
+                    <div className="row">
+                        <div className="col-12">
+                            <FullScreen
+                                open={openFullScreen}
+                                setOpen={setOpenFullScreen}
+                            >
+                                <FormEnfundeDetalle
+                                    cabecera={cabeceraEnfunde}
+                                    hacienda={hacienda}
+                                    empleado={empleado}
+                                    labor={labor}
+                                    distribucion={distribucionSelect}
+                                    detalles={detalleDistribucion}
+                                    save={saveDistribucionLabor}
+                                    itemsToDelete={itemsToDelete}
+                                    setItemsToDelete={setItemsToDelete}
+                                    searchReelevo={searchReelevo}
+                                    setSearchReelevo={setSearchReelevo}
+                                    empleadoReelevo={empleadoReelevo}
+                                    setEmpleadoReelevo={setEmpleadoReelevo}
+                                    materialesInventarioReelevo={materialesInventarioReelevo}
+                                    setMaterialesInventarioReelevo={setMaterialesInventarioReelevo}
+                                />
+                            </FullScreen>
+                            <table className="table table-hover table-bordered">
+                                <thead>
+                                <tr className="text-center">
+                                    <th>Lote</th>
+                                    <th>Has</th>
+                                    <th width="15%">Presente</th>
+                                    <th width="15%">Futuro</th>
+                                    <th width="15%">Desbunche</th>
+                                    <th width="10%">Accion</th>
                                 </tr>
-                            ))}
-                            <tr className="text-center">
-                                <td className="text-left"
-                                    colSpan={2}>{`TOTAL SEMANA ${cabeceraEnfunde.semana}`}</td>
-                                <td><b>{totalPresente()}</b></td>
-                                <td><b>{totalFuturo()}</b></td>
-                                <td><b>{totalDesbunche()}</b></td>
-                                <td><b>{totalPresente() + totalFuturo()}</b></td>
-                            </tr>
-                        </>
-                        }
-                        </tbody>
-                    </table>
-                    {detalleDistribucion.length > 0 && !reloadComponent &&
-                    <div className="row p-0">
-                        <div className="col-md-4">
-                            <button className="btn btn-danger btn-block" onClick={() => irSemanaAnterior()}>
-                                <i className="fas fa-arrow-alt-circle-left"/> -1 Semana
-                            </button>
-                        </div>
-                        <div className="offset-4 col-md-4">
-                            <button className="btn btn-primary btn-block" onClick={() => irSemanaSiguiente()}>
-                                +1 Semana <i className="fas fa-arrow-alt-circle-right"/>
-                            </button>
+                                </thead>
+                                <tbody>
+                                {detalleDistribucion.length > 0 && !reloadComponent &&
+                                <>
+                                    {detalleDistribucion.map((item) => (
+                                        <tr key={item.id} className="text-center table-sm">
+                                            <td style={style.table.textCenter}>{item.loteSeccion.alias}</td>
+                                            <td style={style.table.textCenter}>
+                                                <small><b>{(item.has).toFixed(2)}</b></small>
+                                            </td>
+                                            <td style={style.table.textCenter}>{item.hasOwnProperty('total_presente') ? item.total_presente : '0'}</td>
+                                            <td style={style.table.textCenter}>{item.hasOwnProperty('total_futuro') ? item.total_futuro : '0'}</td>
+                                            <td style={style.table.textCenter}>{item.hasOwnProperty('total_desbunchados') ? item.total_desbunchados : '0'}</td>
+                                            <td>
+                                                <div className="btn-group">
+                                                    <button
+                                                        className="btn btn-success btn-lg"
+                                                        onClick={() => openModal(item)}
+                                                    >
+                                                        <i className="fas fa-external-link-square-alt"/>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    <tr className="text-center">
+                                        <td className="text-left"
+                                            colSpan={2}>{`TOTAL SEMANA ${cabeceraEnfunde.semana}`}</td>
+                                        <td><b>{totalPresente()}</b></td>
+                                        <td><b>{totalFuturo()}</b></td>
+                                        <td><b>{totalDesbunche()}</b></td>
+                                        <td><b>{totalPresente() + totalFuturo()}</b></td>
+                                    </tr>
+                                </>
+                                }
+                                </tbody>
+                            </table>
+                            {detalleDistribucion.length > 0 && !reloadComponent &&
+                            <div className="row p-0">
+                                <div className="col-md-4">
+                                    <button className="btn btn-danger btn-block" onClick={() => irSemanaAnterior()}>
+                                        <i className="fas fa-arrow-alt-circle-left"/> -1 Semana
+                                    </button>
+                                </div>
+                                <div className="offset-4 col-md-4">
+                                    <button className="btn btn-primary btn-block" onClick={() => irSemanaSiguiente()}>
+                                        +1 Semana <i className="fas fa-arrow-alt-circle-right"/>
+                                    </button>
+                                </div>
+                            </div>
+                            }
                         </div>
                     </div>
-                    }
                 </div>
             </div>
         </FormularioBase>
@@ -651,7 +671,8 @@ function BuscarReelevos(props) {
         <>
             <div className="col-md-12">
                 <div className="alert alert-warning">
-                    <b><i className="fas fa-info-circle"/> Información:</b> En caso de ser reemplazo <i className="fas fa-exchange-alt"/>, buscar el empleado.
+                    <b><i className="fas fa-info-circle"/> Información:</b> En caso de ser reemplazo <i
+                    className="fas fa-exchange-alt"/>, buscar el empleado.
                 </div>
             </div>
             <div className="col-md-12">

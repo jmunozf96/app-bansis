@@ -5,13 +5,14 @@ import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import PaginationForm from "../../../../components/Pagination/Pagination";
 import {useHistory} from "react-router-dom";
-import {useDispatch, useSelector} from "react-redux";
+import {useSelector} from "react-redux";
 import {Col, Row} from "react-bootstrap";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
-import AlertDialog from "../../../../components/AlertDialog/AlertDialog";
-import {progressActions} from "../../../../actions/progressActions";
+//import {progressActions} from "../../../../actions/progressActions";
+import ModalForm from "../../../../components/ModalForm";
+import Spinner1 from "../../../../components/Loadings/Spinner1/Spinner1";
 //import EnfundePeriodo from "./EnfundePeriodo";
 
 const style = {
@@ -27,15 +28,14 @@ export default function EnfundeSemanal() {
     const [enfundes, setEnfundes] = useState(null);
     const [page, setPage] = useState(1);
     const history = useHistory();
-    const dispatch = useDispatch();
-    const progessbarStatus = (state) => dispatch(progressActions(state));
+    //const dispatch = useDispatch();
+    //const progessbarStatus = (state) => dispatch(progressActions(state));
     const authentication = useSelector((state) => state.auth._token);
     const credential = useSelector((state) => state.credential.credential);
 
-    //Variable para abrir y cerrar el modal para eliminar el registro
-    const [openModal, setOpenModal] = useState(false);
-    //Variable para enviar datos al modal
-    const [dataModal, setDataModal] = useState(null);
+
+    const [showModal, setShowModal] = useState(false);
+    const [traspasosSaldoEmpleados, setTraspasosSaldosEmpleados] = useState([]);
 
     const [reload, setReload] = useState(true);
 
@@ -47,9 +47,9 @@ export default function EnfundeSemanal() {
                 if (credential && credential.idhacienda) {
                     url = `${API_LINK}/bansis-app/index.php/getEnfunde/semanal?page=${page}&hacienda=${credential.idhacienda.id}`;
                 }
-
                 const request = await fetch(url);
                 const response = await request.json();
+
                 setEnfundes(response);
             })();
             setReload(false);
@@ -62,30 +62,26 @@ export default function EnfundeSemanal() {
     };
 
     const onCerrarEnfunde = (data) => {
-        progessbarStatus(true);
-        setOpenModal(true);
-        setDataModal({
-            title: `${data.hacienda.detalle}`,
-            content: `¿Esta seguro de cerrar el enfunde de la Semana ${data.semana}?.`,
-            id: data.id
-        })
-    };
-
-    const cerrarEnfunde = (id) => {
-        setOpenModal(false);
-        if (id !== undefined) {
+        setShowModal(true);
+        if (data.id !== undefined) {
             (async () => {
-                const url = `${API_LINK}/bansis-app/index.php/endunde/cerrar/semana/${id}`;
+                const url = `${API_LINK}/bansis-app/index.php/endunde/cerrar/semana/${data.id}`;
                 const configuracion = {method: 'POST', headers: {'Authorization': authentication}};
                 const request = await fetch(url, configuracion);
                 const response = await request.json();
-                await progessbarStatus(false);
+
                 setPage(1);
                 if (response.code === 200) {
-                    setReload(true);
+                    setTraspasosSaldosEmpleados(response.transfers);
+                    //setReload(true);
                 }
             })();
         }
+    };
+
+    const onHideModal = () => {
+        setShowModal(false);
+        setTraspasosSaldosEmpleados([]);
     };
 
     if (!enfundes || reload) {
@@ -100,16 +96,6 @@ export default function EnfundeSemanal() {
         <>
             {!reload &&
             <div className="container-fluid mt-3 mb-5">
-                {dataModal &&
-                <AlertDialog
-                    title={dataModal.title}
-                    content={dataModal.content}
-                    open={openModal}
-                    setOpen={setOpenModal}
-                    actionDestroy={cerrarEnfunde}
-                    id={dataModal.id}
-                />
-                }
                 <Row>
                     <Col className="mt-3 mb-3">
                         <Breadcrumbs aria-label="breadcrumb">
@@ -139,6 +125,77 @@ export default function EnfundeSemanal() {
                 </div>
                 <hr/>*/}
                 <div className="row">
+                    <ModalForm
+                        show={showModal}
+                        icon={'fas fa-arrow-right'}
+                        title={`Traspaso de saldos para la siguiente semana`}
+                        animation={true}
+                        backdrop={true}
+                        size="lg"
+                        centered={true}
+                        scrollable={true}
+                        dialogSize={'90'}
+                        cancel={onHideModal}
+                    >
+                        <div className="container-fluid">
+                            <div className="row">
+                                <div className="col-12">
+                                    {traspasosSaldoEmpleados.length === 0 ?
+                                        <Spinner1/> :
+                                        <div className="row">
+                                            <div className="col-12">
+                                                <table className="table table-bordered table-hover">
+                                                    <thead>
+                                                    <tr>
+                                                        <th rowSpan={2}>Empleado</th>
+                                                        <th>Material</th>
+                                                        <th>Estado</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {traspasosSaldoEmpleados.map((item, index) => (
+                                                        <React.Fragment key={index}>
+                                                            {item &&
+                                                            <tr>
+                                                                <td style={style.table.textCenter}>{item.nombres}</td>
+                                                                <td style={style.table.textCenter}>
+                                                                    {item.inventario.length > 0 &&
+                                                                    <table className="table table-bordered m-0">
+                                                                        <tbody>
+                                                                        {item.inventario.map((item, index) => (
+                                                                            <tr key={index}>
+                                                                                <td className="text-left">
+                                                                                    <span className="badge badge-light">
+                                                                                        {item.material.descripcion}
+                                                                                    </span>
+                                                                                </td>
+                                                                                <td width="10%"><i
+                                                                                    className="fas fa-exchange-alt"/>
+                                                                                </td>
+                                                                                <td width="10%">{item.sld_inicial}</td>
+                                                                            </tr>
+                                                                        ))}
+                                                                        </tbody>
+                                                                    </table>
+                                                                    }
+                                                                </td>
+                                                                <td style={style.table.textCenter}>
+                                                                    <i className={`fas fa-check-circle fa-lg`}
+                                                                       style={{color: "green"}}/>
+                                                                </td>
+                                                            </tr>
+                                                            }
+                                                        </React.Fragment>
+                                                    ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </ModalForm>
                     <div className="col-12 table-responsive">
                         <table className="table table-bordered table-hover">
                             <thead>
@@ -149,9 +206,9 @@ export default function EnfundeSemanal() {
                                 <th>Sem.</th>
                                 <th>Per.</th>
                                 <th>Hacienda</th>
+                                <th>Enfunde</th>
                                 <th>Pres.</th>
                                 <th>Fut.</th>
-                                <th>Total</th>
                                 <th>Desb.</th>
                                 <th>Accion</th>
                             </tr>
@@ -178,13 +235,19 @@ export default function EnfundeSemanal() {
                                     <td style={style.table.textCenter}>
                                         {item.hacienda.detalle}
                                     </td>
-                                    <td style={style.table.textCenter}>{item.presente}</td>
-                                    <td style={style.table.textCenter}>{item.futuro}</td>
                                     <td style={style.table.textCenter}><b>{item.total}</b></td>
+                                    <td style={style.table.textCenter}>
+                                        <i className={`fas ${+item.stPresente === 1 ? "fa-check-circle" : "fa-exclamation-circle"} fa-lg`}
+                                           style={{color: `${+item.stPresente === 1 ? "green" : "red"}`}}/>
+                                    </td>
+                                    <td style={style.table.textCenter}>
+                                        <i className={`fas ${+item.stFuturo === 1 ? "fa-check-circle" : "fa-exclamation-circle"} fa-lg`}
+                                           style={{color: `${+item.stFuturo === 1 ? "green" : "red"}`}}/>
+                                    </td>
                                     <td width="6%" style={style.table.textCenter}>{item.desbunche}</td>
                                     <td>
-                                        <div className="btn-group d-none">
-                                            {item.cerrado === "3" ?
+                                        <div className="btn-group">
+                                            {+item.cerrado >= 3 ?
                                                 <button className="btn btn-danger btn-lg">
                                                     <i className="fas fa-lock"/>
                                                 </button>
