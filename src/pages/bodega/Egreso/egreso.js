@@ -222,7 +222,7 @@ export default function Egreso() {
                                         api_url={api_haciendas}
                                         onChangeValue={onChangeValueHaciendaSearch}
                                         value={hacienda}
-                                        disabled={!!credential && credential.idhacienda}
+                                        disabled={!!(credential && credential.idhacienda)}
                                     />
                                 </FormGroup>
                             </Col>

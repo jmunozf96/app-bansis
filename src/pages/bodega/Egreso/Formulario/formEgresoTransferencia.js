@@ -8,11 +8,11 @@ import {Backdrop, CircularProgress} from "@material-ui/core";
 import EgresoTransDetail from "./formEgresoTransDetail";
 
 export default function EgresoTransferencia(props) {
-    const {hacienda, recibe, setOpen, setSearchTransaccionSemana, setNotificacion} = props;
+    const {grupo, hacienda, recibe, setOpen, setSearchTransaccionSemana, setNotificacion} = props;
     const [empleados, setEmpleados] = useState([]);
     const [loadData, setLoadData] = useState(true);
 
-    const url = `${API_LINK}/bansis-app/index.php/search/empleados/${hacienda}/${recibe.id}/inventario`;
+    const url = `${API_LINK}/bansis-app/index.php/search/empleados/${hacienda}/${recibe.id}/inventario?grupo=${grupo}&transfer=1`;
     const response = useFetch(url);
     const {loading} = response;
 
@@ -25,7 +25,7 @@ export default function EgresoTransferencia(props) {
     }
 
     const {result} = response;
-    console.log(result)
+
     if (empleados.length === 0 && loadData) {
         if (result.length === 0) {
             setOpen(false);
@@ -41,7 +41,7 @@ export default function EgresoTransferencia(props) {
             <Row className="ml-0 mr-0 mt-2">
                 {empleados.length > 0 &&
                 empleados.map((empleado, index) =>
-                    <Col className="pt-1 col-12 mb-2" key={index}>
+                    <Col className="pt-2 col-md-12 mb-2" key={index}>
                         <PanelExpansion
                             icon="fas fa-exchange-alt"
                             contentTabPanel="Transferencia de saldo"
@@ -49,18 +49,20 @@ export default function EgresoTransferencia(props) {
                             descripcion={empleado.descripcion}
                         >
                             <Container fluid className="p-0 m-0">
-                                {empleado.hasOwnProperty('inventario') && empleado.inventario.map((inv, index) =>
-                                    <Row className="col-12 ml-0 p-0" key={index}>
-                                        <EgresoTransDetail
-                                            data={inv}
-                                            hacienda={hacienda}
-                                            recibe={recibe}
-                                            solicita={empleado}
-                                            setSearchTransaccionSemana={setSearchTransaccionSemana}
-                                            setNotificacion={setNotificacion}
-                                        />
-                                    </Row>
-                                )}
+                                <Row className="col-md-12 ml-0 p-0">
+                                    {empleado.hasOwnProperty('inventario') && empleado.inventario.map((inv, index) =>
+                                        <div className="col-md-12" key={index}>
+                                            <EgresoTransDetail
+                                                data={inv}
+                                                hacienda={hacienda}
+                                                recibe={recibe}
+                                                solicita={empleado}
+                                                setSearchTransaccionSemana={setSearchTransaccionSemana}
+                                                setNotificacion={setNotificacion}
+                                            />
+                                        </div>
+                                    )}
+                                </Row>
                             </Container>
                         </PanelExpansion>
                     </Col>

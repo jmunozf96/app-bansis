@@ -151,93 +151,102 @@ export default function EgresoDetalle(props) {
     };
 
     return (
-        <>
-            <Col md={12}>
-                <SimpleTableUI
-                    columns={['...', 'Material', 'Movimiento', 'Cantidad', 'Stock', 'Fech.Salida', 'Accion']}
-                >
-                    {detalleEgreso.length > 0 &&
-                    detalleEgreso.map((material, index) => (
-                        <TableRow key={index} hover={true} className="table-sm table-responsive-sm">
-                            <TableCell align={"center"}>
-                                {material.id && !material.edit ? <i className="fas fa-cloud-upload-alt"/> :
-                                    <i className="fas fa-spinner fa-spin"/>}
-                            </TableCell>
-                            <TableCell>{material.descripcion}</TableCell>
-                            <TableCell align={"center"}>
-                                <Badge
-                                    variant={material.movimiento === 'EGRE-ART' ? "warning" : material.cantidad < 0 ? "danger" : "success"}>
-                                    {material.movimiento}
-                                </Badge>
-                            </TableCell>
-                            <TableCell align={"center"}>
-                                {edit && itemEdit.shortid === material.shortid ? (
-                                    <input
-                                        type="number"
-                                        className="form-control text-center"
-                                        id="id-edit-cantidad"
-                                        defaultValue={material.cantidad}
-                                        onKeyDown={(e) => e.keyCode === 13 ? onEditMaterial(e) : null}
-                                        onBlur={(e) => onEditMaterial(e)}
-                                        onFocus={(e) => e.target.select()}
-                                    />
-                                ) : material.cantidad}
-                            </TableCell>
-                            <TableCell align={"center"}>{material.stock}</TableCell>
-                            <TableCell align={"center"}>{material.time}</TableCell>
-                            <TableCell align={"center"}>
-                                {(material.hasOwnProperty('transferencia') && material.transferencia) ?
-                                    <ButtonGroup>
-                                        <Button size="sm" variant="info" onClick={() => showTransferencia(material.id)}>
-                                            <VisibilityIcon/>
-                                        </Button>
-                                        <Button size="sm" variant="dark">
-                                            <BlockIcon/>
-                                        </Button>
-                                    </ButtonGroup>
-                                    :
-                                    <ButtonGroup>
-                                        {edit && itemEdit.shortid === material.shortid ?
-                                            <Button variant="success" size="sm" onClick={(e) => onClickSave(e)}>
-                                                <SaveIcon/>
-                                            </Button> :
-                                            <Button variant="primary" size="sm"
-                                                    onClick={() => onClickEdit(material)}>
-                                                <EditIcon/>
+        <Col md={12} className="mt-2">
+            <hr className="mt-n0 mb-2"/>
+            <div className="row">
+                <div className="col-12 mb-2">
+                    <small>
+                        <i className="fas fa-list"/> Listado de materiales despachados en la semana
+                    </small>
+                </div>
+                <div className="col-12">
+                    <SimpleTableUI
+                        columns={['...', 'Descripcion Material', 'Movimiento', 'Cantidad', 'Stock', 'Fech.Salida', 'Accion']}
+                    >
+                        {detalleEgreso.length > 0 &&
+                        detalleEgreso.map((material, index) => (
+                            <TableRow key={index} hover={true} className="table-sm table-responsive-sm">
+                                <TableCell align={"center"}>
+                                    {material.id && !material.edit ? <i className="fas fa-cloud-upload-alt"/> :
+                                        <i className="fas fa-spinner fa-spin"/>}
+                                </TableCell>
+                                <TableCell>{material.descripcion}</TableCell>
+                                <TableCell align={"center"}>
+                                    <Badge
+                                        variant={material.movimiento === 'EGRE-ART' ? "warning" : material.cantidad < 0 ? "danger" : "success"}>
+                                        {material.movimiento}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell align={"center"}>
+                                    {edit && itemEdit.shortid === material.shortid ? (
+                                        <input
+                                            type="number"
+                                            className="form-control text-center"
+                                            id="id-edit-cantidad"
+                                            defaultValue={material.cantidad}
+                                            onKeyDown={(e) => e.keyCode === 13 ? onEditMaterial(e) : null}
+                                            onBlur={(e) => onEditMaterial(e)}
+                                            onFocus={(e) => e.target.select()}
+                                        />
+                                    ) : material.cantidad}
+                                </TableCell>
+                                <TableCell align={"center"}>{material.stock}</TableCell>
+                                <TableCell align={"center"}>{material.time}</TableCell>
+                                <TableCell align={"center"}>
+                                    {(material.hasOwnProperty('transferencia') && material.transferencia) ?
+                                        <ButtonGroup>
+                                            <Button size="sm" variant="info"
+                                                    onClick={() => showTransferencia(material.id)}>
+                                                <VisibilityIcon/>
                                             </Button>
-                                        }
-                                        <Button variant="danger" size="sm" onClick={() => deleteMaterial(material)}>
-                                            <DeleteIcon/>
-                                        </Button>
-                                    </ButtonGroup>
-                                }
+                                            <Button size="sm" variant="dark">
+                                                <BlockIcon/>
+                                            </Button>
+                                        </ButtonGroup>
+                                        :
+                                        <ButtonGroup>
+                                            {edit && itemEdit.shortid === material.shortid ?
+                                                <Button variant="success" size="sm" onClick={(e) => onClickSave(e)}>
+                                                    <SaveIcon/>
+                                                </Button> :
+                                                <Button variant="primary" size="sm"
+                                                        onClick={() => onClickEdit(material)}>
+                                                    <EditIcon/>
+                                                </Button>
+                                            }
+                                            <Button variant="danger" size="sm" onClick={() => deleteMaterial(material)}>
+                                                <DeleteIcon/>
+                                            </Button>
+                                        </ButtonGroup>
+                                    }
 
-                            </TableCell>
-                        </TableRow>
-                    ))
-                    }
-                </SimpleTableUI>
-                <FormDialog
-                    title="Detalle de transferencia de saldo:"
-                    open={openModalDetailTransferencia}
-                    setOpen={setOpenModalDetailTransferencia}
-                >
-                    <EgresoShowTransferencia
-                        data={showDetailTransferencia}
+                                </TableCell>
+                            </TableRow>
+                        ))
+                        }
+                    </SimpleTableUI>
+                    <FormDialog
+                        title="Detalle de transferencia de saldo:"
+                        open={openModalDetailTransferencia}
                         setOpen={setOpenModalDetailTransferencia}
-                        setNotificacion={setNotificacion}
-                        setSearchTransaccionSemana={setSearchTransaccionSemana}
+                    >
+                        <EgresoShowTransferencia
+                            data={showDetailTransferencia}
+                            setOpen={setOpenModalDetailTransferencia}
+                            setNotificacion={setNotificacion}
+                            setSearchTransaccionSemana={setSearchTransaccionSemana}
+                        />
+                    </FormDialog>
+                    <AlertDialog
+                        title={dataModal.title}
+                        content={dataModal.content}
+                        open={openModal}
+                        setOpen={setOpenModal}
+                        actionDestroy={destroyData}
+                        id={dataModal.material}
                     />
-                </FormDialog>
-                <AlertDialog
-                    title={dataModal.title}
-                    content={dataModal.content}
-                    open={openModal}
-                    setOpen={setOpenModal}
-                    actionDestroy={destroyData}
-                    id={dataModal.material}
-                />
-            </Col>
-        </>
+                </div>
+            </div>
+        </Col>
     );
 }

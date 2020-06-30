@@ -82,6 +82,7 @@ export default function EnfundeSemanal() {
     const onHideModal = () => {
         setShowModal(false);
         setTraspasosSaldosEmpleados([]);
+        setReload(true);
     };
 
     if (!enfundes || reload) {
@@ -245,7 +246,7 @@ export default function EnfundeSemanal() {
                                            style={{color: `${+item.stFuturo === 1 ? "green" : "red"}`}}/>
                                     </td>
                                     <td width="6%" style={style.table.textCenter}>{item.desbunche}</td>
-                                    <td>
+                                    <td width="8%">
                                         <div className="btn-group">
                                             {+item.cerrado >= 3 ?
                                                 <button className="btn btn-danger btn-lg">
@@ -261,7 +262,7 @@ export default function EnfundeSemanal() {
                                                 className="btn btn-primary btn-lg"
                                                 onClick={() => history.push(`${history.location.pathname}/semana/detalle/${item.id}`)}
                                             >
-                                                <i className="fas fa-archive"/>
+                                                <i className="fas fa-map-marked-alt"/>
                                             </button>
                                         </div>
                                     </td>

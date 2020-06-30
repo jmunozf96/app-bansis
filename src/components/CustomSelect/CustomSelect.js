@@ -1,47 +1,54 @@
 import React, {useEffect, useState} from "react";
-import useFetch from "../../hooks/useFetch";
+import {FormControl, InputLabel, MenuItem, Select} from "@material-ui/core";
+import {makeStyles} from "@material-ui/core/styles";
+
+const useStyles = makeStyles((theme) => ({
+    formControl: {
+        margin: theme.spacing(0),
+        minWidth: 120,
+    },
+    selectEmpty: {
+        marginTop: theme.spacing(0),
+    },
+}));
 
 export default function CustomSelect(props) {
-    const {name, defaultValue, placeholder, api_url, disabled = false} = props;
+    const classes = useStyles();
+    const {label, name, value, placeholder, api_url, disabled = false, loading, setLoading, changeValue} = props;
     const [dataSelect, setDataSelect] = useState([]);
-    const [update, setUpdate] = useState(true);
-
-    const datos = useFetch(api_url);
-
-    const {loading, result} = datos;
 
     useEffect(() => {
-        if (update && !loading) {
-            const {code, dataArray} = result;
-            if (code === 200) {
-                setDataSelect(dataArray);
-            }
-            setUpdate(false);
+        if (loading) {
+            (async () => {
+                const request = await fetch(api_url);
+                const response = await request.json();
+                setDataSelect(response.dataArray);
+            })();
+            setLoading(false);
         }
-    }, [update, loading, result, setDataSelect]);
-
-    if (loading) {
-        return (
-            <div>
-                Cargando datos...
-            </div>
-        );
-    }
+    }, [loading, api_url, setLoading]);
 
     return (
-        <select
-            className="form-control custom-select"
-            name={name}
-            value={defaultValue}
-            onChange={(e) => e.preventDefault()}
-            disabled={disabled}
-        >
-            <option disabled={true} hidden={true} value="">{placeholder}</option>
-            {dataSelect.length > 0 && dataSelect.map((data, index) => (
-                <option key={data.id} value={data.id}>
-                    {data.hasOwnProperty('descripcion') && data.descripcion}
-                </option>
-            ))}
-        </select>
+        <FormControl variant="outlined" className={classes.formControl}>
+            <InputLabel id="demo-simple-select-outlined-label">{label}</InputLabel>
+            <Select
+                labelId="demo-simple-select-outlined-label"
+                id="demo-simple-select-outlined"
+                name={name}
+                value={dataSelect.length > 0 ? value : ""}
+                onChange={(e) => changeValue(e)}
+                disabled={disabled}
+                label={label}
+            >
+                <MenuItem value="">
+                    <em>{placeholder}</em>
+                </MenuItem>
+                {dataSelect.length > 0 && dataSelect.map((data) => (
+                    <MenuItem key={data.id} value={data.id}>
+                        {data.hasOwnProperty('descripcion') && data.descripcion}
+                    </MenuItem>
+                ))}
+            </Select>
+        </FormControl>
     );
 }

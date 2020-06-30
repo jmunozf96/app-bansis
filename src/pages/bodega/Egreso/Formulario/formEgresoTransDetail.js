@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Badge, Button, Col} from "react-bootstrap";
+import {Button, Col} from "react-bootstrap";
 import {FormHelperText} from "@material-ui/core";
 
 import moment from "moment";
@@ -60,6 +60,7 @@ export default function EgresoTransDetail(props) {
                 const url = `${API_LINK}/bansis-app/index.php/egreso-bodega/saldos/transfer`;
                 const configuracion = _configStoreApi('POST', url, datos, progressbarStatus, authentication);
                 const request = await _saveApi(configuracion);
+                console.log(request);
                 const {code, message} = request;
                 if (code === 200) {
                     setNotificacion({
@@ -77,7 +78,7 @@ export default function EgresoTransDetail(props) {
 
             document.getElementById(`'id-cantidad-inv'${id}`).value = '';
             setReload(true);
-        }else{
+        } else {
             setNotificacion({
                 open: true,
                 message: 'Cantidad no permitida'
@@ -86,8 +87,8 @@ export default function EgresoTransDetail(props) {
     };
 
     return (
-        <>
-            <Col md={5} className="m-0 mb-2">
+        <div className="row">
+            <Col md={7} className="m-0 mb-2">
                 <input
                     className="form-control bg-white"
                     defaultValue={material.descripcion}
@@ -108,27 +109,27 @@ export default function EgresoTransDetail(props) {
                     Saldo
                 </FormHelperText>
             </Col>
-            <Col md={3} className="m-0 mb-2 col-6">
+            <Col md={2} className="m-0 mb-2 col-6">
                 <input
                     id={`'id-cantidad-inv'${id}`}
                     name="cantidad"
                     className="form-control text-center bg-white"
                     type="number"
                     onChange={onChangeCantidad}
+                    onKeyDown={(e) => e.keyCode === 13 && onclickTransfer()}
                 />
                 <FormHelperText id="outlined-weight-helper-text">
-                    Cantidad a transferir
+                    Cantidad
                 </FormHelperText>
             </Col>
-            <Col md={2} className="m-0 mb-2 col-12">
+            <Col md={1} className="m-0 mb-2 col-12">
                 <Button
                     variant="danger"
                     onClick={() => onclickTransfer()}
                 >
-                    <i className="fas fa-exchange-alt"/> Transferir <Badge
-                    variant="light">{dataTransfer.cantidad}</Badge>
+                    <i className="fas fa-exchange-alt"/>
                 </Button>
             </Col>
-        </>
+        </div>
     );
 }

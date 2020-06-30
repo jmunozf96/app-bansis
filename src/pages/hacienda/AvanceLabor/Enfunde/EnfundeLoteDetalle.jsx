@@ -213,7 +213,7 @@ function ModalDetalleEnfundeSeccionSemana(props) {
     }, [loadDataLote, data, setEnfunde, setLoadDataLote, idenfunde]);
 
     const sumHas = () => {
-        return enfunde.detalleSemana.reduce((total, item) => +total + +item.seccion.has, 0)
+        return (enfunde.detalleSemana.reduce((total, item) => +total + +item.seccion.has, 0)).toFixed(2)
     };
 
     const sumPresente = () => {
@@ -301,32 +301,44 @@ function ModalDetalleEnfundeSeccionSemana(props) {
                                         <thead className="text-center">
                                         <tr>
                                             <th>Empleado</th>
-                                            <th width="13%">Has</th>
-                                            <th width="13%">Presente</th>
-                                            <th width="13%">Futuro</th>
-                                            <th width="13%">Total</th>
-                                            <th width="13%">...</th>
+                                            <th>Reelevo</th>
+                                            <th width="5%">Has</th>
+                                            <th width="10%">Presente</th>
+                                            <th width="10%">Futuro</th>
+                                            <th width="10%">Total</th>
+                                            <th width="5%">...</th>
                                         </tr>
                                         </thead>
                                         <tbody>
                                         {enfunde && enfunde.detalleSemana.length > 0 &&
                                         enfunde.detalleSemana.map((item, i) => (
-                                            <tr key={i} className="table-sm text-center">
-                                                <td style={style.table.textCenter}>{item.seccion['cab_seccion_labor'].empleado.nombres}</td>
-                                                <td style={style.table.textCenter}>{(+item.seccion.has).toFixed(2)}</td>
+                                            <tr key={i} className="table-sm text-center"  style={item.reelevo && {backgroundColor: 'rgba(67,255,179,0.35)'}}>
+                                                <td style={style.table.textCenter}>{item.seccion['cab_seccion_labor'].empleado.nombre1
+                                                    .concat(' ')
+                                                    .concat(item.seccion['cab_seccion_labor'].empleado.nombre2)
+                                                    .concat(' ')
+                                                    .concat(item.seccion['cab_seccion_labor'].empleado.apellido1)}</td>
+                                                <td style={style.table.textCenter}>
+                                                    {item.reelevo && item.reelevo.nombre1
+                                                        .concat(' ')
+                                                        .concat(item.seccion['cab_seccion_labor'].empleado.apellido1)}
+                                                </td>
+                                                <td style={style.table.textCenter}>
+                                                    {!item.reelevo ? (+item.seccion.has).toFixed(2) : '-'}
+                                                </td>
                                                 <td style={style.table.textCenter}>{+item.cant_pre}</td>
                                                 <td style={style.table.textCenter}>{+item.cant_fut}</td>
                                                 <td style={style.table.textCenter}>{+item.cant_pre + +item.cant_fut}</td>
                                                 <td>
                                                     <button className="btn btn-info">
-                                                        Enfunde
+                                                        <i className="fas fa-route"/>
                                                     </button>
                                                 </td>
                                             </tr>
                                         ))
                                         }
                                         <tr className="text-center" style={{backgroundColor: '#E6ECF5'}}>
-                                            <td><b>TOTAL SEMANA</b></td>
+                                            <td colSpan={2}><b>TOTAL SEMANA</b></td>
                                             <td><b>{sumHas()}</b></td>
                                             <td><b>{sumPresente()}</b></td>
                                             <td><b>{sumFuturo()}</b></td>

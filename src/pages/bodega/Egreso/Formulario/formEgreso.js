@@ -41,7 +41,7 @@ export default function FormEgreso() {
 
     const [disabledElements, setDisabledElements] = useState({
         change: true,
-        hacienda: !!credential && credential.idhacienda,
+        hacienda: !!(credential && credential.idhacienda),
         labor: true,
         empleado: false,
         bodega: false,
@@ -102,11 +102,12 @@ export default function FormEgreso() {
             setDisabledElements({
                 ...disabledElements,
                 change: false,
+                empleado: true,
                 hacienda: true,
                 bodega: false,
                 btnnuevo: true,
                 btnsave: false,
-                transfer: false
+                transfer: true
             });
             setLoadTransaccionEdit({...loadTransacionEdit, load: false});
         }
@@ -124,6 +125,7 @@ export default function FormEgreso() {
         const data = qs.stringify({
             json: JSON.stringify(transaction)
         });
+
         progressbarStatus(true);
         (async () => {
             const url = `${API_LINK}/bansis-app/index.php/egreso-bodega`;
@@ -142,14 +144,21 @@ export default function FormEgreso() {
                         ...disabledElements,
                         change: true,
                         btnnuevo: false,
-                        btnsave: true,
-                        material: false,
-                        cantidad: false
+                        btnsave: true
                     });
+
+                    if(cabeceraEgreso.bodega !== "" && cabeceraEgreso.grupo !== ""){
+                        setDisabledElements({
+                            ...disabledElements,
+                            material: false,
+                            cantidad: false
+                        });
+                    }
                 }
                 /*setMaterial(null);
                 setStock(0);*/
             }
+            setDetalleEgreso([]);
             setSearchTransaccionSemana(true);
         })();
     };
@@ -258,12 +267,12 @@ export default function FormEgreso() {
                             setSearchTransaccionSemana={setSearchTransaccionSemana}
                         />
                         <Col>
-
                             <FullScreen
                                 open={openFullScreen}
                                 setOpen={setOpenFullScreen}
                             >
                                 <EgresoTransferencia
+                                    grupo={cabeceraEgreso.grupo}
                                     hacienda={cabeceraEgreso.hacienda}
                                     recibe={cabeceraEgreso.empleado}
                                     setOpen={setOpenFullScreen}
@@ -271,13 +280,12 @@ export default function FormEgreso() {
                                     setNotificacion={setNotificacion}
                                 />
                             </FullScreen>
-
                             <Button
                                 variant="primary mt-3"
                                 disabled={disabledElements.transfer}
                                 onClick={() => !disabledElements.transfer && onClickOpenFullScreen()}
                             >
-                                <i className="fas fa-exchange-alt"/> Traspaso de Saldo
+                                <i className="fas fa-exchange-alt"/> Transferir Saldo
                             </Button>
                         </Col>
                     </EgresoCabecera>

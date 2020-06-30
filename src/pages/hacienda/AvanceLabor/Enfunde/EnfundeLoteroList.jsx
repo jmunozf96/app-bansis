@@ -188,7 +188,7 @@ export default function EnfundeLoteroList() {
                         <Buscador
                             api={api_buscador}
                             change={changeHacienda}
-                            disabled={credential && credential.idhacienda}
+                            disabled={!!(credential && credential.idhacienda)}
                             id="id-hacienda-search"
                             label="Hacienda"
                             setData={setHacienda}
@@ -204,7 +204,7 @@ export default function EnfundeLoteroList() {
                         api_url={apiEmpleado}
                         setSearch={setSearchEmpleado}
                         onChangeValue={changeEmpleado}
-                        disabled={false}
+                        disabled={((!credential && !credential.idhacienda) || !hacienda)}
                         value={empleado}
                         setChangeURL={setChangeURL}
                     />

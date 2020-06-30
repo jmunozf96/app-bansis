@@ -9,7 +9,7 @@ import YoutubeSearchedForIcon from '@material-ui/icons/YoutubeSearchedFor';
 import "./InputSearch.scss";
 
 export default function InputSearch(props) {
-    const {id, label, api_url, setSearch, onChangeValue, disabled, value = null, setChangeURL} = props;
+    const {id, label, placeholder = '', api_url, setSearch, onChangeValue, disabled, value = null, setChangeURL} = props;
     const [open, setOpen] = useState(false);
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -85,6 +85,7 @@ export default function InputSearch(props) {
                 <TextField
                     {...params}
                     label={label}
+                    placeholder={placeholder}
                     variant="outlined"
                     InputProps={{
                         ...params.InputProps,
