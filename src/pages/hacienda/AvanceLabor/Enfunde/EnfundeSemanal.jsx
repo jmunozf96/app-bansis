@@ -13,6 +13,7 @@ import Typography from "@material-ui/core/Typography";
 //import {progressActions} from "../../../../actions/progressActions";
 import ModalForm from "../../../../components/ModalForm";
 import Spinner1 from "../../../../components/Loadings/Spinner1/Spinner1";
+import ConfirmDialog from "../../../../components/ConfirmDialog";
 //import EnfundePeriodo from "./EnfundePeriodo";
 
 const style = {
@@ -33,9 +34,15 @@ export default function EnfundeSemanal() {
     const authentication = useSelector((state) => state.auth._token);
     const credential = useSelector((state) => state.credential.credential);
 
-
+    const [openDialog, setOpenDialog] = useState(false);
+    const [dataDialog, setDataDialog] = useState({
+        title: '',
+        content: '',
+        data: null
+    });
     const [showModal, setShowModal] = useState(false);
     const [traspasosSaldoEmpleados, setTraspasosSaldosEmpleados] = useState([]);
+    const [enfundePresente, setEnfundePresente] = useState(null);
 
     const [reload, setReload] = useState(true);
 
@@ -61,7 +68,17 @@ export default function EnfundeSemanal() {
         setReload(true);
     };
 
+    const confirmDialog = (data) => {
+        setOpenDialog(true);
+        setDataDialog({
+            title: 'Cerrar enfunde Semanal',
+            content: '¿Esta seguro de cerrar el enfunde?',
+            data
+        })
+    };
+
     const onCerrarEnfunde = (data) => {
+        setOpenDialog(false);
         setShowModal(true);
         if (data.id !== undefined) {
             (async () => {
@@ -72,7 +89,11 @@ export default function EnfundeSemanal() {
 
                 setPage(1);
                 if (response.code === 200) {
-                    setTraspasosSaldosEmpleados(response.transfers);
+                    if (response.hasOwnProperty('transfers')) {
+                        setTraspasosSaldosEmpleados(response.transfers);
+                    } else if (response.hasOwnProperty('enfundePresente')) {
+                        setEnfundePresente(response['enfundePresente']);
+                    }
                     //setReload(true);
                 }
             })();
@@ -82,6 +103,7 @@ export default function EnfundeSemanal() {
     const onHideModal = () => {
         setShowModal(false);
         setTraspasosSaldosEmpleados([]);
+        setEnfundePresente(null);
         setReload(true);
     };
 
@@ -141,62 +163,78 @@ export default function EnfundeSemanal() {
                         <div className="container-fluid">
                             <div className="row">
                                 <div className="col-12">
-                                    {traspasosSaldoEmpleados.length === 0 ?
+                                    {traspasosSaldoEmpleados.length === 0 && !enfundePresente ?
                                         <Spinner1/> :
-                                        <div className="row">
-                                            <div className="col-12">
-                                                <table className="table table-bordered table-hover">
-                                                    <thead>
-                                                    <tr>
-                                                        <th rowSpan={2}>Empleado</th>
-                                                        <th>Material</th>
-                                                        <th>Estado</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    {traspasosSaldoEmpleados.map((item, index) => (
-                                                        <React.Fragment key={index}>
-                                                            {item &&
+                                        <>
+                                            {enfundePresente ?
+                                                <h3><i className="fas fa-check-circle"/> {enfundePresente.presente}</h3>
+                                                :
+                                                <div className="row">
+                                                    <div className="col-12">
+                                                        <table className="table table-bordered table-hover">
+                                                            <thead>
                                                             <tr>
-                                                                <td style={style.table.textCenter}>{item.nombres}</td>
-                                                                <td style={style.table.textCenter}>
-                                                                    {item.inventario.length > 0 &&
-                                                                    <table className="table table-bordered m-0">
-                                                                        <tbody>
-                                                                        {item.inventario.map((item, index) => (
-                                                                            <tr key={index}>
-                                                                                <td className="text-left">
+                                                                <th rowSpan={2}>Empleado</th>
+                                                                <th>Material</th>
+                                                                <th>Estado</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            {traspasosSaldoEmpleados.map((item, index) => (
+                                                                <React.Fragment key={index}>
+                                                                    {item &&
+                                                                    <tr>
+                                                                        <td style={style.table.textCenter}>{item.nombres}</td>
+                                                                        <td style={style.table.textCenter}>
+                                                                            {item.inventario.length > 0 &&
+                                                                            <table className="table table-bordered m-0">
+                                                                                <tbody>
+                                                                                {item.inventario.map((item, index) => (
+                                                                                    <tr key={index}>
+                                                                                        <td className="text-left">
                                                                                     <span className="badge badge-light">
                                                                                         {item.material.descripcion}
                                                                                     </span>
-                                                                                </td>
-                                                                                <td width="10%"><i
-                                                                                    className="fas fa-exchange-alt"/>
-                                                                                </td>
-                                                                                <td width="10%">{item.sld_inicial}</td>
-                                                                            </tr>
-                                                                        ))}
-                                                                        </tbody>
-                                                                    </table>
+                                                                                        </td>
+                                                                                        <td width="10%"><i
+                                                                                            className="fas fa-exchange-alt"/>
+                                                                                        </td>
+                                                                                        <td width="10%">{item.sld_inicial}</td>
+                                                                                    </tr>
+                                                                                ))}
+                                                                                </tbody>
+                                                                            </table>
+                                                                            }
+                                                                        </td>
+                                                                        <td style={style.table.textCenter}>
+                                                                            <i className={`fas fa-check-circle fa-lg`}
+                                                                               style={{color: "green"}}/>
+                                                                        </td>
+                                                                    </tr>
                                                                     }
-                                                                </td>
-                                                                <td style={style.table.textCenter}>
-                                                                    <i className={`fas fa-check-circle fa-lg`}
-                                                                       style={{color: "green"}}/>
-                                                                </td>
-                                                            </tr>
-                                                            }
-                                                        </React.Fragment>
-                                                    ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
+                                                                </React.Fragment>
+                                                            ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </>
                                     }
                                 </div>
                             </div>
                         </div>
                     </ModalForm>
+                    {dataDialog.data &&
+                    <ConfirmDialog
+                        title={dataDialog.title}
+                        content={dataDialog.content}
+                        open={openDialog}
+                        setOpen={setOpenDialog}
+                        data={dataDialog.data}
+                        actionConfirm={onCerrarEnfunde}
+                    />
+                    }
                     <div className="col-12 table-responsive">
                         <table className="table table-bordered table-hover">
                             <thead>
@@ -248,13 +286,13 @@ export default function EnfundeSemanal() {
                                     <td width="6%" style={style.table.textCenter}>{item.desbunche}</td>
                                     <td width="8%">
                                         <div className="btn-group">
-                                            {+item.cerrado >= 3 ?
+                                            {+item.cerrado >= 2 ?
                                                 <button className="btn btn-danger btn-lg">
                                                     <i className="fas fa-lock"/>
                                                 </button>
                                                 :
                                                 <button className="btn btn-success btn-lg"
-                                                        onClick={() => onCerrarEnfunde(item)}>
+                                                        onClick={() => confirmDialog(item)}>
                                                     <i className="fas fa-lock-open"/>
                                                 </button>
                                             }

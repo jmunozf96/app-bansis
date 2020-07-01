@@ -159,6 +159,7 @@ export default function FormEnfundeDetalle(props) {
             setMaterialesInventario(materialesInventarioReelevo);
             const material = materialesInventarioReelevo[0];
             setMaterialSelect(material);
+            setCalculateSaldoReelevo(true);
             setLoadDataReelevo(false);
         }
     }, [detallesEnfundeFuturo, detallesEnfundePresente, loadDataReelevo, materialesInventarioReelevo]);
@@ -167,7 +168,6 @@ export default function FormEnfundeDetalle(props) {
         if (calculateSaldoReelevo) {
             if (materialSelect && empleadoReelevo) {
                 const {material} = materialSelect;
-
                 const arrayDeleteMaterialPrepare = deleteSectionEnfunde.filter((item) => item.material === material.id && item.reelevo && item.reelevo.id === empleadoReelevo.id);
                 const saldoEliminadosPrepare = arrayDeleteMaterialPrepare.reduce((total, item) => +total + item.cantidad, 0);
 
