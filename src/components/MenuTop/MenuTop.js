@@ -17,7 +17,7 @@ import {recursosAction} from "../../actions/recursosActions";
 export default function MenuTop() {
     const authentication = useSelector((state) => state.auth._token);
     const progressbarStatus = useSelector((state) => state.progressbar.loading);
-    const credentialCard = useSelector((state) => state.credential.credential);
+    const credentialCard = useSelector((state) => state.credential);
     const recursos = useSelector((state) => state.recursos);
 
     const localStorageAuth = localStorage.getItem('_sessionId') === undefined || localStorage.getItem('_sessionId') === null;

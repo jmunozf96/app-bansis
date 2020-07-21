@@ -32,7 +32,7 @@ export default function EnfundeSemanal() {
     //const dispatch = useDispatch();
     //const progessbarStatus = (state) => dispatch(progressActions(state));
     const authentication = useSelector((state) => state.auth._token);
-    const credential = useSelector((state) => state.credential.credential);
+    const credential = useSelector((state) => state.credential);
 
     const [openDialog, setOpenDialog] = useState(false);
     const [dataDialog, setDataDialog] = useState({

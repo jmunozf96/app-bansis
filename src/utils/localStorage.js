@@ -5,11 +5,13 @@ export const getStateLocalStorage = () => {
     const credential = Cookies.get('sessionId');
     const recursos = Cookies.get('sessionRecursos');
     if (auth === null) return undefined;
-    return {
-        "auth": {"_token": JSON.parse(auth)},
-        "credential": {"credential": JSON.parse(credential !== undefined ? credential : null)},
-        "recursos": JSON.parse(recursos !== undefined ? recursos : null)
-    };
+    return (
+        {
+            auth: {_token: JSON.parse(auth)},
+            credential: JSON.parse(credential !== undefined ? credential : null),
+            recursos: JSON.parse(recursos !== undefined ? recursos : null),
+        }
+    );
 };
 
 export const setStateLocalStorage = (state) => {

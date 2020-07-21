@@ -27,7 +27,7 @@ export default function Egreso() {
     const history = useHistory();
     const dispatch = useDispatch();
     const progessbarStatus = (state) => dispatch(progressActions(state));
-    const credential = useSelector((state) => state.credential.credential);
+    const credential = useSelector((state) => state.credential);
     //const authentication = useSelector((state) => state.auth._token);
 
     const [openDrawer, setOpenDrawer] = useState(false);

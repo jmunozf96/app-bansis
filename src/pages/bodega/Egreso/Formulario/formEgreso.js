@@ -24,7 +24,7 @@ export default function FormEgreso() {
         id
     });
 
-    const credential = useSelector((state) => state.credential.credential);
+    const credential = useSelector((state) => state.credential);
     const [searchEmpleado, setSearchEmpleado] = useState('');
     const [searchMaterial, setSearchMaterial] = useState('');
     const [changeURL, setChangeURL] = useState(false);

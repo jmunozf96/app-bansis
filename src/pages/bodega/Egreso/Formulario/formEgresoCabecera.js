@@ -55,7 +55,7 @@ export default function EgresoCabecera(props) {
 
     const dispatch = useDispatch();
     //const progressbarStatus = (state) => dispatch(progressActions(state));
-    //const credential = useSelector((state) => state.credential.credential);
+    //const credential = useSelector((state) => state.credential);
     useEffect(() => {
         if (!loadDataSelectHacienda && loadHaciendaDinamic) {
             if (cabeceraEgreso.hacienda !== "") {

@@ -31,6 +31,7 @@ import Page404 from "./components/Error/404 Page";
 import FormUsuario from "./pages/seguridad/Usuario/FormUsuario";
 import FormRecursosUsuario from "./pages/seguridad/Recursos/FormRecursosUsuario";
 import ReporteEnfunde from "./pages/hacienda/Informes/RepEnfunde";
+import Recepcion from "./pages/cosecha/Recepcion";
 
 export const routes = [
     {
@@ -136,6 +137,10 @@ export const routes = [
     {
         path: "/bodega/egreso-material/:idmodulo/formulario/:id?",
         component: FormEgreso
+    },
+    {
+        path: "/cosecha/recepcion/racimos-lote/:idmodulo",
+        component: Recepcion
     },
     {
         path: "/seguridad/usuario/:idmodulo",

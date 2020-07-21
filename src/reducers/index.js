@@ -9,6 +9,7 @@ import haciendaReducers from "./hacienda/haciendaReducers";
 import bodegaReducers from "./bodega/bodegaReducers";
 import grupoReducers from "./bodega/grupoReducers";
 import recursosReducers from "./recursosReducers";
+import cosechaReducers from "./cosecha/cosechaReducers";
 
 export default combineReducers({
     auth: authReducer,
@@ -20,5 +21,6 @@ export default combineReducers({
     dataHacienda: haciendaReducers,
     dataBodega: bodegaReducers,
     dataGrupo: grupoReducers,
-    statusForm: statusFormReducers
+    statusForm: statusFormReducers,
+    cosecha: cosechaReducers
 });

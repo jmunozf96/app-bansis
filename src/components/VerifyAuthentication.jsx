@@ -19,7 +19,7 @@ export default function VerifyAuthentication({children}) {
     const [renderiza, setRenderiza] = useState(false);
 
     const authentication = useSelector((state) => state.auth._token);
-    const credentialCard = useSelector((state) => state.credential.credential);
+    const credentialCard = useSelector((state) => state.credential);
     const dispatch = useDispatch();
 
     const {idmodulo} = useParams();
