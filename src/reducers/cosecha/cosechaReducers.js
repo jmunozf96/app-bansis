@@ -1,9 +1,10 @@
 const initialProps = {
-    updateCajasDia: false,
-    updateLotesRecobro: false,
-    updateCintaRecobro: false,
-    loadRequestData: false,
-    loadDataCosecha: false
+    updateCajasDia: true,
+    updateLotesRecobro: true,
+    updateCintaRecobro: true,
+    loadRequestData: true,
+    loadDataCosecha: false,
+    lotesCortados: false
 };
 
 export default function (state = initialProps, action) {
@@ -32,6 +33,11 @@ export default function (state = initialProps, action) {
             return ({
                 ...state,
                 updateCintaRecobro: action.payload
+            });
+        case 'LOTES_CORTADOS':
+            return ({
+                ...state,
+                lotesCortados: action.payload
             });
         case 'NOT_LOAD_COMPONENTS' :
             return ({

@@ -33,6 +33,13 @@ export const enabledCintaRecobro = state => {
     })
 };
 
+export const enabledLotesCortados = state => {
+    return ({
+        type: 'LOTES_CORTADOS',
+        payload: state
+    })
+};
+
 export const disabledComponents = state => {
     return ({
         type: 'NOT_LOAD_COMPONENTS',

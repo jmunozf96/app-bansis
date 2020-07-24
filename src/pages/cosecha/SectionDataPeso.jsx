@@ -5,7 +5,7 @@ import {API_LINK} from "../../utils/constants";
 import moment from "moment";
 import 'moment/locale/es';
 import {
-    enabledLoadDataCosecha,
+    enabledLoadDataCosecha, enabledLotesCortados,
     enabledLotesRecobroAction,
     enabledRequestDataAction
 } from "../../actions/cosecha/cosechaActions";
@@ -75,6 +75,7 @@ export default function SectionDataPeso(props) {
                 await progressbarStatus(false);
             })();
             dispatch(enabledLoadDataCosecha(false));
+            dispatch(enabledRequestDataAction(true));
         }
     }, [loadDataCosecha, dispatch, day, hacienda, setLotesDia]);
 
@@ -90,17 +91,18 @@ export default function SectionDataPeso(props) {
                     /*
                     * enfunde, cortados, peso, recobro
                     * */
-                    setColorCorte(+dataCosecha['cs_color']);
-                    if (colorCorte === +dataCosecha['cs_color'] && colorCorte !== 0) {
+                    if (colorCorte === 0) {
+                        setColorCorte(+dataCosecha['cs_color']);
+                        setSearchRecobroCintaSemana(true);
+                    } else if (colorCorte === +dataCosecha['cs_color']) {
                         addLote(dataCosecha, datos);
-                        dispatch(enabledLotesRecobroAction(false));
-                        setLoadChart(false);
                     } else {
+                        setColorCorte(+dataCosecha['cs_color']);
+                        setSearchRecobroCintaSemana(true);
+                        dispatch(enabledLotesCortados(true));
                         dispatch(enabledLotesRecobroAction(true));
-                        setLoadChart(true);
                     }
 
-                    setSearchRecobroCintaSemana(true);
                 }
             })();
 

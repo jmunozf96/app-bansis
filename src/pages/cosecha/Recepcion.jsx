@@ -14,7 +14,7 @@ import CustomSelect from "../../components/CustomSelect/CustomSelect";
 
 import {useDispatch, useSelector} from "react-redux";
 import {
-    enabledCajasDiaAction,
+    enabledCajasDiaAction, enabledLotesCortados,
     enabledLotesRecobroAction,
     enabledRequestDataAction
 } from "../../actions/cosecha/cosechaActions";
@@ -33,6 +33,7 @@ export default function Recepcion() {
     const classes = useStyles();
     const day = moment().format("DD/MM/YYYY");
     //const day = "18/07/2020";
+    const [cajasDay, setCajasDay] = useState([]);
     const [lotesDia, setLotesDia] = useState([]);
     const [colorCorte, setColorCorte] = useState(0);
 
@@ -57,14 +58,14 @@ export default function Recepcion() {
     //const [recordAsync, setRecordAsync] = useState(true);
     //const [updateComponentCajasDia, setUpdateComponentCajasDia] = useState(false);
 
-    const api_buscador = `${API_LINK}/bansis-app/index.php/haciendas-select`;
-    const [loadDataSelectHacienda, setLoadDataSelectHacienda] = useState(true);
-    const [hacienda, setHacienda] = useState('');
-
     const dispatch = useDispatch();
     //const getUpdateCajasDia = useSelector((state) => state.cosecha.updateCajasDia);
     const getRequestData = useSelector((state) => state.cosecha.loadRequestData);
     const getUpdateLotesRecobro = useSelector((state) => state.cosecha.updateLotesRecobro);
+    const credential = useSelector((state) => state.credential);
+    const api_buscador = `${API_LINK}/bansis-app/index.php/haciendas-select`;
+    const [loadDataSelectHacienda, setLoadDataSelectHacienda] = useState(true);
+    const [hacienda, setHacienda] = useState(credential.idhacienda ? credential.idhacienda.id : "");
 
     useEffect(() => {
         if (ordenarArray && lotesDia.length > 0) {
@@ -134,7 +135,12 @@ export default function Recepcion() {
                 if (code === 200) {
                     if (request.data.length > 0) {
                         setLotesDia(request.data);
+                        //dispatch(enabledLotesCortados(true));
+                    } else {
+                        setLotesDia([]);
+                        //dispatch(enabledLotesCortados(false));
                     }
+                    setLoadDataChartBar(true);
                 }
             })();
             dispatch(enabledLotesRecobroAction(false));
@@ -142,14 +148,16 @@ export default function Recepcion() {
     }, [lotesDia, getUpdateLotesRecobro, dispatch, colorCorte, day, hacienda]);
 
     const addLote = (lote, recobro) => {
-        lotesDia.forEach((item) => item.activo = 0);
-        if (!existeLote(lote)) {
-            setAddData(true);
-        } else {
-            setUpdateData(true);
+        if (lotesDia.length > 0) {
+            lotesDia.forEach((item) => item.activo = 0);
+            if (!existeLote(lote)) {
+                setAddData(true);
+            } else {
+                setUpdateData(true);
+            }
+            setLote(lote);
+            setRecobro(recobro);
         }
-        setLote(lote);
-        setRecobro(recobro);
     };
 
     const existeLote = (lote) => {
@@ -178,11 +186,13 @@ export default function Recepcion() {
     const changeHacienda = (e) => {
         const dato = e.target.value;
         setHacienda(dato);
+        setCajasDay([]);
+        setLotesDia([]);
+
         if (dato !== '') {
             //Actualizar componentes
-            setLoadDataChartBar(true);
+            //setLoadDataChartBar(true);
             setSearchRecobroCintaSemana(true);
-
             dispatch(enabledLotesRecobroAction(true));
             dispatch(enabledRequestDataAction(true));
             dispatch(enabledCajasDiaAction(true));
@@ -223,7 +233,6 @@ export default function Recepcion() {
                                     color={colorCorte}
                                     setColor={setColorCorte}
                                     setLotes={setLotesDia}
-                                    setLoadChart={setLoadDataChartBar}
                                     setSearchRecobroCintaSemana={setSearchRecobroCintaSemana}
                                 />
                             </Paper>
@@ -241,7 +250,7 @@ export default function Recepcion() {
                                         setValue={setHacienda}
                                         placeholder="NINGUNA..."
                                         api_url={api_buscador}
-                                        disabled={false}
+                                        disabled={!!(credential && credential.idhacienda)}
                                         loading={loadDataSelectHacienda}
                                         setLoading={setLoadDataSelectHacienda}
                                         changeValue={changeHacienda}
@@ -252,6 +261,8 @@ export default function Recepcion() {
                                 <Paper className={classes.paper} style={{height: "100px", overflowY: "scroll"}}>
                                     <CajasFecha
                                         hacienda={hacienda}
+                                        cajasDay={cajasDay}
+                                        setCajasDay={setCajasDay}
                                     />
                                 </Paper>
                             </Grid>

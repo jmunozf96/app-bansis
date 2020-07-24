@@ -6,11 +6,9 @@ import {useDispatch, useSelector} from "react-redux";
 import {enabledCajasDiaAction} from "../../../actions/cosecha/cosechaActions";
 
 export default function CajasFecha(props) {
-    const {hacienda} = props;
+    const {hacienda, cajasDay, setCajasDay} = props;
     const day = moment().format("DD/MM/YYYY");
     //const day = "18/07/2020";
-
-    const [cajasDay, setCajasDay] = useState([]);
 
     const dispatch = useDispatch();
     const getUpdateCajasDia = useSelector((state) => state.cosecha.updateCajasDia);
@@ -29,7 +27,7 @@ export default function CajasFecha(props) {
             dispatch(enabledCajasDiaAction(false));
         }
 
-    }, [day, hacienda, getUpdateCajasDia, dispatch]);
+    }, [day, hacienda, getUpdateCajasDia, dispatch, setCajasDay]);
 
     useEffect(() => {
         if (!getUpdateCajasDia) {

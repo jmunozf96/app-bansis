@@ -79,7 +79,7 @@ function Detalle({item, activo = false}) {
         <>
             {item.length > 0 && item.map((item, index) => (
                 <tr key={index}
-                    style={(+item['enfunde'] - +item['cortados']) < 0 ? styles.bgDanger : activo ? styles.bgSuccess : null}>
+                    style={(+item['enfunde'] - (+item['cortadosTotal'] + +item['caidas'] + +item['cortados'])) < 0 ? styles.bgDanger : activo ? styles.bgSuccess : null}>
                     <td width="5%" style={styles.table.textCenter}><i className="fas fa-square-full fa-1x"
                                                                       style={{color: '#E91E63'}}/></td>
                     <td width="15%" style={styles.table.textCenter}>{item['color']}</td>

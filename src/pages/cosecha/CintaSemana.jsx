@@ -4,7 +4,7 @@ import {API_LINK} from "../../utils/constants";
 import moment from "moment";
 import 'moment/locale/es';
 
-export default function CintaSemana({color, setColor, setLotes, setLoadChart, setSearchRecobroCintaSemana}) {
+export default function CintaSemana({color, setColor, setLotes, setSearchRecobroCintaSemana}) {
     const day = moment().format("DD/MM/YYYY");
     //const day = "18/07/2020";
     const [loadData, setLoadData] = useState(true);
@@ -35,7 +35,6 @@ export default function CintaSemana({color, setColor, setLotes, setLoadChart, se
                         color={color}
                         setColor={setColor}
                         setLotes={setLotes}
-                        setLoadChart={setLoadChart}
                         setSearchRecobroCintaSemana={setSearchRecobroCintaSemana}
                     />
                 </div>

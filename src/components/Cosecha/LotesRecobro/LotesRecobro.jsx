@@ -2,6 +2,8 @@ import React, {useEffect, useState} from "react";
 import ApexChart from "../../ApexChart/ApexChart";
 import {API_LINK} from "../../../utils/constants";
 import CircularProgress from '@material-ui/core/CircularProgress';
+import {useDispatch, useSelector} from "react-redux";
+import {enabledLotesCortados} from "../../../actions/cosecha/cosechaActions";
 
 export default function LotesRecobro({color, load, setLoad, lotesDia, update, setUpdate, hacienda}) {
     const [loadingData, setLoadingData] = useState(false);
@@ -51,6 +53,30 @@ export default function LotesRecobro({color, load, setLoad, lotesDia, update, se
     const [seriesRecobro, setSeriesRecobro] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loadChart, setLoadChart] = useState(false);
+
+    const dispatch = useDispatch();
+    const getLotesCortados = useSelector((state) => state.cosecha.lotesCortados);
+
+    useEffect(() => {
+        if (getLotesCortados) {
+            setSeriesEnfunde([]);
+            setSeriesRecobro([]);
+            setCategories([]);
+            setData({
+                ...data,
+                series: [],
+                options: {
+                    ...data.options,
+                    xaxis: {
+                        categories: [],
+                    },
+                    colors: ['#008ffb', "#00e396"]
+                    //colors : ['#b84644', '#4576b5'],
+                },
+            });
+            dispatch(enabledLotesCortados(false));
+        }
+    }, [getLotesCortados, dispatch, data]);
 
     useEffect(() => {
         if (loadChart || update) {

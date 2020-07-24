@@ -1,15 +1,15 @@
 import React from "react";
 import {useDispatch} from "react-redux";
-import {enabledLotesRecobroAction} from "../../actions/cosecha/cosechaActions";
+import {enabledLotesCortados, enabledLotesRecobroAction} from "../../actions/cosecha/cosechaActions";
 
-export default function CintaCheck({color, setColor, setLotes, data, setLoadChart, setSearchRecobroCintaSemana}) {
+export default function CintaCheck({color, setColor, setLotes, data, setSearchRecobroCintaSemana}) {
     const dispatch = useDispatch();
 
     const changeCintaSemana = (e) => {
         setColor(+e.target.value);
         setLotes([]);
+        dispatch(enabledLotesCortados(true));
         dispatch(enabledLotesRecobroAction(true));
-        setLoadChart(true);
         setSearchRecobroCintaSemana(true);
     };
 
