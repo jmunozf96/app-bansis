@@ -17,7 +17,7 @@ export default function SectionDataPeso(props) {
     } = props;
 
     const day = moment().format("DD/MM/YYYY");
-    //const day = "18/07/2020";
+    //const day = "24/07/2020";
     const [primerRegistro, setPrimerRegistro] = useState(true);
     const [contadorData, setContadorData] = useState(0);
     //const [continueInterval, setContinueInterval] = useState(true);
@@ -33,6 +33,7 @@ export default function SectionDataPeso(props) {
     const dispatch = useDispatch();
     const loadRequestData = useSelector((state) => state.cosecha.loadRequestData);
     const loadDataCosecha = useSelector((state) => state.cosecha.loadDataCosecha);
+    const getTotalCortadosDia = useSelector(state => state.cosecha.totalCortadoDia);
 
     useEffect(() => {
         if (loadRequestData && !loadDataCosecha && hacienda !== '') {
@@ -115,7 +116,7 @@ export default function SectionDataPeso(props) {
     useEffect(() => {
         if (searchRecobroCintaSemana && +colorCorte !== 0 && hacienda) {
             (async () => {
-                const url = `${API_LINK}/bansis-app/index.php/recepcion/${hacienda}/cintaRecobro?cinta=${colorCorte}`;
+                const url = `${API_LINK}/bansis-app/index.php/recepcion/${hacienda}/cintaRecobro?cinta=${colorCorte}&fecha=${day}`;
                 const request = await fetch(url);
                 const response = await request.json();
                 const {code, recobro} = response;
@@ -147,7 +148,7 @@ export default function SectionDataPeso(props) {
                             />
                         </div>
                         <div className="col-2">
-                            <label><b style={{color: "red"}}>Cortados</b></label>
+                            <label><b style={{color: "red"}}>Cort. Ini. + Mat. Caidas</b></label>
                             <input
                                 className="form-control text-center bg-white"
                                 value={dataRecobro ? dataRecobro.cortados : 0}
@@ -155,18 +156,26 @@ export default function SectionDataPeso(props) {
                             />
                         </div>
                         <div className="col-2">
-                            <label><b>Saldo</b></label>
+                            <label><b style={{color: "red"}}>Cort. Hoy</b></label>
                             <input
                                 className="form-control text-center bg-white"
-                                value={dataRecobro ? +dataRecobro.enfunde - +dataRecobro.cortados : 0}
+                                value={getTotalCortadosDia}
                                 disabled
                             />
                         </div>
                         <div className="col-2">
-                            <label>Recobro</label>
+                            <label><b>Saldo</b></label>
                             <input
                                 className="form-control text-center bg-white"
-                                value={dataRecobro ? ((+dataRecobro.recobro).toFixed(2).toString() + ' %') : 0}
+                                value={dataRecobro ? +dataRecobro.enfunde - (+dataRecobro.cortados + +getTotalCortadosDia) : 0}
+                                disabled
+                            />
+                        </div>
+                        <div className="col-2">
+                            <label>% por Recobrar</label>
+                            <input
+                                className="form-control text-center bg-white"
+                                value={dataRecobro ? (((1 - ((+dataRecobro.cortados + +getTotalCortadosDia) / +dataRecobro.enfunde)) * 100).toFixed(2).toString() + ' %') : 0}
                                 disabled
                             />
                         </div>

@@ -33,9 +33,23 @@ export const enabledCintaRecobro = state => {
     })
 };
 
+export const enabledLoadLotesCortadosAction = state => {
+    return ({
+        type: 'LOAD_LOTES_CORTADOS',
+        payload: state
+    })
+};
+
 export const enabledLotesCortados = state => {
     return ({
         type: 'LOTES_CORTADOS',
+        payload: state
+    })
+};
+
+export const setTotalCortadosDia = state => {
+    return ({
+        type: 'LOAD_TOTAL_CORTADOS_CINTA',
         payload: state
     })
 };

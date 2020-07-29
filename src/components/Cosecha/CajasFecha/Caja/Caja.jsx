@@ -13,8 +13,9 @@ export default function Caja(props) {
                 <i className="fas fa-pallet"/>
             </span>
                     <div className="info-box-content">
-                        <span className="info-box-text">{data.datos['descripcion']} - <span
-                            className="info-box-number">{+data.totalpesadas}</span></span>
+                        <span className="info-box-text">
+                            {data.datos['descripcion']}: <span className="info-box-number">{+data.totalpesadas}</span> <span className="info-box-number-bold">/ {+data.totalcajas}</span>
+                        </span>
                         <div className="progress">
                             <div className="progress-bar"
                                  style={{width: `${(+data.totalpesadas / +data.totalcajas) * 100}%`}}/>

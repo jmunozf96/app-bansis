@@ -6,7 +6,7 @@ import 'moment/locale/es';
 
 export default function CintaSemana({color, setColor, setLotes, setSearchRecobroCintaSemana}) {
     const day = moment().format("DD/MM/YYYY");
-    //const day = "18/07/2020";
+    //const day = "24/07/2020";
     const [loadData, setLoadData] = useState(true);
     const [cintasSemana, setCintasSemana] = useState([]);
 

@@ -12,36 +12,29 @@ export default function LotesRecobro({color, load, setLoad, lotesDia, update, se
         options: {
             chart: {
                 type: 'line',
-                height: 200,
+                height: 350,
+                stacked: true,
             },
             plotOptions: {
                 bar: {
                     columnWidth: '35%',
+                    horizontal: false,
                     dataLabels: {
                         position: 'top',
                         hideOverflowingLabels: true,
                     },
                 }
             },
+            stroke: {
+                show: true,
+                curve: 'straight',
+                width: [1, 1, 4],
+            },
             xaxis: {
                 categories: [],
             },
-            tooltip: {
-                y: [
-                    {
-                        formatter: function (val) {
-                            return val + " racimos"
-                        }
-                    }
-                ]
-            },
             fill: {
-                opacity: 1,
-            },
-            legend: {
-                position: 'top',
-                horizontalAlign: 'left',
-                offsetX: 40
+                opacity: 5,
             },
             dataLabels: {
                 enabled: false
@@ -49,10 +42,13 @@ export default function LotesRecobro({color, load, setLoad, lotesDia, update, se
         }
     });
 
-    const [seriesEnfunde, setSeriesEnfunde] = useState([]);
-    const [seriesRecobro, setSeriesRecobro] = useState([]);
+    const [seriesEnfunde, setSeriesEnfunde] = useState(null);
+    const [seriesRecobro, setSeriesRecobro] = useState(null);
+    const [seriesSaldo, setSeriesSaldo] = useState(null);
     const [categories, setCategories] = useState([]);
     const [loadChart, setLoadChart] = useState(false);
+
+    const [maxChartData, setMaxChartData] = useState(0);
 
     const dispatch = useDispatch();
     const getLotesCortados = useSelector((state) => state.cosecha.lotesCortados);
@@ -70,7 +66,7 @@ export default function LotesRecobro({color, load, setLoad, lotesDia, update, se
                     xaxis: {
                         categories: [],
                     },
-                    colors: ['#008ffb', "#00e396"]
+                    colors: ['#008FFB', '#b81910', "#00E396"]
                     //colors : ['#b84644', '#4576b5'],
                 },
             });
@@ -78,9 +74,11 @@ export default function LotesRecobro({color, load, setLoad, lotesDia, update, se
         }
     }, [getLotesCortados, dispatch, data]);
 
+
     useEffect(() => {
         if (loadChart || update) {
             let array = seriesRecobro;
+            let array_saldo = seriesSaldo;
             if (lotesDia.length > 0) {
                 lotesDia.forEach((item) => {
                     let index = null;
@@ -89,38 +87,60 @@ export default function LotesRecobro({color, load, setLoad, lotesDia, update, se
                         return elemento === item['cs_seccion']
                     });
                     if (encontro) {
-                        array.data[index] = (+item['enfunde'] - (+item['cortadosTotal'] + +item['caidas'] + +item['cortados'])) < 0 ? 0
+                        /*array.data[index] = (+item['enfunde'] - (+item['cortadosTotal'] + +item['caidas'] + +item['cortados'])) < 0 ? 0
+                            : (+item['enfunde'] - (+item['cortadosTotal'] + +item['caidas'] + +item['cortados']));*/
+                        array.data[index] = (+item['cortadosTotal'] + +item['caidas'] + +item['cortados']);
+                        array_saldo.data[index] = (+item['enfunde'] - (+item['cortadosTotal'] + +item['caidas'] + +item['cortados'])) < 0 ? 0
                             : (+item['enfunde'] - (+item['cortadosTotal'] + +item['caidas'] + +item['cortados']));
                     }
                 })
             }
             setData({
                 ...data,
-                series: [array, seriesEnfunde],
+                series: [array_saldo, array, seriesEnfunde],
                 options: {
                     ...data.options,
                     xaxis: {
                         categories: categories,
                     },
-                    colors: [function ({dataPointIndex}) {
-                        if (lotesDia.length > 0) {
-                            const existe = lotesDia.filter((item) => item['cs_seccion'] === categories[dataPointIndex]);
-                            if (existe.length > 0) {
-                                return '#E91E63'
-                            } else {
-                                return '#008ffb'
+                    yaxis: [
+                        {
+                            seriesName: ['cortados', 'cortados', 'enfunde'],
+                            axisBorder: {
+                                show: true,
+                            },
+                            crosshairs: {show: false},
+                            tooltip: {
+                                enabled: true,
+                                offsetX: 0,
+                            },
+                            max: maxChartData,
+                        },
+                    ],
+                    tooltip: {
+                        y: [
+                            {
+                                formatter: function (val) {
+                                    return val + " racimos"
+                                }
                             }
-                        } else {
-                            return '#008ffb'
-                        }
-                    }, "#00e396"]
-                    //colors : ['#b84644', '#4576b5'],
+                        ]
+                    },
+                    colors: ['#008FFB', "rgba(255,68,85,0.35)", "#00E396"],
+                    legend: {
+                        position: 'top',
+                        horizontalAlign: 'left',
+                        offsetX: 40,
+                        fontSize: '18px',
+                        fontFamily: 'Helvetica, Arial',
+                    }
+                    //colors : ['#E91E63', '#4576b5', '#008ffb'],
                 },
             });
             setLoadChart(false);
             setUpdate(false);
         }
-    }, [loadChart, lotesDia, seriesEnfunde, seriesRecobro, categories, data, update, setUpdate]);
+    }, [loadChart, lotesDia, seriesEnfunde, seriesSaldo, seriesRecobro, categories, data, update, setUpdate, maxChartData]);
 
     useEffect(() => {
         if (load && hacienda !== '') {
@@ -131,7 +151,10 @@ export default function LotesRecobro({color, load, setLoad, lotesDia, update, se
                 const response = await request.json();
                 setSeriesRecobro(response.cortados);
                 setSeriesEnfunde(response.enfunde);
+                setSeriesSaldo(response.saldos);
                 setCategories(response.categories);
+
+                setMaxChartData(Math.max(...response.enfunde.data) + 10);
                 setLoadChart(true);
                 await setLoadingData(false);
             })();
@@ -145,14 +168,39 @@ export default function LotesRecobro({color, load, setLoad, lotesDia, update, se
                 {loadingData ?
                     <CircularProgress color={"secondary"} style={{marginTop: 140}}/>
                     :
-                    <ApexChart
-                        data={data}
-                        type="line"
-                        height={350}
-                    />
+                    <>
+                        {data.series.length > 0 ?
+                        <ApexChart
+                            data={data}
+                            type="line"
+                            height={350}
+                        /> :
+                            <i className="fas fa-chart-bar fa-10x" style={{marginTop: 100}}/>
+                        }
+                    </>
                 }
             </div>
         </div>
     );
 }
 
+/*
+Funcion para diferenciar por color los lotes activos, llamar en los props a lotesDia y ubicarlo en el array de Color del serDataChart
+function ({dataPointIndex}) {
+    if (lotesDia.length > 0) {
+        const existe = lotesDia.filter((item) => item['cs_seccion'] === categories[dataPointIndex]);
+        if (existe.length === 1) {
+            const item = existe[0];
+            const pasado_enfunde = +item['enfunde'] - (+item['cortadosTotal'] + +item['caidas'] + +item['cortados']);
+            if (pasado_enfunde < 0) {
+                return '#b81e18'
+            } else {
+                return '#008ffb'
+            }
+        } else {
+            return '#008ffb'
+        }
+    } else {
+        return '#008ffb'
+    }
+}*/

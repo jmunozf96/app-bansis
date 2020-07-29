@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import Caja from "./Caja";
 import moment from "moment";
 import {API_LINK} from "../../../utils/constants";
@@ -8,7 +8,7 @@ import {enabledCajasDiaAction} from "../../../actions/cosecha/cosechaActions";
 export default function CajasFecha(props) {
     const {hacienda, cajasDay, setCajasDay} = props;
     const day = moment().format("DD/MM/YYYY");
-    //const day = "18/07/2020";
+    //const day = "24/07/2020";
 
     const dispatch = useDispatch();
     const getUpdateCajasDia = useSelector((state) => state.cosecha.updateCajasDia);
@@ -39,16 +39,21 @@ export default function CajasFecha(props) {
     }, [getUpdateCajasDia, dispatch]);
 
     return (
-        <>
-            {cajasDay.length > 0 &&
-            <div className="row">
-                {cajasDay.map((caja, i) => (
-                    <div className="col-md-6 col-12 mb-2" key={i}>
-                        <Caja data={caja}/>
+        <div className="row">
+            {cajasDay.length > 0 ?
+                <>
+                    {cajasDay.map((caja, i) => (
+                        <div className="col-md-6 col-12 mb-2" key={i}>
+                            <Caja data={caja}/>
+                        </div>
+                    ))}
+                </> :
+                <div className="col-12 m-0">
+                    <div className="alert alert-primary">
+                        <i className="fas fa-exclamation-circle"/> No se han encontrado datos de cajas pesadas el día de hoy.
                     </div>
-                ))}
-            </div>
+                </div>
             }
-        </>
+        </div>
     );
 }

@@ -14,9 +14,9 @@ import CustomSelect from "../../components/CustomSelect/CustomSelect";
 
 import {useDispatch, useSelector} from "react-redux";
 import {
-    enabledCajasDiaAction, enabledLotesCortados,
+    enabledCajasDiaAction, enabledLoadLotesCortadosAction, enabledLotesCortados,
     enabledLotesRecobroAction,
-    enabledRequestDataAction
+    enabledRequestDataAction, setTotalCortadosDia
 } from "../../actions/cosecha/cosechaActions";
 
 const useStyles = makeStyles((theme) => ({
@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
 export default function Recepcion() {
     const classes = useStyles();
     const day = moment().format("DD/MM/YYYY");
-    //const day = "18/07/2020";
+    //const day = "24/07/2020";
     const [cajasDay, setCajasDay] = useState([]);
     const [lotesDia, setLotesDia] = useState([]);
     const [colorCorte, setColorCorte] = useState(0);
@@ -103,10 +103,16 @@ export default function Recepcion() {
                     }
                 }
             })();
+
+            if (lotesDia.length > 0) {
+                const filterCinta = lotesDia.filter(item => +item['cs_color'] === +colorCorte);
+                dispatch(setTotalCortadosDia(filterCinta.reduce((total, item) => total + +item['cortados'], 0)));
+            }
+
             setAddData(false);
             setLote(null);
         }
-    }, [addData, lote, colorCorte, day, lotesDia, hacienda]);
+    }, [addData, lote, colorCorte, day, lotesDia, hacienda, dispatch]);
 
     useEffect(() => {
         if (updateData && lote && !addData && recobro) {
@@ -118,16 +124,24 @@ export default function Recepcion() {
                 }
                 return true;
             });
+
+            if (lotesDia.length > 0) {
+                const filterCinta = lotesDia.filter(item => +item['cs_color'] === +colorCorte);
+                dispatch(setTotalCortadosDia(filterCinta.reduce((total, item) => total + +item['cortados'], 0)));
+            }
+
             setLote(null);
             setUpdateData(false);
             setRecobro(null);
             setUpdateDataChartBar(true);
         }
-    }, [addData, updateData, lote, lotesDia, colorCorte, recobro]);
+    }, [addData, updateData, lote, lotesDia, colorCorte, recobro, dispatch]);
 
     useEffect(() => {
         if ((getUpdateLotesRecobro && colorCorte !== 0) && lotesDia.length === 0 && hacienda !== '') {
             (async () => {
+                await dispatch(enabledLotesCortados(true));
+                await dispatch(enabledLoadLotesCortadosAction(true));
                 const url = `${API_LINK}/bansis-app/index.php/recepcion/${hacienda}/cosecha-lotes?color=${colorCorte}&fecha=${day}`;
                 const response = await fetch(url);
                 const request = await response.json();
@@ -135,13 +149,15 @@ export default function Recepcion() {
                 if (code === 200) {
                     if (request.data.length > 0) {
                         setLotesDia(request.data);
-                        //dispatch(enabledLotesCortados(true));
+                        const filterCinta = request.data.filter(item => +item['cs_color'] === +colorCorte);
+                        dispatch(setTotalCortadosDia(filterCinta.reduce((total, item) => total + +item['cortados'], 0)));
                     } else {
                         setLotesDia([]);
                         //dispatch(enabledLotesCortados(false));
                     }
                     setLoadDataChartBar(true);
                 }
+                await dispatch(enabledLoadLotesCortadosAction(false));
             })();
             dispatch(enabledLotesRecobroAction(false));
         }
@@ -168,9 +184,7 @@ export default function Recepcion() {
     const onStopRecording = () => {
         if (!btnGroupStatus.record) {
             setLotesDia([]);
-            setLoadDataChartBar(true);
             setSearchRecobroCintaSemana(true);
-
             dispatch(enabledLotesRecobroAction(true));
         }
 
@@ -188,7 +202,7 @@ export default function Recepcion() {
         setHacienda(dato);
         setCajasDay([]);
         setLotesDia([]);
-
+        dispatch(setTotalCortadosDia(0));
         if (dato !== '') {
             //Actualizar componentes
             //setLoadDataChartBar(true);
@@ -196,10 +210,12 @@ export default function Recepcion() {
             dispatch(enabledLotesRecobroAction(true));
             dispatch(enabledRequestDataAction(true));
             dispatch(enabledCajasDiaAction(true));
+            dispatch(enabledLotesCortados(true));
         } else {
             dispatch(enabledLotesRecobroAction(false));
             dispatch(enabledRequestDataAction(false));
             dispatch(enabledCajasDiaAction(false));
+            dispatch(enabledLotesCortados(false));
         }
     };
 
@@ -287,6 +303,7 @@ export default function Recepcion() {
                                 hacienda={hacienda}
                                 colorCorte={colorCorte}
                                 setColorCorte={setColorCorte}
+                                lotesDia={lotesDia}
                                 setLotesDia={setLotesDia}
                                 addLote={addLote}
                                 setLoadChart={setLoadDataChartBar}

@@ -4,7 +4,9 @@ const initialProps = {
     updateCintaRecobro: true,
     loadRequestData: true,
     loadDataCosecha: false,
-    lotesCortados: false
+    lotesCortados: false,
+    loadLotesCortados: false,
+    totalCortadoDia: 0
 };
 
 export default function (state = initialProps, action) {
@@ -34,6 +36,11 @@ export default function (state = initialProps, action) {
                 ...state,
                 updateCintaRecobro: action.payload
             });
+        case 'LOAD_LOTES_CORTADOS':
+            return ({
+                ...state,
+                loadLotesCortados: action.payload
+            });
         case 'LOTES_CORTADOS':
             return ({
                 ...state,
@@ -44,6 +51,11 @@ export default function (state = initialProps, action) {
                 updateCajasDia: false,
                 updateLotesRecobro: false,
                 updateCintaRecobro: false
+            });
+        case 'LOAD_TOTAL_CORTADOS_CINTA':
+            return({
+                ...state,
+                totalCortadoDia: action.payload
             });
         default:
             return state;
