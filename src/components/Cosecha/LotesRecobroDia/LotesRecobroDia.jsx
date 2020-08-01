@@ -22,11 +22,12 @@ export default function LotesRecobroDia(props) {
             <thead className="text-center">
             <tr>
                 <th width="5%" style={styles.table.textCenter}>Estado</th>
-                <th width="15%" style={styles.table.textCenter}>Cinta <i className="fas fa-angle-down"/></th>
-                <th width="10%" style={styles.table.textCenter}>Lote <i className="fas fa-angle-down"/></th>
+                <th width="8%" style={styles.table.textCenter}>Lote <i className="fas fa-angle-down"/></th>
                 <th width="10%">Enfunde <i className="fas fa-angle-down"/></th>
+                <th width="8%">Caidas <i className="fas fa-angle-down"/></th>
                 <th width="10%">Cort. Inicial <i className="fas fa-angle-down"/></th>
                 <th width="10%">Cort. Hoy <i className="fas fa-angle-down"/></th>
+                <th width="10%"  style={{color: "red"}}>Total Recob. <i className="fas fa-angle-down"/></th>
                 <th width="10%">Saldo <i className="fas fa-angle-down"/></th>
                 <th width="10%" style={styles.table.textCenter}>Lbs. dia Σ <i className="fas fa-angle-down"/></th>
                 <th width="10%" style={styles.table.textCenter}>Lbs. dia X̅̄ <i className="fas fa-angle-down"/></th>
@@ -35,7 +36,7 @@ export default function LotesRecobroDia(props) {
             </thead>
             {getLoadLotesCortados ? <tbody>
                 <tr>
-                    <td colSpan={10} className="text-center p-5">
+                    <td colSpan={11} className="text-center p-5">
                         <i className="fa fa-spinner fa-spin fa-3x fa-fw"/>
                     </td>
                 </tr>
@@ -54,10 +55,14 @@ export default function LotesRecobroDia(props) {
                                     item={inactivos}
                                 />
                                 <tr>
-                                    <td colSpan={3}><b>{data.length} LOTES CORTADOS</b></td>
+                                    <td colSpan={2}><b>{data.length} LOTES CORTADOS</b></td>
                                     <td><b>{totalizar(data, 'enfunde')}</b></td>
-                                    <td><b>{totalizar(data, 'cortadosTotal') + totalizar(data, 'caidas')}</b></td>
+                                    <td><b>{totalizar(data, 'caidas')}</b></td>
+                                    <td><b>{totalizar(data, 'cortadosTotal')}</b></td>
                                     <td><b>{totalizar(data, 'cortados')}</b></td>
+                                    <td>
+                                        <b>{totalizar(data, 'caidas') + totalizar(data, 'cortadosTotal') + totalizar(data, 'cortados')}</b>
+                                    </td>
                                     <td width="10%">
                                         <b>{totalizar(data, 'enfunde') - (totalizar(data, 'cortadosTotal') + totalizar(data, 'caidas') + totalizar(data, 'cortados'))}</b>
                                     </td>
@@ -70,10 +75,13 @@ export default function LotesRecobroDia(props) {
                                 </tbody>
                                 <tfoot>
                                 <tr className="text-center">
-                                    <th colSpan={3}/>
+                                    <th colSpan={2}/>
                                     <th width="10%">Enfunde <i className="fas fa-angle-up"/></th>
+                                    <th width="8%">Caidas <i className="fas fa-angle-up"/></th>
                                     <th width="10%">Cort.Inicial <i className="fas fa-angle-up"/></th>
                                     <th width="10%">Cort. Hoy<i className="fas fa-angle-up"/></th>
+                                    <th width="10%"  style={{color: "red"}}>Total Recob. <i
+                                        className="fas fa-angle-down"/></th>
                                     <th width="10%">Saldo <i className="fas fa-angle-up"/></th>
                                     <th width="10%" style={styles.table.textCenter}>Lbs. dia Σ <i
                                         className="fas fa-angle-up"/></th>
@@ -85,9 +93,10 @@ export default function LotesRecobroDia(props) {
                                 </tfoot>
                             </> : <tbody>
                             <tr>
-                                <td colSpan={10} className="p-4">
+                                <td colSpan={11} className="p-4">
                                     <div className="alert alert-primary m-0">
-                                        <i className="fas fa-exclamation-circle"/> No se han encontrado datos de corte el día de hoy.
+                                        <i className="fas fa-exclamation-circle"/> No se han encontrado datos de corte el
+                                        día de hoy.
                                     </div>
                                 </td>
                             </tr>
@@ -110,11 +119,12 @@ function Detalle({item, activo = false}) {
                             <i className="fas fa-check-circle fa-1x"/> : <i className="fas fa-times-circle fa-1x"/>
                         }
                     </td>
-                    <td width="15%" style={styles.table.textCenter}>{item['color']}</td>
-                    <td width="10%" style={styles.table.textCenter}>{item['cs_seccion']}</td>
+                    <td width="8%" style={styles.table.textCenter}>{item['cs_seccion']}</td>
                     <td width="10%">{item['enfunde']}</td>
-                    <td width="10%">{+item['cortadosTotal'] + +item['caidas']}</td>
+                    <td width="8%">{+item['caidas']}</td>
+                    <td width="10%">{+item['cortadosTotal']}</td>
                     <td width="10%">{item['cortados']}</td>
+                    <td width="10%" style={styles.table.textCenter}>{+item['caidas'] + +item['cortadosTotal'] + +item['cortados']}</td>
                     <td width="10%">{+item['enfunde'] - (+item['cortadosTotal'] + +item['caidas'] + +item['cortados'])}</td>
                     <td width="10%" style={styles.table.textCenter}>{(+item['peso']).toFixed(2)}</td>
                     <td width="10%"
@@ -130,7 +140,7 @@ function Detalle({item, activo = false}) {
 
 const styles = {
     bgSuccess: {
-        backgroundColor: "rgba(200,255,171,0.34)"
+        backgroundColor: "rgba(154,208,130,0.58)"
     },
     bgDanger: {
         backgroundColor: "rgba(255,68,85,0.42)"

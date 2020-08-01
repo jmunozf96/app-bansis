@@ -98,6 +98,7 @@ export default function SectionDataPeso(props) {
                     } else if (colorCorte === +dataCosecha['cs_color']) {
                         addLote(dataCosecha, datos);
                     } else {
+                        setLotesDia([]);
                         setColorCorte(+dataCosecha['cs_color']);
                         setSearchRecobroCintaSemana(true);
                         dispatch(enabledLotesCortados(true));
@@ -111,7 +112,7 @@ export default function SectionDataPeso(props) {
             setSearchDataRecobroLote(false);
         }
     }, [hacienda, searchDataRecobroLote, dataCosecha, day, colorCorte, dispatch,
-        setColorCorte, addLote, setLoadChart, setSearchRecobroCintaSemana]);
+        setColorCorte, addLote, setLoadChart, setSearchRecobroCintaSemana, setLotesDia]);
 
     useEffect(() => {
         if (searchRecobroCintaSemana && +colorCorte !== 0 && hacienda) {
@@ -133,7 +134,7 @@ export default function SectionDataPeso(props) {
             <div className="row ">
                 <div className="col-12">
                     <div className="form-row">
-                        <div className="col-2">
+                        <div className="col-1">
                             <label><b>Cinta</b></label>
                             <input className="form-control"
                                    name={`${dataRecobro && dataRecobro.cinta}-CALENDARIO`}
@@ -147,8 +148,16 @@ export default function SectionDataPeso(props) {
                                 disabled
                             />
                         </div>
+                        <div className="col-1">
+                            <label><b style={{color: "red"}}>Caidas</b></label>
+                            <input
+                                className="form-control text-center bg-white"
+                                value={dataRecobro ? dataRecobro.caidas : 0}
+                                disabled
+                            />
+                        </div>
                         <div className="col-2">
-                            <label><b style={{color: "red"}}>Cort. Ini. + Mat. Caidas</b></label>
+                            <label><b>Cort. Ini.</b></label>
                             <input
                                 className="form-control text-center bg-white"
                                 value={dataRecobro ? dataRecobro.cortados : 0}

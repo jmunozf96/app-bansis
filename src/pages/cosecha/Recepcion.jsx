@@ -139,6 +139,7 @@ export default function Recepcion() {
 
     useEffect(() => {
         if ((getUpdateLotesRecobro && colorCorte !== 0) && lotesDia.length === 0 && hacienda !== '') {
+            dispatch(setTotalCortadosDia(0));
             (async () => {
                 await dispatch(enabledLotesCortados(true));
                 await dispatch(enabledLoadLotesCortadosAction(true));
@@ -155,7 +156,7 @@ export default function Recepcion() {
                         setLotesDia([]);
                         //dispatch(enabledLotesCortados(false));
                     }
-                    setLoadDataChartBar(true);
+                    await setLoadDataChartBar(true);
                 }
                 await dispatch(enabledLoadLotesCortadosAction(false));
             })();
@@ -202,7 +203,6 @@ export default function Recepcion() {
         setHacienda(dato);
         setCajasDay([]);
         setLotesDia([]);
-        dispatch(setTotalCortadosDia(0));
         if (dato !== '') {
             //Actualizar componentes
             //setLoadDataChartBar(true);
@@ -310,7 +310,7 @@ export default function Recepcion() {
                                 searchRecobroCintaSemana={searchRecobroCintaSemana}
                                 setSearchRecobroCintaSemana={setSearchRecobroCintaSemana}
                             />
-                            <div className="row mt-3">
+                            <div className="row mt-2">
                                 <div className="col-12 table-responsive">
                                     <LotesRecobroDia
                                         data={lotesDia}

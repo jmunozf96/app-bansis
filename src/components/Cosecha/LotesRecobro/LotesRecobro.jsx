@@ -153,9 +153,8 @@ export default function LotesRecobro({color, load, setLoad, lotesDia, update, se
                 setSeriesEnfunde(response.enfunde);
                 setSeriesSaldo(response.saldos);
                 setCategories(response.categories);
-
                 setMaxChartData(Math.max(...response.enfunde.data) + 10);
-                setLoadChart(true);
+                await setLoadChart(true);
                 await setLoadingData(false);
             })();
             setLoad(false);
