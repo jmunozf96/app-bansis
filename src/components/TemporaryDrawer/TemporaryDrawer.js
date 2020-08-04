@@ -91,7 +91,7 @@ export default function TemporaryDrawer(props) {
     };
 
     const searchSemana = (data, periodo, semana) => {
-        setFilterCalendar(`$periodo${periodo}&semana=${semana}`);
+        setFilterCalendar(`&periodo${periodo}&semana=${semana}`);
         setReload(true);
         setState({...state, left: false});
         progessbarStatus(true);

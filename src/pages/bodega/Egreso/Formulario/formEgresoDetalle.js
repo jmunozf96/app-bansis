@@ -1,7 +1,5 @@
-import React, {useEffect, useState} from "react";
-import {Badge, Button, ButtonGroup, Col} from "react-bootstrap";
-import SimpleTableUI from "../../../../components/TableUI";
-import {TableCell, TableRow} from "@material-ui/core";
+import React, {useCallback, useEffect, useState} from "react";
+import {Button, ButtonGroup, Col} from "react-bootstrap";
 
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
@@ -15,6 +13,14 @@ import AlertDialog from "../../../../components/AlertDialog/AlertDialog";
 import {progressActions} from "../../../../actions/progressActions";
 import FormDialog from "../../../../components/FormDialog";
 import EgresoShowTransferencia from "./formEgresoShowTransferencia";
+
+const style = {
+    table: {
+        tableCenter: {
+            verticalAlign: "middle"
+        }
+    }
+};
 
 export default function EgresoDetalle(props) {
     const {detalleEgreso, setDetalleEgreso, reload, setReload, setNotificacion, setSearchTransaccionSemana} = props;
@@ -141,14 +147,35 @@ export default function EgresoDetalle(props) {
             );
             if (Object.entries(request).length > 0) {
                 setShowDetailTransferencia({
-                    transfer: request.destino ? request.destino : request.compartido,
-                    entra: request.compartido,
-                    sale: request.destino
+                    id: request.id,
+                    transfer: request.debito_transfer ? request.debito_transfer : request.credito_transfer,
+                    movimiento: request.movimiento,
+                    debito: request.debito,
+                    cantidad: request.cantidad
                 });
                 setOpenModalDetailTransferencia(true);
             }
         })()
     };
+
+    const colorMovimiento = (movimiento) => {
+        switch (movimiento) {
+            case 'DEBIT-SAL':
+                return 'danger';
+            case 'CREDIT-SAL':
+                return 'warning';
+            default:
+                return 'success';
+        }
+    };
+
+    const totalDespachadoSemana = useCallback(() => {
+        if (detalleEgreso.length > 0) {
+            const contabilizar = detalleEgreso.filter(item => (item.hasOwnProperty('debito') && !item.debito) || item.movimiento === 'EGRE-ART');
+            return contabilizar.reduce((total, item) => total + +item.cantidad, 0);
+        }
+        return 0;
+    }, [detalleEgreso]);
 
     return (
         <Col md={12} className="mt-2">
@@ -159,25 +186,35 @@ export default function EgresoDetalle(props) {
                         <i className="fas fa-list"/> Listado de materiales despachados en la semana
                     </small>
                 </div>
-                <div className="col-12">
-                    <SimpleTableUI
-                        columns={['...', 'Descripcion Material', 'Movimiento', 'Cantidad', 'Stock', 'Fech.Salida', 'Accion']}
-                    >
+                <div className="col-12 table-responsive">
+                    <table className="table table-bordered table-hover">
+                        <thead className="text-white bg-dark">
+                        <tr className="text-center">
+                            <th width="5%">...</th>
+                            <th width="40%">Descripcion Material</th>
+                            <th width="10%">Movimiento</th>
+                            <th width="10%">Cantidad</th>
+                            <th width="10%">Stock</th>
+                            <th width="15%">Fech.Salida</th>
+                            <th width="10%">Accion</th>
+                        </tr>
+                        </thead>
+                        <tbody>
                         {detalleEgreso.length > 0 &&
                         detalleEgreso.map((material, index) => (
-                            <TableRow key={index} hover={true} className="table-sm table-responsive-sm">
-                                <TableCell align={"center"}>
-                                    {material.id && !material.edit ? <i className="fas fa-cloud-upload-alt"/> :
-                                        <i className="fas fa-spinner fa-spin"/>}
-                                </TableCell>
-                                <TableCell>{material.descripcion}</TableCell>
-                                <TableCell align={"center"}>
-                                    <Badge
-                                        variant={material.movimiento === 'EGRE-ART' ? "warning" : material.cantidad < 0 ? "danger" : "success"}>
+                            <tr key={index} className="table-sm">
+                                <td width="5%" className="text-center"
+                                    style={style.table.tableCenter}>{material.id && !material.edit ?
+                                    <i className="fas fa-cloud-upload-alt"/> :
+                                    <i className="fas fa-spinner fa-spin"/>}</td>
+                                <td width="40%" style={style.table.tableCenter}>{material.descripcion}</td>
+                                <td width="10%" className="text-center" style={style.table.tableCenter}>
+                                    <span
+                                        className={`badge badge-${colorMovimiento(material.movimiento)}`}>
                                         {material.movimiento}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell align={"center"}>
+                                    </span>
+                                </td>
+                                <td width="10%" className="text-center" style={style.table.tableCenter}>
                                     {edit && itemEdit.shortid === material.shortid ? (
                                         <input
                                             type="number"
@@ -189,10 +226,12 @@ export default function EgresoDetalle(props) {
                                             onFocus={(e) => e.target.select()}
                                         />
                                     ) : material.cantidad}
-                                </TableCell>
-                                <TableCell align={"center"}>{material.stock}</TableCell>
-                                <TableCell align={"center"}>{material.time}</TableCell>
-                                <TableCell align={"center"}>
+                                </td>
+                                <td width="10%" className="text-center"
+                                    style={style.table.tableCenter}>{material.stock}</td>
+                                <td width="15%" className="text-center"
+                                    style={style.table.tableCenter}>{material.time}</td>
+                                <td width="10%" className="text-center" style={style.table.tableCenter}>
                                     {(material.hasOwnProperty('transferencia') && material.transferencia) ?
                                         <ButtonGroup>
                                             <Button size="sm" variant="info"
@@ -219,12 +258,17 @@ export default function EgresoDetalle(props) {
                                             </Button>
                                         </ButtonGroup>
                                     }
-
-                                </TableCell>
-                            </TableRow>
+                                </td>
+                            </tr>
                         ))
                         }
-                    </SimpleTableUI>
+                        <tr className="text-center">
+                            <td colSpan={3}><b>TOTAL DESPACHADO EN LA SEMANA</b></td>
+                            <td>{totalDespachadoSemana()}</td>
+                            <td colSpan={3}/>
+                        </tr>
+                        </tbody>
+                    </table>
                     <FormDialog
                         title="Detalle de transferencia de saldo:"
                         open={openModalDetailTransferencia}

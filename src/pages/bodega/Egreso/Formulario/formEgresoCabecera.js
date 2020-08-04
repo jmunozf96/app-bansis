@@ -96,6 +96,7 @@ export default function EgresoCabecera(props) {
                             ...cabeceraEgreso,
                             fecha: moment(fecha).format("DD/MM/YYYY")
                         });
+                        console.log(egreso_detalle);
                         egreso_detalle.map((egreso) => {
                             let material = {
                                 id: egreso.id,
@@ -107,6 +108,7 @@ export default function EgresoCabecera(props) {
                                 stock: parseFloat(egreso.materialdetalle.stock),
                                 time: moment(egreso.fecha_salida).format('DD/MM/YYYY'),
                                 edit: false,
+                                debito: +egreso.debito === 1 && !egreso.id_origen,
                                 transferencia: egreso.movimiento !== 'EGRE-ART'
                             };
                             return detalles.push(material);
@@ -221,7 +223,7 @@ export default function EgresoCabecera(props) {
                 change: true,
                 material: false,
                 btnnuevo: false,
-                transfer: false
+                transfer: cabeceraEgreso.empleado === null
             });
         } else {
             setDisabledElements({
@@ -270,7 +272,7 @@ export default function EgresoCabecera(props) {
             empleado: value
         });
         if (value) {
-            setDisabledElements({...disabledElements, change: true, bodega: false});
+            setDisabledElements({...disabledElements, change: true, bodega: false, transfer: cabeceraEgreso.grupo === ""});
             setSearchTransaccionSemana(true);
 
             if (item) {
@@ -279,7 +281,7 @@ export default function EgresoCabecera(props) {
             }
 
         } else {
-            setDisabledElements({...disabledElements, change: true});
+            setDisabledElements({...disabledElements, change: true, transfer: true});
             setDetalleEgreso([]);
         }
         setSearchEmpleado('');

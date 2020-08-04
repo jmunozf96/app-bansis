@@ -4,13 +4,11 @@ import {FormHelperText} from "@material-ui/core";
 
 import moment from "moment";
 import 'moment/locale/es';
-import qs from 'qs';
-import {_configStoreApi, _saveApi, API_LINK} from "../../../../utils/constants";
-import {useDispatch, useSelector} from "react-redux";
-import {progressActions} from "../../../../actions/progressActions";
+/*import {useDispatch, useSelector} from "react-redux";
+import {progressActions} from "../../../../actions/progressActions";*/
 
 export default function EgresoTransDetail(props) {
-    const {data: {id, material, sld_final}, hacienda, recibe, solicita, setSearchTransaccionSemana, setNotificacion} = props;
+    const {data: {id, material, sld_final}, hacienda, recibe, solicita, setNotificacion, transferSaldo} = props;
     const [dataTransfer, setDataTransfer] = useState({
         hacienda: hacienda,
         emp_recibe: recibe,
@@ -29,9 +27,9 @@ export default function EgresoTransDetail(props) {
         }
     }, [reload]);
 
-    const dispatch = useDispatch();
+    /*const dispatch = useDispatch();
     const progressbarStatus = (state) => dispatch(progressActions(state));
-    const authentication = useSelector(state => state.auth._token);
+    const authentication = useSelector(state => state.auth._token);*/
 
     const onChangeCantidad = (e) => {
         const cantidad = parseInt(e.target.value);
@@ -55,21 +53,22 @@ export default function EgresoTransDetail(props) {
 
     const onclickTransfer = () => {
         if (+dataTransfer.cantidad > 0) {
-            (async () => {
+            /*(async () => {
                 const datos = qs.stringify({json: JSON.stringify(dataTransfer)});
                 const url = `${API_LINK}/bansis-app/index.php/egreso-bodega/saldos/transfer`;
                 const configuracion = _configStoreApi('POST', url, datos, progressbarStatus, authentication);
                 const request = await _saveApi(configuracion);
                 console.log(request);
-                const {code, message} = request;
+                /!*const {code, message} = request;
                 if (code === 200) {
                     setNotificacion({
                         open: true,
                         message
                     });
                     setSearchTransaccionSemana(true);
-                }
-            })();
+                }*!/
+            })();*/
+            transferSaldo(dataTransfer);
             setDataTransfer({
                 ...dataTransfer,
                 sld_final: +(dataTransfer.sld_final - dataTransfer.cantidad),
@@ -85,6 +84,7 @@ export default function EgresoTransDetail(props) {
             })
         }
     };
+
 
     return (
         <div className="row">

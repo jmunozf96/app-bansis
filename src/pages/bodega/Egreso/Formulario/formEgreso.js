@@ -16,6 +16,7 @@ import {progressActions} from "../../../../actions/progressActions";
 import SnackbarComponent from "../../../../components/Snackbar/Snackbar";
 import FullScreen from "../../../../components/FullScreen";
 import {useHistory, useParams} from "react-router-dom";
+import {v4 as uuidv4} from "uuid";
 
 export default function FormEgreso() {
     const {id, idmodulo} = useParams();
@@ -147,7 +148,7 @@ export default function FormEgreso() {
                         btnsave: true
                     });
 
-                    if(cabeceraEgreso.bodega !== "" && cabeceraEgreso.grupo !== ""){
+                    if (cabeceraEgreso.bodega !== "" && cabeceraEgreso.grupo !== "") {
                         setDisabledElements({
                             ...disabledElements,
                             material: false,
@@ -204,6 +205,36 @@ export default function FormEgreso() {
 
     const onClickOpenFullScreen = () => {
         setOpenFullScreen(true);
+    };
+
+    const transferSaldoMaterialEmpleado = (dataTransfer) => {
+        if (dataTransfer) {
+            const {cantidad, emp_solicitado: {inventario}} = dataTransfer;
+            let materialTransfer = {
+                shortid: uuidv4(),
+                idmaterial: inventario[0].idmaterial,
+                descripcion: inventario[0].material.descripcion,
+                movimiento: 'CREDIT-SAL',
+                cantidad: +cantidad,
+                stock: parseFloat(inventario[0].material.stock),
+                time: moment().format("DD/MM/YYYY"),
+                transfer: true,
+                dataTransfer: dataTransfer
+            };
+            setDetalleEgreso([
+                ...detalleEgreso,
+                materialTransfer
+            ]);
+            setNotificacion({
+                ...notificacion,
+                open: true,
+                message: 'Debito agregado a la lita de espera para ser procesado',
+            });
+            setDisabledElements({
+                ...disabledElements,
+                btnsave: false,
+            });
+        }
     };
 
     return (
@@ -278,6 +309,8 @@ export default function FormEgreso() {
                                     setOpen={setOpenFullScreen}
                                     setSearchTransaccionSemana={setSearchTransaccionSemana}
                                     setNotificacion={setNotificacion}
+                                    detalleEgreso={detalleEgreso}
+                                    transferSaldo={transferSaldoMaterialEmpleado}
                                 />
                             </FullScreen>
                             <Button

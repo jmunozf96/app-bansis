@@ -186,7 +186,7 @@ export default function Egreso() {
             <Row className="mb-0 pb-0">
                 <Col className="col-12 col-md-4 mb-3 p-0">
                     <ButtonGroup className="col-12">
-                        <Button className="" variant="danger" onClick={() => unFilter()}>
+                        <Button className="col-3" variant="danger" onClick={() => unFilter()}>
                             <i className="fas fa-sync fa-1x"/>
                         </Button>
                         <Button onClick={() => setOpenDrawer(true)} size="">
@@ -329,27 +329,33 @@ function TablaDetalle(props) {
                         </small>
                     </td>
                     <td className="text-center" width="5%">
-                        {data.estado ?
+                        {+data.estado === 1 ?
                             (<Badge variant="success">A</Badge>)
                             :
                             (<Badge variant="danger">I</Badge>)
                         }
                     </td>
                     <td className="text-center" width="9%">
-                        <ButtonGroup size="sm">
-                            {/*<Button variant="info">
+                        {+data.estado === 1 ?
+                            <ButtonGroup size="sm">
+                                {/*<Button variant="info">
                                 <VisibilityIcon/>
                             </Button>*/}
-                            <Button
-                                variant="primary"
-                                onClick={() => history.push(`${history.location.pathname}/formulario/${data.id}`)}
-                            >
-                                <SyncIcon/>
-                            </Button>
-                            <Button variant="danger">
-                                <DeleteIcon/>
-                            </Button>
-                        </ButtonGroup>
+                                <Button
+                                    variant="primary"
+                                    onClick={() => history.push(`${history.location.pathname}/formulario/${data.id}`)}
+                                >
+                                    <SyncIcon/>
+                                </Button>
+                                <Button variant="danger">
+                                    <DeleteIcon/>
+                                </Button>
+                            </ButtonGroup>
+                            :
+                            <button className="btn btn-info">
+                                <i className="fas fa-lock"/>
+                            </button>
+                        }
                     </td>
                 </tr>
             )}

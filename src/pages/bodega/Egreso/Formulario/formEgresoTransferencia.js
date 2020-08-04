@@ -8,7 +8,7 @@ import {Backdrop, CircularProgress} from "@material-ui/core";
 import EgresoTransDetail from "./formEgresoTransDetail";
 
 export default function EgresoTransferencia(props) {
-    const {grupo, hacienda, recibe, setOpen, setSearchTransaccionSemana, setNotificacion} = props;
+    const {grupo, hacienda, recibe, setOpen, setSearchTransaccionSemana, setNotificacion, transferSaldo, detalleEgreso} = props;
     const [empleados, setEmpleados] = useState([]);
     const [loadData, setLoadData] = useState(true);
 
@@ -24,14 +24,33 @@ export default function EgresoTransferencia(props) {
         )
     }
 
-    const {result} = response;
+    let {result} = response;
 
     if (empleados.length === 0 && loadData) {
         if (result.length === 0) {
             setOpen(false);
             alert("No hay saldos para transferir")
         } else {
-            setEmpleados(result);
+            let empleados_inventario_activo = result.filter(item => item.inventario.length > 0);
+            if (empleados_inventario_activo.length > 0) {
+                empleados_inventario_activo.forEach((item) => {
+                    if (detalleEgreso.length > 0) {
+                        let filterTransfer = detalleEgreso.filter(item => item.hasOwnProperty('transfer') && item.transfer);
+                        if (filterTransfer.length > 0) {
+                            item.inventario.forEach(inventario => {
+                                filterTransfer.forEach(transfer => {
+                                    const {dataTransfer} = transfer;
+                                    if (item.id === dataTransfer.emp_solicitado.id && inventario.id === dataTransfer.id_inventario_tomado) {
+                                        inventario.tot_egreso -= dataTransfer.cantidad;
+                                        inventario.sld_final = (+inventario.sld_inicial + +inventario.tot_egreso) - inventario.tot_devolucion;
+                                    }
+                                });
+                            })
+                        }
+                    }
+                });
+            }
+            setEmpleados(empleados_inventario_activo);
         }
         setLoadData(false);
     }
@@ -57,6 +76,7 @@ export default function EgresoTransferencia(props) {
                                                 hacienda={hacienda}
                                                 recibe={recibe}
                                                 solicita={empleado}
+                                                transferSaldo={transferSaldo}
                                                 setSearchTransaccionSemana={setSearchTransaccionSemana}
                                                 setNotificacion={setNotificacion}
                                             />
