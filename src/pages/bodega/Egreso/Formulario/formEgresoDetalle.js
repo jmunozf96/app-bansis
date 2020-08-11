@@ -249,7 +249,8 @@ export default function EgresoDetalle(props) {
                                                     <SaveIcon/>
                                                 </Button> :
                                                 <Button variant="primary" size="sm"
-                                                        onClick={() => onClickEdit(material)}>
+                                                        disabled={(material.hasOwnProperty('transfer'))}
+                                                        onClick={() => !material.hasOwnProperty('transfer') && onClickEdit(material)}>
                                                     <EditIcon/>
                                                 </Button>
                                             }

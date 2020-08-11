@@ -38,6 +38,7 @@ export default function InputSearch(props) {
 
                     if (response.dataArray)
                         setOptions(response.dataArray.map((data) => data));
+
                     await setLoading(false);
                 }
             } catch (e) {
@@ -58,9 +59,16 @@ export default function InputSearch(props) {
 
     const onChange = (e) => {
         //setLoading(true);
-        setSearch(e.target.value);
         setChangeURL(true);
+        setSearch(e.target.value);
         setLoading(true);
+    };
+
+    const optionSelected = (option, value) => {
+        if (option && value) {
+            return option.descripcion === value.descripcion;
+        }
+        return false;
     };
 
     //Para que esto funcione en la API siempre debe devolver un dato descripcion
@@ -73,7 +81,7 @@ export default function InputSearch(props) {
             open={open}
             onOpen={() => setOpen(true)}
             onClose={() => setOpen(false)}
-            getOptionSelected={(option, value) => option.descripcion === value.descripcion}
+            getOptionSelected={(option, value) => optionSelected(option, value)}
             getOptionLabel={(option) => option.descripcion}
             options={options}
             loading={loading}

@@ -132,7 +132,6 @@ export default function FormEnfundeDetalle(props) {
                 //Array de eliminados confirmados
                 const arrayDeleteMaterial = itemsToDelete.filter((item) => item.material === material.id && !item.reelevo);
                 const saldoEliminados = arrayDeleteMaterial.reduce((total, item) => +total + item.cantidad, 0);
-
                 const arrayFilterP = detallesEnfundePresente.filter((item) => item.detalle.material.id === material.id
                     && (!item.hasOwnProperty('contabilizar')
                         || (item.hasOwnProperty('contabilizar') && item.hasOwnProperty('edicion')))

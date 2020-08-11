@@ -96,7 +96,6 @@ export default function EgresoCabecera(props) {
                             ...cabeceraEgreso,
                             fecha: moment(fecha).format("DD/MM/YYYY")
                         });
-                        console.log(egreso_detalle);
                         egreso_detalle.map((egreso) => {
                             let material = {
                                 id: egreso.id,

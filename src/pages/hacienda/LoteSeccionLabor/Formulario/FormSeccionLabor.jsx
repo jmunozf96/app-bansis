@@ -162,7 +162,7 @@ export default function FormSeccionLabor() {
     }, [changeURL, searchEmpleado, hacienda, labor]);
 
     useEffect(() => {
-        if (searchHasDisponibles) {
+        if (searchHasDisponibles && loteSeccion) {
             (async () => {
                 try {
                     const url = `${API_LINK}/bansis-app/index.php/get-data/has-seccion?seccion=${loteSeccion.id}&empleado=${empleado.id}&labor=${labor.id}`;
@@ -206,6 +206,7 @@ export default function FormSeccionLabor() {
                 const {secciones} = response;
                 if (secciones && Object.entries(secciones).length > 0) {
                     const {secciones: {detalle_seccion_labor}} = response;
+
                     if (detalle_seccion_labor.length > 0) {
                         const detallesDB = [];
                         detalle_seccion_labor.map((detalle) => {
@@ -290,7 +291,13 @@ export default function FormSeccionLabor() {
                 ...disabledElements,
                 labor: false
             });
-            setApiLabor(`${API_LINK}/bansis-app/index.php/labores-select`)
+            setApiLabor(`${API_LINK}/bansis-app/index.php/labores-select`);
+
+            if (labor) {
+                setApiSearchDetalles(`${API_LINK}/bansis-app/index.php/get-data/lote-seccion-labor?labor=${labor.id}&empleado=${value.id}`);
+                setSearchDetallesDistribucion(true);
+            }
+
         } else {
             setDisabledElements({
                 ...disabledElements,
@@ -303,6 +310,7 @@ export default function FormSeccionLabor() {
             clearHasDistribucion();
             clearTransaccion();
 
+            setApiEmpleado(`${API_LINK}/bansis-app/index.php/search/empleados?hacienda=${hacienda.id}`);
         }
         setUpdateData(true);
     };
@@ -490,11 +498,13 @@ export default function FormSeccionLabor() {
                 };
                 const request = await fetch(url, config);
                 const response = await request.json();
-                console.log(response);
-                const {code, message} = response;
+                const {code, message, destroy} = response;
                 if (code === 200) {
-                    await deleteDetalle(distribucion);
+                    if (destroy) {
+                        await deleteDetalle(distribucion);
+                    }
                     await setSearchHasDisponibles(true);
+                    await setSearchDetallesDistribucion(true);
                 }
                 loadNotificacion(message);
             })();
@@ -567,7 +577,6 @@ export default function FormSeccionLabor() {
                         btnSave: true
                     });
                     progessbarStatus(true);
-
                     const url = `${API_LINK}/bansis-app/index.php/lote-seccion-labor`;
                     const data = qs.stringify({
                         json: JSON.stringify({
