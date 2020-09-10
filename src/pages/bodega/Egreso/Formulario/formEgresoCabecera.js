@@ -3,7 +3,7 @@ import {Button, Col, Form, FormGroup, Row} from "react-bootstrap";
 import {API_LINK, focuselement} from "../../../../utils/constants";
 import CustomSelect from "../../../../components/CustomSelect";
 import InputSearch from "../../../../components/InputSearch/InputSearch";
-import {FormHelperText, TextField} from "@material-ui/core";
+import {Checkbox, FormControlLabel, FormHelperText, TextField} from "@material-ui/core";
 
 import moment from "moment";
 import 'moment/locale/es';
@@ -33,6 +33,8 @@ export default function EgresoCabecera(props) {
         setItem,
         stock,
         setStock,
+        devolucion,
+        setDevolucion,
         children
     } = props;
 
@@ -271,7 +273,12 @@ export default function EgresoCabecera(props) {
             empleado: value
         });
         if (value) {
-            setDisabledElements({...disabledElements, change: true, bodega: false, transfer: cabeceraEgreso.grupo === ""});
+            setDisabledElements({
+                ...disabledElements,
+                change: true,
+                bodega: false,
+                transfer: cabeceraEgreso.grupo === ""
+            });
             setSearchTransaccionSemana(true);
 
             if (item) {
@@ -555,10 +562,25 @@ export default function EgresoCabecera(props) {
                                 </Col>
                             </Row>
                         </form>
+                        <div className="row mt-2">
+                            <div className="col-12 mb-0">
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={devolucion}
+                                            onChange={() => setDevolucion(!devolucion)}
+                                            name="checkedB"
+                                            color="secondary"
+                                        />
+                                    }
+                                    label={devolucion ? "EGRESO PARCIAL" : "EGRESO FINAL: Una vez despachado el material, no se acepta devolución."}
+                                />
+                            </div>
+                        </div>
                     </Col>
                 </Row>
             </Col>
-            <Col md={12}>
+            <Col md={12} className="mt-n4">
                 <Row>
                     {children}
                 </Row>

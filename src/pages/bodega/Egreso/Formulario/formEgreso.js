@@ -57,6 +57,8 @@ export default function FormEgreso() {
     const [material, setMaterial] = useState(null);
     const [stock, setStock] = useState(0);
 
+    const [egresoDevolucion, setEgresoDevolucion] = useState(true);
+
     const [detalleEgreso, setDetalleEgreso] = useState([]);
     const [reload, setReload] = useState(false);
     const [notificacion, setNotificacion] = useState({
@@ -120,6 +122,7 @@ export default function FormEgreso() {
         const transaction = {
             cabecera: cabeceraEgreso,
             detalle: detalleEgreso,
+            devolucion: egresoDevolucion,
             time: moment().format("DD/MM/YYYY"),
         };
 
@@ -268,6 +271,8 @@ export default function FormEgreso() {
                         setItem={setMaterial}
                         stock={stock}
                         setStock={setStock}
+                        devolucion={egresoDevolucion}
+                        setDevolucion={setEgresoDevolucion}
                     >
                         {/*<Col>
                             {alert &&
@@ -297,6 +302,7 @@ export default function FormEgreso() {
                             setNotificacion={setNotificacion}
                             setSearchTransaccionSemana={setSearchTransaccionSemana}
                         />
+                        {egresoDevolucion &&
                         <Col>
                             <FullScreen
                                 open={openFullScreen}
@@ -321,6 +327,7 @@ export default function FormEgreso() {
                                 <i className="fas fa-exchange-alt"/> Transferir Saldo
                             </Button>
                         </Col>
+                        }
                     </EgresoCabecera>
                     <hr/>
                     <Row>
