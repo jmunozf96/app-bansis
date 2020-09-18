@@ -32,6 +32,7 @@ import FormUsuario from "./pages/seguridad/Usuario/FormUsuario";
 import FormRecursosUsuario from "./pages/seguridad/Recursos/FormRecursosUsuario";
 import ReporteEnfunde from "./pages/hacienda/Informes/RepEnfunde";
 import Recepcion from "./pages/cosecha/Recepcion";
+import DashboardEnfunde from "./pages/hacienda/Informes/DashboardEnfunde";
 
 export const routes = [
     {
@@ -105,6 +106,10 @@ export const routes = [
     {
         path: "/hacienda/reporte/labor/enfunde/:idmodulo",
         component: ReporteEnfunde
+    },
+    {
+        path: "/hacienda/reporte/labor/enfunde/:idmodulo/dashboard-enfunde",
+        component: DashboardEnfunde
     },
     {
         path: "/bodega/:idmodulo",

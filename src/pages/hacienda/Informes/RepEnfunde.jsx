@@ -10,8 +10,10 @@ import {Col, Row} from "react-bootstrap";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
+import {useHistory} from "react-router-dom";
 
 export default function ReporteEnfunde() {
+    const history = useHistory();
     const [enfunde, setEnfunde] = useState(null);
     const [loadData, setLoadData] = useState(enfunde === null);
     const [page, setPage] = useState(1);
@@ -59,7 +61,6 @@ export default function ReporteEnfunde() {
 
     return (
         <InformeComponent>
-            {enfunde !== null &&
             <Row>
                 <Col className="mt-n2 mb-3">
                     <Breadcrumbs aria-label="breadcrumb">
@@ -72,7 +73,16 @@ export default function ReporteEnfunde() {
                     </Breadcrumbs>
                 </Col>
             </Row>
-            }
+            <div className="row">
+                <div className="col-3">
+                    <button className="btn btn-primary btn-block"
+                            onClick={() => history.push(`${history.location.pathname}/dashboard-enfunde`)}
+                    >
+                        <i className="fas fa-chart-bar"/> Dashboard - Enfunde
+                    </button>
+                </div>
+            </div>
+            <hr/>
             <InformeEnfundeSemanal
                 data={enfunde}
                 setData={setEnfunde}
