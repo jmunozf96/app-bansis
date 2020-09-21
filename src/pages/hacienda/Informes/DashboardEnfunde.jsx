@@ -9,6 +9,15 @@ export default function DashboardEnfunde() {
     const [hacienda, setHacienda] = useState(null);
 
     const [apiLoteSeccion, setApiLoteSeccion] = useState('');
+    const hacienda1 = {
+        'descripcion': 'Primo',
+        'enfunde': 47859
+    };
+
+    const hacienda2 = {
+        'descripcion': 'Sofca',
+        'enfunde': 58962
+    };
 
     return (
         <ContainerPrincipal>
@@ -27,9 +36,8 @@ export default function DashboardEnfunde() {
                             />
                             <div className="col-12">
                                 <div className="row">
-                                    <CardData xl={6} lg={12}/>
-                                    <CardData xl={6} lg={12}/>
-                                    <CardData xl={6} lg={12}/>
+                                    <CardData xl={6} lg={12} data={hacienda1}/>
+                                    <CardData xl={6} lg={12} data={hacienda2}/>
                                 </div>
                             </div>
                             <div className="m-1"/>
@@ -212,16 +220,7 @@ function MenuGrafico({col, children, icon, label}) {
 
 function GraficoBarrasPeriodo() {
     const [data, setData] = useState({
-        series: [
-            {
-                name: "Enfunde Primo",
-                data: [500, 600, 700, 500, 800, 455, 874, 896, 854, 145, 145, 136]
-            },
-            {
-                name: "Enfunde Sofca",
-                data: [450, 900, 620, 320, 745, 632, 258, 314, 148, 236, 485, 910]
-            }
-        ],
+        series: [],
         options: {
             chart: {
                 type: 'line',
@@ -242,6 +241,35 @@ function GraficoBarrasPeriodo() {
             },
         }
     });
+
+    useState(() => {
+        (async () => {
+            try {
+                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-periodo`;
+                const request = await fetch(url);
+                const response = await request.json();
+                const {code} = response;
+
+                if (code === 200) {
+                    const {dataChartBarPrimo, dataChartBarSofca, dataOptions} = response;
+                    setData({
+                        ...data,
+                        series: [dataChartBarPrimo, dataChartBarSofca],
+                        options: {
+                            ...data.options,
+                            xaxis: {
+                                categories: dataOptions,
+                            },
+                        }
+                    })
+                }
+
+            } catch (e) {
+                console.log()
+            }
+        })();
+    });
+
     return (
         <ApexChart
             data={data}
@@ -253,27 +281,11 @@ function GraficoBarrasPeriodo() {
 
 function GraficoBarrasLote() {
     const [data, setData] = useState({
-        series: [
-            {
-                name: "Enfunde Primo",
-                data: [
-                    500, 600, 700, 500, 800, 455, 874, 896, 854, 145, 145, 136,
-                    500, 600, 700, 500, 800, 455, 874, 896, 854, 145, 145, 136,
-                    500, 600, 700, 500, 800, 455, 874, 896, 854, 145
-                ]
-            },
-        ],
+        series: [],
         options: {
             chart: {
                 type: 'bar',
                 height: 500,
-            },
-            xaxis: {
-                categories: [
-                    '01A', '01B', '02A', '02B', '02C', '03A', '03C', '03D', '04A', '04B', '05A', '06A',
-                    '06B', '07A', '07B', '08A', '08B', '09A', '09B', '10A', '11A', '12A', '13A', '14A',
-                    '15A', '16A', '17A', '18A', '18B', '19A', '19B', '20A', '20B', '20C'
-                ],
             },
             fill: {
                 opacity: 5,
@@ -283,6 +295,35 @@ function GraficoBarrasLote() {
             },
         }
     });
+
+    useState(() => {
+        (async () => {
+            try {
+                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-lote`;
+                const request = await fetch(url);
+                const response = await request.json();
+                const {code} = response;
+
+                if (code === 200) {
+                    const {valueLotes, dataOptions} = response;
+                    setData({
+                        ...data,
+                        series: [valueLotes],
+                        options: {
+                            ...data.options,
+                            xaxis: {
+                                categories: dataOptions,
+                            },
+                        }
+                    })
+                }
+
+            } catch (e) {
+                console.log()
+            }
+        })();
+    });
+
     return (
         <ApexChart
             data={data}
@@ -479,7 +520,7 @@ function GraficoVariables() {
     )
 }
 
-function CardData({xl, lg}) {
+function CardData({xl, lg, data}) {
     return (
         <div className={`col-xl-${xl} col-lg-${lg} col-md-12 col-sm-12 col-12 mt-2`}>
             <div className="card">
@@ -487,7 +528,7 @@ function CardData({xl, lg}) {
                     <div className="row">
                         <div className="col-12 m-0 text-left">
                             <ul className="list-group list-group-flush">
-                                <CardDataItem/>
+                                <CardDataItem data={data}/>
                             </ul>
                         </div>
                     </div>
@@ -497,10 +538,10 @@ function CardData({xl, lg}) {
     )
 }
 
-function CardDataItem() {
+function CardDataItem({data}) {
     return (
         <li className="list-group-item">
-            Enfunde: <h2 className="m-0"><i className="fas fa-sort-numeric-up-alt"/> 4.505 </h2>
+            Enfunde {data.descripcion} <h2 className="m-0"><i className="fas fa-sort-numeric-up-alt"/> {data.enfunde} </h2>
         </li>
     )
 }
