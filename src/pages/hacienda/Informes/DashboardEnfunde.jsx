@@ -1,22 +1,25 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Buscador from "../../../components/Buscador";
 import {API_LINK} from "../../../utils/constants";
 import {useSelector} from "react-redux";
 import ApexChart from "../../../components/ApexChart/ApexChart";
+import {Modal} from "react-bootstrap";
+import ModalForm from "../../../components/ModalForm";
 
 export default function DashboardEnfunde() {
     const credential = useSelector((state) => state.credential);
     const [hacienda, setHacienda] = useState(null);
 
     const [apiLoteSeccion, setApiLoteSeccion] = useState('');
-    const hacienda1 = {
-        'descripcion': 'Primo',
-        'enfunde': 47859
-    };
+    const [haciendasCard, setHaciendasCard] = useState([]);
 
-    const hacienda2 = {
-        'descripcion': 'Sofca',
-        'enfunde': 58962
+    const [configModal, setConfigModal] = useState(configuracionModal);
+
+    const onHideModal = () => {
+        setConfigModal({
+            ...configModal,
+            show: false
+        });
     };
 
     return (
@@ -24,6 +27,14 @@ export default function DashboardEnfunde() {
             <Titulo/>
             <div className="col-12 mt-2 mb-3">
                 <div className="row">
+                    <div className="col-12">
+                        <ModalData
+                            configuracion={configModal}
+                            onHide={onHideModal}
+                        >
+                            <p>Hola mundo</p>
+                        </ModalData>
+                    </div>
                     <div className="col-md-4 col-12">
                         <div className="row">
                             <MenuPeriodo
@@ -36,8 +47,11 @@ export default function DashboardEnfunde() {
                             />
                             <div className="col-12">
                                 <div className="row">
-                                    <CardData xl={6} lg={12} data={hacienda1}/>
-                                    <CardData xl={6} lg={12} data={hacienda2}/>
+                                    {haciendasCard.length > 0 && haciendasCard.map((data, i) =>
+                                        <CardData key={i} xl={6} lg={12} data={data}/>
+                                    )}
+                                    {/*<CardData xl={6} lg={12} data={hacienda1}/>
+                                    <CardData xl={6} lg={12} data={hacienda2}/>*/}
                                 </div>
                             </div>
                             <div className="m-1"/>
@@ -46,7 +60,16 @@ export default function DashboardEnfunde() {
                                 col={12}
                                 label="Enfunde Hacienda %"
                             >
-                                <GraficoPastelEnfundeHacienda/>
+                                <AlertInfo
+                                    icon='fas fa-check-circle'
+                                    type='primary'
+                                    title="Información: "
+                                    message="Porcentaje (%) de Enfunde por Hacienda."
+                                    padding="pt-2 pr-2 pl-2"
+                                />
+                                <GraficoPastelEnfundeHacienda
+                                    setHaciendas={setHaciendasCard}
+                                />
                             </MenuGrafico>
                             <div className="m-1"/>
                             <MenuGrafico
@@ -62,6 +85,14 @@ export default function DashboardEnfunde() {
                                 col={12}
                                 label="Enfunde vs Has"
                             >
+                                <AlertInfo
+                                    icon='fas fa-check-circle'
+                                    type='primary'
+                                    title="Información "
+                                    message="Comparación de variables: Se mide la mayor cantidad de (enfunde/hectarea),
+                                    contra las hectareas totales de los lotes donde se ha enfundado."
+                                    padding="pt-2 pr-2 pl-2"
+                                />
                                 <GraficoVariables/>
                             </MenuGrafico>
                         </div>
@@ -73,6 +104,13 @@ export default function DashboardEnfunde() {
                                 col={12}
                                 label="Enfunde Periodal"
                             >
+                                <AlertInfo
+                                    icon='fas fa-check-circle'
+                                    type='info'
+                                    title="Información: "
+                                    message="Comparación de enfunde por periodo entre fincas registradas."
+                                    padding="p-2"
+                                />
                                 <GraficoBarrasPeriodo/>
                             </MenuGrafico>
                             <div className="m-1"/>
@@ -81,7 +119,17 @@ export default function DashboardEnfunde() {
                                 col={12}
                                 label="Enfunde Lote"
                             >
-                                <GraficoBarrasLote/>
+                                <AlertInfo
+                                    icon='fas fa-info-circle'
+                                    type='warning'
+                                    title="Información: "
+                                    message="Dar click en la barra del lote para visualizar los loteros que han trabajado ahí."
+                                    padding="p-2"
+                                />
+                                <GraficoBarrasLote
+                                    modal={configModal}
+                                    setModal={setConfigModal}
+                                />
                             </MenuGrafico>
                             <div className="m-1"/>
                             <MenuGrafico
@@ -89,7 +137,17 @@ export default function DashboardEnfunde() {
                                 col={12}
                                 label="Enfunde Lotero"
                             >
-                                <GraficoBarrasLoteros/>
+                                <AlertInfo
+                                    icon='fas fa-info-circle'
+                                    type='warning'
+                                    title="Información: "
+                                    message="Dar click en la barra del lotero para visualizar los lotes donde ha enfundado."
+                                    padding="p-2"
+                                />
+                                <GraficoBarrasLoteros
+                                    modal={configModal}
+                                    setModal={setConfigModal}
+                                />
                             </MenuGrafico>
                         </div>
                     </div>
@@ -230,9 +288,6 @@ function GraficoBarrasPeriodo() {
                 show: true,
                 curve: 'straight',
             },
-            xaxis: {
-                categories: ['Per1', 'Per2', 'Per3', 'Per4', 'Per5', 'Per6', 'Per8', 'Per9', 'Per10', 'Per11', 'Per12', 'Per13'],
-            },
             fill: {
                 opacity: 5,
             },
@@ -279,13 +334,41 @@ function GraficoBarrasPeriodo() {
     )
 }
 
-function GraficoBarrasLote() {
+function GraficoBarrasLote({modal, setModal}) {
     const [data, setData] = useState({
         series: [],
         options: {
             chart: {
                 type: 'bar',
                 height: 500,
+                events: {
+                    dataPointSelection: (event, chartContext, config) => {
+                        const id = config.w.config.dataId[config.dataPointIndex];
+                        if (config.selectedDataPoints[0].length > 0) {
+                            const data = peticionHttp(`${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-lote-data?idlote=${id}`);
+                            data.then(
+                                response => {
+                                    if (response.code === 200) {
+                                        setModal({
+                                            ...modal,
+                                            show: true,
+                                            icon: 'fas fa-bars',
+                                            title: 'Detalle de Loteros en lote: ' + config.w.config.xaxis.categories[config.dataPointIndex],
+                                            view: View(response.data)
+                                        });
+                                    } else {
+                                        alert(response.errors);
+                                        console.error(response.errors);
+                                    }
+                                },
+                                error => {
+                                    console.error(error)
+                                }
+                            );
+
+                        }
+                    }
+                }
             },
             fill: {
                 opacity: 5,
@@ -305,7 +388,7 @@ function GraficoBarrasLote() {
                 const {code} = response;
 
                 if (code === 200) {
-                    const {valueLotes, dataOptions} = response;
+                    const {valueLotes, dataOptions, dataId} = response;
                     setData({
                         ...data,
                         series: [valueLotes],
@@ -313,6 +396,303 @@ function GraficoBarrasLote() {
                             ...data.options,
                             xaxis: {
                                 categories: dataOptions,
+                            },
+                            dataId: dataId
+                        }
+                    })
+                }
+
+            } catch (e) {
+                console.log()
+            }
+        })();
+    });
+
+    function View(data) {
+        const totalizar = (dataIndex, sum = true) => {
+            let total = data.reduce((total, item) => +total + +item[dataIndex], 0);
+            if (!sum) /*Calcular el promedio*/ total = total / data.length;
+            return total;
+        };
+
+        return (
+            <div className="row">
+                <div className="col-12">
+                    <div className="alert alert-info">
+                        <b><i className="fas fa-info-circle"/> Información:</b> Loteros que han enfundado en este lote,
+                        se detalla:
+                        <div className="mt-2"/>
+                        <ul>
+                            <div className="row">
+                                <div className="col-md-6">
+                                    <li>Semana de inicio hasta la semana que ha enfundado.</li>
+                                    <li>Semanas total enfundadas.</li>
+                                    <li>Hectareas (Has.) promedio asignadas.</li>
+                                </div>
+                                <div className="col-md-6">
+                                    <li>Total enfundado en todas las semanas.</li>
+                                    <li>Enfunde por Has.</li>
+                                </div>
+                            </div>
+                        </ul>
+                    </div>
+                </div>
+                <div className="col-12 table-responsive">
+                    <table className="table table-bordered table-hovered">
+                        <thead className="text-center">
+                        <tr>
+                            <th>Empleado</th>
+                            <th>Sem.Ini</th>
+                            <th>Sem.Fin.</th>
+                            <th>Sem.Total</th>
+                            <th>Has. PromSem.</th>
+                            <th>Enfunde</th>
+                            <th>Enf./Has.</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {data.length > 0 && data.map((item, i) =>
+                            <tr key={i}>
+                                <td>{item.nombres}</td>
+                                <td className="text-center">{item.SemanaInicio}</td>
+                                <td className="text-center">{item.SemanaFin}</td>
+                                <td className="text-center">{item.semanasLaboradas}</td>
+                                <td className="text-center">{parseFloat(item.HasProm).toFixed(2)}</td>
+                                <td className="text-center">{item.total}</td>
+                                <td className="text-center">{item.totalHas}</td>
+                            </tr>
+                        )}
+                        <tr>
+                            <td colSpan={3} className="text-center"><b>TOTAL:</b></td>
+                            {/*<td className="text-center"><b>{parseInt(totalizar('SemanaInicio', false))}</b></td>
+                            <td className="text-center"><b>{parseInt(totalizar('SemanaFin', false))}</b></td>*/}
+                            <td className="text-center"><b>{parseInt(totalizar('semanasLaboradas', false))}</b></td>
+                            <td className="text-center"><b>{(totalizar('HasProm', false)).toFixed(2)}</b></td>
+                            <td className="text-center"><b>{parseInt(totalizar('total', true))}</b></td>
+                            <td className="text-center"><b>{(totalizar('totalHas', false)).toFixed(2)}</b></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <ApexChart
+            data={data}
+            type="bar"
+            height={300}
+        />
+    )
+}
+
+function GraficoBarrasLoteros({modal, setModal}) {
+    const [data, setData] = useState({
+        series: [],
+        options: {
+            chart: {
+                type: 'bar',
+                events: {
+                    dataPointSelection: (event, chartContext, config) => {
+                        //console.log(chartContext, config);
+                        const id = config.w.config.dataId[config.dataPointIndex];
+                        if (config.selectedDataPoints[0].length > 0) {
+                            const data = peticionHttp(`${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-lotero-data?idlotero=${id}`);
+                            data.then(
+                                response => {
+                                    if (response.code === 200) {
+                                        setModal({
+                                            ...modal,
+                                            show: true,
+                                            icon: 'fas fa-bars',
+                                            title: 'Detalle de Lotes de ' + config.w.config.xaxis.categories[config.dataPointIndex],
+                                            view: View(response.data)
+                                        });
+                                    } else {
+                                        alert(response.errors);
+                                        console.error(response.errors);
+                                    }
+                                },
+                                error => {
+                                    console.error(error)
+                                }
+                            );
+
+                        }
+                    },
+                }
+            },
+            stroke: {
+                show: true,
+                curve: 'straight',
+            },
+            fill: {
+                opacity: 5,
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+        }
+    });
+
+    useState(() => {
+        (async () => {
+            try {
+                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-lotero`;
+                const request = await fetch(url);
+                const response = await request.json();
+                const {code} = response;
+
+                if (code === 200) {
+                    const {values, options, dataId} = response;
+                    console.log(response);
+                    setData({
+                        ...data,
+                        series: [values],
+                        options: {
+                            ...data.options,
+                            xaxis: {
+                                categories: options,
+                            },
+                            dataId: dataId
+                        },
+                    })
+                }
+
+            } catch (e) {
+                console.log()
+            }
+        })();
+    });
+
+    function View(data) {
+        const totalizar = (dataIndex, sum = true) => {
+            let total = data.reduce((total, item) => +total + +item[dataIndex], 0);
+            if (!sum) /*Calcular el promedio*/ total = total / data.length;
+            return total;
+        };
+
+        return (
+            <div className="row">
+                <div className="col-12">
+                    <div className="alert alert-info">
+                        <b><i className="fas fa-info-circle"/> Información:</b> Lotes donde ha enfundado, se detalla:
+                        <div className="mt-2"/>
+                        <ul>
+                            <div className="row">
+                                <div className="col-md-6">
+                                    <li>Semana de inicio hasta la semana que ha enfundado.</li>
+                                    <li>Semanas total enfundadas.</li>
+                                    <li>Hectareas (Has.) promedio asignadas.</li>
+                                </div>
+                                <div className="col-md-6">
+                                    <li>Total enfundado en todas las semanas.</li>
+                                    <li>Enfunde por Has.</li>
+                                </div>
+                            </div>
+                        </ul>
+                    </div>
+                </div>
+                <div className="col-12 table-responsive">
+                    <table className="table table-bordered table-hovered">
+                        <thead className="text-center">
+                        <tr>
+                            <th>Lote</th>
+                            <th>Sem.Ini</th>
+                            <th>Sem.Fin.</th>
+                            <th>Sem.Total</th>
+                            <th>Has. PromSem.</th>
+                            <th>Enfunde</th>
+                            <th>Enf./Has.</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {data.length > 0 && data.map((item, i) =>
+                            <tr key={i}>
+                                <td className="text-center">{item.alias}</td>
+                                <td className="text-center">{item.SemanaInicio}</td>
+                                <td className="text-center">{item.SemanaFin}</td>
+                                <td className="text-center">{item.semanasLaboradas}</td>
+                                <td className="text-center">{parseFloat(item.HasProm).toFixed(2)}</td>
+                                <td className="text-center">{item.total}</td>
+                                <td className="text-center">{item.totalHas}</td>
+                            </tr>
+                        )}
+                        <tr>
+                            <td colSpan={3} className="text-center"><b>TOTAL:</b></td>
+                            {/*<td className="text-center"><b>{parseInt(totalizar('SemanaInicio', false))}</b></td>
+                            <td className="text-center"><b>{parseInt(totalizar('SemanaFin', false))}</b></td>*/}
+                            <td className="text-center"><b>{parseInt(totalizar('semanasLaboradas', false))}</b></td>
+                            <td className="text-center"><b>{(totalizar('HasProm', false)).toFixed(2)}</b></td>
+                            <td className="text-center"><b>{parseInt(totalizar('total', true))}</b></td>
+                            <td className="text-center"><b>{(totalizar('totalHas', false)).toFixed(2)}</b></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <ApexChart
+            data={data}
+            type="bar"
+            style={{marginLeft: 25, marginRight: 15}}
+            height=""
+        />
+    )
+}
+
+function GraficoBarrasAnual() {
+    const [data, setData] = useState({
+        series: [],
+        options: {
+            chart: {
+                type: 'bar',
+                height: 500,
+            },
+            stroke: {
+                show: true,
+                curve: 'straight',
+            },
+            fill: {
+                opacity: 5,
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+        }
+    });
+
+    useState(() => {
+        (async () => {
+            try {
+                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-historico`;
+                const request = await fetch(url);
+                const response = await request.json();
+                const {code} = response;
+
+                if (code === 200) {
+                    const {series, categories} = response;
+                    setData({
+                        ...data,
+                        series: series,
+                        options: {
+                            ...data.options,
+                            xaxis: {
+                                categories: categories,
                             },
                         }
                     })
@@ -333,120 +713,22 @@ function GraficoBarrasLote() {
     )
 }
 
-function GraficoBarrasAnual() {
+function GraficoPastelEnfundeHacienda({setHaciendas}) {
     const [data, setData] = useState({
-        series: [
-            {
-                name: "Enfunde Primo",
-                data: [500, 600, 700]
-            },
-            {
-                name: "Enfunde Sofca",
-                data: [450, 900, 620]
-            }
-        ],
-        options: {
-            chart: {
-                type: 'bar',
-                height: 500,
-            },
-            stroke: {
-                show: true,
-                curve: 'straight',
-            },
-            xaxis: {
-                categories: ['2018', '2019', '2020'],
-            },
-            fill: {
-                opacity: 5,
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: true,
-                }
-            },
-            dataLabels: {
-                enabled: false
-            },
-        }
-    });
-    return (
-        <ApexChart
-            data={data}
-            type="bar"
-            height={300}
-        />
-    )
-}
-
-function GraficoBarrasLoteros() {
-    const [data, setData] = useState({
-        series: [{
-            data: [
-                500, 250, 350, 950, 650, 450, 850,
-                500, 250, 350, 950, 650, 450, 850,
-                500, 250, 350, 950, 650, 450, 850,
-                500, 250, 350, 950, 650, 450, 850,
-            ]
-        }],
-        options: {
-            chart: {
-                type: 'bar',
-            },
-            stroke: {
-                show: true,
-                curve: 'straight',
-            },
-            xaxis: {
-                categories: [
-                    "LEODAN ZAMBRANO", "MARCELO REYES", "ALFREDO CUEICAL", "FELIX ASEICHA",
-                    "HENRY PILAY", "GUSTAVO SANCHEZ", "JUAN LEOPOLDO IRRAZABAL",
-                    "LEODAN ZAMBRANO", "MARCELO REYES", "ALFREDO CUEICAL", "FELIX ASEICHA",
-                    "HENRY PILAY", "GUSTAVO SANCHEZ", "JUAN LEOPOLDO IRRAZABAL",
-                    "LEODAN ZAMBRANO", "MARCELO REYES", "ALFREDO CUEICAL", "FELIX ASEICHA",
-                    "HENRY PILAY", "GUSTAVO SANCHEZ", "JUAN LEOPOLDO IRRAZABAL",
-                    "LEODAN ZAMBRANO", "MARCELO REYES", "ALFREDO CUEICAL", "FELIX ASEICHA",
-                    "HENRY PILAY", "GUSTAVO SANCHEZ", "JUAN LEOPOLDO IRRAZABAL",
-                ],
-            },
-            fill: {
-                opacity: 5,
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: true,
-                }
-            },
-            dataLabels: {
-                enabled: false
-            },
-        }
-    });
-    return (
-        <ApexChart
-            data={data}
-            type="bar"
-            height=""
-        />
-    )
-}
-
-function GraficoPastelEnfundeHacienda() {
-    const [data, setData] = useState({
-        series: [44, 50],
+        series: [],
         options: {
             chart: {
                 type: 'pie',
-                height: 400,
+                height: 500,
                 events: {
                     dataPointSelection: (event, chartContext, config) => {
                         //console.log(chartContext, config);
+                        console.log(config.w.config.dataId[config.dataPointIndex]);
                         console.log(config.w.config.series[config.dataPointIndex]);
                         console.log(config.w.config.labels[config.dataPointIndex]);
                     },
                 }
             },
-            labels: ['Primo', 'Sofca'],
             fill: {
                 opacity: 5,
             },
@@ -460,20 +742,50 @@ function GraficoPastelEnfundeHacienda() {
                         width: 200
                     },
                     legend: {
-                        position: 'bottom'
+                        show: false
                     }
                 },
-                legend: {
-                    position: 'bottom',
-                }
-            }]
+            }],
+            legend: {
+                position: 'bottom',
+            }
         }
     });
+
+    useState(() => {
+        (async () => {
+            try {
+                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-hacienda`;
+                const request = await fetch(url);
+                const response = await request.json();
+                const {code} = response;
+
+                if (code === 200) {
+                    const {values, options, dataHaciendas, dataId} = response;
+                    setData({
+                        ...data,
+                        series: values,
+                        options: {
+                            ...data.options,
+                            labels: options,
+                            dataId: dataId
+                        }
+                    });
+
+                    setHaciendas(dataHaciendas);
+                }
+
+            } catch (e) {
+                console.log()
+            }
+        })();
+    });
+
     return (
         <ApexChart
             data={data}
             type="pie"
-            height={300}
+            height={500}
         />
     )
 }
@@ -511,6 +823,29 @@ function GraficoVariables() {
             },
         }
     });
+
+    useState(() => {
+        (async () => {
+            try {
+                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-has`;
+                const request = await fetch(url);
+                const response = await request.json();
+                const {code} = response;
+
+                if (code === 200) {
+                    const {series} = response;
+                    setData({
+                        ...data,
+                        series: series,
+                    })
+                }
+
+            } catch (e) {
+                console.log()
+            }
+        })();
+    });
+
     return (
         <ApexChart
             data={data}
@@ -538,10 +873,58 @@ function CardData({xl, lg, data}) {
     )
 }
 
+function ModalData({configuracion, onHide}) {
+    return (
+        <ModalForm
+            show={configuracion.show}
+            icon={configuracion.icon}
+            title={configuracion.title}
+            animation={configuracion.animation}
+            backdrop={configuracion.backdrop}
+            size={configuracion.size}
+            centered={configuracion.centered}
+            scrollable={configuracion.scrollable}
+            dialogSize={'65'}
+            cancel={onHide}
+            save={onHide}
+        >
+            {configuracion.view}
+        </ModalForm>
+    )
+}
+
+function configuracionModal() {
+    return {
+        show: false,
+        icon: '',
+        title: '',
+        animation: true,
+        backdrop: true,
+        size: 'lg',
+        centered: true,
+        scrollable: true,
+        view: null
+    }
+}
+
+function AlertInfo({icon, type, title, message, ...data}) {
+    return (
+        <div className={`row ${data.padding}`}>
+            <div className="col-12">
+                <div className={`alert alert-${type}`}>
+                    <b><i className={icon}/> {title}</b> {message}
+                </div>
+            </div>
+        </div>
+    )
+};
+
 function CardDataItem({data}) {
     return (
         <li className="list-group-item">
-            Enfunde {data.descripcion} <h2 className="m-0"><i className="fas fa-sort-numeric-up-alt"/> {data.enfunde} </h2>
+            Enfunde {data.detalle} <h2 className="m-0"><i
+            className="fas fa-sort-numeric-up-alt"/> {parseInt(data.enfunde).toLocaleString()}
+        </h2>
         </li>
     )
 }
@@ -597,3 +980,12 @@ function CardLotero() {
         </div>
     );
 }
+
+const peticionHttp = async (url) => {
+    try {
+        const request = await fetch(url);
+        return await request.json();
+    } catch (e) {
+        return e;
+    }
+};

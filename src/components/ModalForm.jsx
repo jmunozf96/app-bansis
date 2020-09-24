@@ -11,6 +11,7 @@ const ModalForm = ({show, icon, title, children, ...config}) => {
             size={config.size}
             centered={config.centered}
             scrollable={config.scrollable}
+            onHide={() => config.cancel()}
             dialogClassName={`custom-dialog-${config.dialogSize}`}
         >
             <Modal.Header>
