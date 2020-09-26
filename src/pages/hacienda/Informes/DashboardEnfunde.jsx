@@ -83,17 +83,30 @@ export default function DashboardEnfunde() {
                             <MenuGrafico
                                 icon="fas fa-chart-bar"
                                 col={12}
-                                label="Enfunde vs Has"
+                                label="Enfunde vs Has / Semanal"
                             >
-                                <AlertInfo
-                                    icon='fas fa-check-circle'
-                                    type='primary'
-                                    title="Información "
-                                    message="Comparación de variables: Se mide la mayor cantidad de (enfunde/hectarea),
+                                <HaciendaStatus hacienda={hacienda}>
+                                    <AlertInfo
+                                        icon='fas fa-check-circle'
+                                        type='primary'
+                                        title="Información "
+                                        message="Comparación de variables: Se mide la mayor cantidad de (enfunde/hectarea),
                                     contra las hectareas totales de los lotes donde se ha enfundado."
-                                    padding="pt-2 pr-2 pl-2"
-                                />
-                                <GraficoVariables/>
+                                        padding="pt-2 pr-2 pl-2"
+                                    />
+                                    <GraficoVariables
+                                        hacienda={hacienda}
+                                        modal={configModal}
+                                        setModal={setConfigModal}
+                                    />
+                                    <AlertInfo
+                                        icon='fas fa-info-circle'
+                                        type='warning'
+                                        title="Información: "
+                                        message="Dar click en algún valor, para visualizar información del lote."
+                                        padding="pl-2 pr-2"
+                                    />
+                                </HaciendaStatus>
                             </MenuGrafico>
                         </div>
                     </div>
@@ -119,17 +132,20 @@ export default function DashboardEnfunde() {
                                 col={12}
                                 label="Enfunde Lote"
                             >
-                                <AlertInfo
-                                    icon='fas fa-info-circle'
-                                    type='warning'
-                                    title="Información: "
-                                    message="Dar click en la barra del lote para visualizar los loteros que han trabajado ahí."
-                                    padding="p-2"
-                                />
-                                <GraficoBarrasLote
-                                    modal={configModal}
-                                    setModal={setConfigModal}
-                                />
+                                <HaciendaStatus hacienda={hacienda}>
+                                    <AlertInfo
+                                        icon='fas fa-info-circle'
+                                        type='warning'
+                                        title="Información: "
+                                        message="Dar click en la barra del lote para visualizar los loteros que han trabajado ahí."
+                                        padding="p-2"
+                                    />
+                                    <GraficoBarrasLote
+                                        modal={configModal}
+                                        setModal={setConfigModal}
+                                        hacienda={hacienda}
+                                    />
+                                </HaciendaStatus>
                             </MenuGrafico>
                             <div className="m-1"/>
                             <MenuGrafico
@@ -137,17 +153,20 @@ export default function DashboardEnfunde() {
                                 col={12}
                                 label="Enfunde Lotero"
                             >
-                                <AlertInfo
-                                    icon='fas fa-info-circle'
-                                    type='warning'
-                                    title="Información: "
-                                    message="Dar click en la barra del lotero para visualizar los lotes donde ha enfundado."
-                                    padding="p-2"
-                                />
-                                <GraficoBarrasLoteros
-                                    modal={configModal}
-                                    setModal={setConfigModal}
-                                />
+                                <HaciendaStatus hacienda={hacienda}>
+                                    <AlertInfo
+                                        icon='fas fa-info-circle'
+                                        type='warning'
+                                        title="Información: "
+                                        message="Dar click en la barra del lotero para visualizar los lotes donde ha enfundado."
+                                        padding="p-2"
+                                    />
+                                    <GraficoBarrasLoteros
+                                        modal={configModal}
+                                        setModal={setConfigModal}
+                                        hacienda={hacienda}
+                                    />
+                                </HaciendaStatus>
                             </MenuGrafico>
                         </div>
                     </div>
@@ -155,6 +174,30 @@ export default function DashboardEnfunde() {
             </div>
         </ContainerPrincipal>
     )
+}
+
+function HaciendaStatus({hacienda, children}) {
+    if (hacienda === null) {
+        return (
+            <div className="row">
+                <div className="col-12">
+                    <div className="jumbotron jumbotron-fluid m-0">
+                        <div className="container">
+                            <React.Fragment>
+                                <h1 className="display-5">
+                                    <i className="fas fa-info"/> Seleccionar una Hacienda.
+                                </h1>
+                                <p className="lead">El grafico muestra la información de cada hacienda, se debe
+                                    seleccionar cualquier hacienda a la que desee realizar un analisis.</p>
+                            </React.Fragment>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    return children
 }
 
 function ContainerPrincipal({children}) {
@@ -334,7 +377,7 @@ function GraficoBarrasPeriodo() {
     )
 }
 
-function GraficoBarrasLote({modal, setModal}) {
+function GraficoBarrasLote({modal, setModal, hacienda}) {
     const [data, setData] = useState({
         series: [],
         options: {
@@ -382,7 +425,7 @@ function GraficoBarrasLote({modal, setModal}) {
     useState(() => {
         (async () => {
             try {
-                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-lote`;
+                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-lote?idhacienda=${hacienda.id}`;
                 const request = await fetch(url);
                 const response = await request.json();
                 const {code} = response;
@@ -401,6 +444,8 @@ function GraficoBarrasLote({modal, setModal}) {
                         }
                     })
                 }
+
+                //await setLoading(false);
 
             } catch (e) {
                 console.log()
@@ -487,7 +532,7 @@ function GraficoBarrasLote({modal, setModal}) {
     )
 }
 
-function GraficoBarrasLoteros({modal, setModal}) {
+function GraficoBarrasLoteros({modal, setModal, hacienda}) {
     const [data, setData] = useState({
         series: [],
         options: {
@@ -544,7 +589,7 @@ function GraficoBarrasLoteros({modal, setModal}) {
     useState(() => {
         (async () => {
             try {
-                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-lotero`;
+                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-lotero?idhacienda=${hacienda.id}`;
                 const request = await fetch(url);
                 const response = await request.json();
                 const {code} = response;
@@ -790,17 +835,9 @@ function GraficoPastelEnfundeHacienda({setHaciendas}) {
     )
 }
 
-function GraficoVariables() {
+function GraficoVariables({hacienda, modal, setModal}) {
     const [data, setData] = useState({
-        series: [{
-            name: "Enfunde Primo",
-            data: [
-                [16.4, 5.4], [21.7, 2], [25.4, 3], [19, 2], [10.9, 1], [13.6, 3.2],
-                [10.9, 7.4], [10.9, 0], [10.9, 8.2], [16.4, 0], [16.4, 1.8], [13.6, 0.3],
-                [13.6, 0], [29.9, 0], [27.1, 2.3], [16.4, 0], [13.6, 3.7], [10.9, 5.2],
-                [16.4, 6.5], [10.9, 0], [24.5, 7.1], [10.9, 0], [8.1, 4.7], [19, 0],
-                [21.7, 1.8], [27.1, 0], [24.5, 0], [27.1, 0], [29.9, 1.5], [27.1, 0.8], [22.1, 2]]
-        }],
+        series: [],
         options: {
             chart: {
                 height: 400,
@@ -809,13 +846,35 @@ function GraficoVariables() {
                     enabled: true,
                     type: 'xy'
                 },
-            },
-            xaxis: {
-                tickAmount: 10,
-                labels: {
-                    formatter: function (val) {
-                        return parseFloat(val).toFixed(1)
-                    }
+                events: {
+                    dataPointSelection: (event, chartContext, config) => {
+                        const lote = {
+                            id: config.w.config.dataId[config.dataPointIndex]
+                        };
+                        if (config.selectedDataPoints[0].length > 0) {
+                            const data = peticionHttp(`${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-has-dataLote?idseccion=${lote.id}`);
+                            data.then(
+                                response => {
+                                    if (response.code === 200) {
+                                        setModal({
+                                            ...modal,
+                                            show: true,
+                                            icon: 'fas fa-bars',
+                                            title: 'Detalle de enfunde semanal Lote: ' + response.seccion['alias'] + ' - Has.: ' + parseFloat(response.seccion['has']).toFixed(2),
+                                            view: View(response)
+                                        });
+                                    } else {
+                                        alert(response.errors);
+                                        console.error(response.errors);
+                                    }
+                                },
+                                error => {
+                                    console.error(error)
+                                }
+                            );
+
+                        }
+                    },
                 }
             },
             dataLabels: {
@@ -827,16 +886,31 @@ function GraficoVariables() {
     useState(() => {
         (async () => {
             try {
-                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-has`;
+                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-has?idhacienda=${hacienda.id}`;
                 const request = await fetch(url);
                 const response = await request.json();
                 const {code} = response;
 
                 if (code === 200) {
-                    const {series} = response;
+                    const {series, dataId} = response;
                     setData({
                         ...data,
                         series: series,
+                        options: {
+                            ...data.options,
+                            xaxis: {
+                                tickAmount: 5,
+                                labels: {
+                                    formatter: function (val) {
+                                        return parseFloat(val).toFixed(2)
+                                    }
+                                }
+                            },
+                            yaxis: {
+                                tickAmount: 5
+                            },
+                            dataId: dataId
+                        }
                     })
                 }
 
@@ -845,6 +919,34 @@ function GraficoVariables() {
             }
         })();
     });
+
+    function View({series, categories}) {
+        const data = {
+            series: [series],
+            options: {
+                chart: {
+                    type: 'line',
+                    height: 500,
+                },
+                fill: {
+                    opacity: 5,
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                xaxis: {
+                    categories,
+                },
+            }
+        };
+        return (
+            <ApexChart
+                data={data}
+                type="line"
+                height={300}
+            />
+        )
+    }
 
     return (
         <ApexChart
