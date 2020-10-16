@@ -3,14 +3,21 @@ import Buscador from "../../../components/Buscador";
 import {API_LINK} from "../../../utils/constants";
 import {useSelector} from "react-redux";
 import ApexChart from "../../../components/ApexChart/ApexChart";
-import {Modal} from "react-bootstrap";
 import ModalForm from "../../../components/ModalForm";
+//import {Modal} from "react-bootstrap";
+//import login from "../../login";
 
 export default function DashboardEnfunde() {
     const credential = useSelector((state) => state.credential);
-    const [hacienda, setHacienda] = useState(null);
 
-    const [apiLoteSeccion, setApiLoteSeccion] = useState('');
+    //Filttros
+    const [periodo, setPeriodo] = useState(0);
+    const [semanas, setSemanas] = useState([]);
+
+    const [hacienda, setHacienda] = useState(null);
+    const [load, setLoad] = useState(true);
+
+    //const [apiLoteSeccion, setApiLoteSeccion] = useState('');
     const [haciendasCard, setHaciendasCard] = useState([]);
 
     const [configModal, setConfigModal] = useState(configuracionModal);
@@ -24,7 +31,7 @@ export default function DashboardEnfunde() {
 
     return (
         <ContainerPrincipal>
-            <Titulo/>
+            <Titulo periodo={periodo}/>
             <div className="col-12 mt-2 mb-3">
                 <div className="row">
                     <div className="col-12">
@@ -35,20 +42,24 @@ export default function DashboardEnfunde() {
                             <p>Hola mundo</p>
                         </ModalData>
                     </div>
-                    <div className="col-md-4 col-12">
+                    <div className="col-md-5 col-12">
                         <div className="row">
                             <MenuPeriodo
                                 col={12}
                                 credential={credential}
-                                hacienda={hacienda}
+                                //hacienda={hacienda}
                                 setHacienda={setHacienda}
-                                apiLoteSeccion={apiLoteSeccion}
-                                setApiLoteSeccion={setApiLoteSeccion}
+                                //apiLoteSeccion={apiLoteSeccion}
+                                //setApiLoteSeccion={setApiLoteSeccion}
+                                setLoad={setLoad}
+                                periodo={periodo}
+                                setPeriodo={setPeriodo}
+                                setSemanas={setSemanas}
                             />
                             <div className="col-12">
                                 <div className="row">
                                     {haciendasCard.length > 0 && haciendasCard.map((data, i) =>
-                                        <CardData key={i} xl={6} lg={12} data={data}/>
+                                        <CardData key={i} xl={12} lg={12} data={data}/>
                                     )}
                                     {/*<CardData xl={6} lg={12} data={hacienda1}/>
                                     <CardData xl={6} lg={12} data={hacienda2}/>*/}
@@ -68,6 +79,9 @@ export default function DashboardEnfunde() {
                                     padding="pt-2 pr-2 pl-2"
                                 />
                                 <GraficoPastelEnfundeHacienda
+                                    hacienda={hacienda}
+                                    load={load}
+                                    setLoad={setLoad}
                                     setHaciendas={setHaciendasCard}
                                 />
                             </MenuGrafico>
@@ -77,7 +91,11 @@ export default function DashboardEnfunde() {
                                 col={12}
                                 label="Enfunde Anual"
                             >
-                                <GraficoBarrasAnual/>
+                                <GraficoBarrasAnual
+                                    hacienda={hacienda}
+                                    load={load}
+                                    setLoad={setLoad}
+                                />
                             </MenuGrafico>
                             <div className="m-1"/>
                             <MenuGrafico
@@ -98,6 +116,10 @@ export default function DashboardEnfunde() {
                                         hacienda={hacienda}
                                         modal={configModal}
                                         setModal={setConfigModal}
+                                        load={load}
+                                        setLoad={setLoad}
+                                        periodo={periodo}
+                                        semanas={semanas}
                                     />
                                     <AlertInfo
                                         icon='fas fa-info-circle'
@@ -110,7 +132,7 @@ export default function DashboardEnfunde() {
                             </MenuGrafico>
                         </div>
                     </div>
-                    <div className="col-md-8 col-12">
+                    <div className="col-md-7 col-12">
                         <div className="row">
                             <MenuGrafico
                                 icon="fas fa-chart-bar"
@@ -124,7 +146,12 @@ export default function DashboardEnfunde() {
                                     message="Comparación de enfunde por periodo entre fincas registradas."
                                     padding="p-2"
                                 />
-                                <GraficoBarrasPeriodo/>
+                                <GraficoBarrasPeriodo
+                                    hacienda={hacienda}
+                                    load={load}
+                                    setLoad={setLoad}
+                                    periodo={periodo}
+                                />
                             </MenuGrafico>
                             <div className="m-1"/>
                             <MenuGrafico
@@ -144,6 +171,10 @@ export default function DashboardEnfunde() {
                                         modal={configModal}
                                         setModal={setConfigModal}
                                         hacienda={hacienda}
+                                        load={load}
+                                        setLoad={setLoad}
+                                        periodo={periodo}
+                                        semanas={semanas}
                                     />
                                 </HaciendaStatus>
                             </MenuGrafico>
@@ -165,6 +196,10 @@ export default function DashboardEnfunde() {
                                         modal={configModal}
                                         setModal={setConfigModal}
                                         hacienda={hacienda}
+                                        load={load}
+                                        setLoad={setLoad}
+                                        periodo={periodo}
+                                        semanas={semanas}
                                     />
                                 </HaciendaStatus>
                             </MenuGrafico>
@@ -179,18 +214,16 @@ export default function DashboardEnfunde() {
 function HaciendaStatus({hacienda, children}) {
     if (hacienda === null) {
         return (
-            <div className="row">
-                <div className="col-12">
-                    <div className="jumbotron jumbotron-fluid m-0">
-                        <div className="container">
-                            <React.Fragment>
-                                <h1 className="display-5">
-                                    <i className="fas fa-info"/> Seleccionar una Hacienda.
-                                </h1>
-                                <p className="lead">El grafico muestra la información de cada hacienda, se debe
-                                    seleccionar cualquier hacienda a la que desee realizar un analisis.</p>
-                            </React.Fragment>
-                        </div>
+            <div className="col-12">
+                <div className="jumbotron jumbotron-fluid m-0">
+                    <div className="container">
+                        <React.Fragment>
+                            <h1 className="display-5">
+                                <i className="fas fa-info"/> Seleccionar una Hacienda.
+                            </h1>
+                            <p className="lead">El grafico muestra la información de cada hacienda, se debe
+                                seleccionar cualquier hacienda a la que desee realizar un analisis.</p>
+                        </React.Fragment>
                     </div>
                 </div>
             </div>
@@ -210,19 +243,20 @@ function ContainerPrincipal({children}) {
     )
 }
 
-function Titulo() {
+function Titulo({periodo}) {
     return (
         <div className="col-12 mt-3">
             <div className="card">
                 <div className="card-header">
-                    <h5 className="m-0"><i className="fas fa-chart-bar"/> INFORME DE ENFUNDE</h5>
+                    <h5 className="m-0"><i className="fas fa-chart-bar"/> INFORME DE
+                        ENFUNDE {periodo > 0 && ` | PERIODO : ${periodo}`}</h5>
                 </div>
             </div>
         </div>
     )
 }
 
-function MenuPeriodo({col, credential, hacienda, setHacienda, apiLoteSeccion, setApiLoteSeccion}) {
+function MenuPeriodo({col, credential, setHacienda, setLoad, periodo, setPeriodo, setSemanas}) {
     return (
         <div className={`col-md-${col} col-12`}>
             <div className="card">
@@ -231,18 +265,25 @@ function MenuPeriodo({col, credential, hacienda, setHacienda, apiLoteSeccion, se
                 </div>
                 <div className="card-body">
                     <div className="row">
-                        <div className="col-12 mb-3">
+                        <div className="col-12 mb-2">
                             <HaciendaSelect
                                 credential={credential}
                                 setHacienda={setHacienda}
-                                setApiLoteSeccion={setApiLoteSeccion}/>
+                                setLoad={setLoad}
+                            />
                         </div>
-                        <div className="col-12">
+                        {/*<div className="col-12">
                             <LotesSelect
                                 hacienda={hacienda}
                                 apiLoteSeccion={apiLoteSeccion}
                             />
-                        </div>
+                        </div>*/}
+                        <Periodos
+                            periodo={periodo}
+                            setPeriodo={setPeriodo}
+                            setLoad={setLoad}
+                            setSemanas={setSemanas}
+                        />
                     </div>
                 </div>
             </div>
@@ -250,7 +291,7 @@ function MenuPeriodo({col, credential, hacienda, setHacienda, apiLoteSeccion, se
     )
 }
 
-function HaciendaSelect({credential, setHacienda, setApiLoteSeccion}) {
+function HaciendaSelect({credential, setHacienda, setLoad}) {
     const api_buscador = `${API_LINK}/bansis-app/index.php/haciendas-select`;
     const [haciendaSelect, setHaciendaSelect] = useState(credential.idhacienda ? credential.idhacienda : null);
 
@@ -258,11 +299,12 @@ function HaciendaSelect({credential, setHacienda, setApiLoteSeccion}) {
         setHaciendaSelect(value);
         if (value) {
             setHacienda(value);
-            setApiLoteSeccion(`${API_LINK}/bansis-app/index.php/lotes-seccion-select?hacienda=${value.id}`)
+            //setApiLoteSeccion(`${API_LINK}/bansis-app/index.php/lotes-seccion-select?hacienda=${value.id}`)
         } else {
             setHacienda(null);
-            setApiLoteSeccion("");
+            //setApiLoteSeccion("");
         }
+        setLoad(true);
     };
 
     return (
@@ -279,7 +321,7 @@ function HaciendaSelect({credential, setHacienda, setApiLoteSeccion}) {
     )
 }
 
-function LotesSelect({hacienda, apiLoteSeccion}) {
+/*function LotesSelect({hacienda, apiLoteSeccion}) {
     const [loteSeccion, setLoteSeccion] = useState(null);
 
     const changeLoteSeccion = (e, value) => {
@@ -289,16 +331,16 @@ function LotesSelect({hacienda, apiLoteSeccion}) {
     return (
         <Buscador
             api={apiLoteSeccion}
+            value={loteSeccion}
             change={changeLoteSeccion}
             disabled={(hacienda === null)}
             id="id-seccion-search"
             label="Seleccione una Seccion"
             setData={setLoteSeccion}
             variant="outlined"
-            value={loteSeccion}
         />
     )
-}
+}*/
 
 function MenuGrafico({col, children, icon, label}) {
     return (
@@ -309,9 +351,8 @@ function MenuGrafico({col, children, icon, label}) {
                 </div>
                 <div className="card-body p-1">
                     <div className="row">
-                        <div className="col-12">
-                            {children}
-                        </div>
+                        {/*Componentes gráficos*/}
+                        {children}
                     </div>
                 </div>
             </div>
@@ -319,7 +360,7 @@ function MenuGrafico({col, children, icon, label}) {
     )
 }
 
-function GraficoBarrasPeriodo() {
+function GraficoBarrasPeriodo({hacienda, load, setLoad, periodo}) {
     const [data, setData] = useState({
         series: [],
         options: {
@@ -340,44 +381,66 @@ function GraficoBarrasPeriodo() {
         }
     });
 
-    useState(() => {
-        (async () => {
-            try {
-                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-periodo`;
-                const request = await fetch(url);
-                const response = await request.json();
-                const {code} = response;
+    useEffect(() => {
+        if (load) {
+            (async () => {
+                try {
+                    let url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-periodo`;
+                    let str_hacienda = '';
+                    let str_periodo = '';
 
-                if (code === 200) {
-                    const {dataChartBarPrimo, dataChartBarSofca, dataOptions} = response;
-                    setData({
-                        ...data,
-                        series: [dataChartBarPrimo, dataChartBarSofca],
-                        options: {
-                            ...data.options,
-                            xaxis: {
-                                categories: dataOptions,
-                            },
+                    if (hacienda) str_hacienda = `?idhacienda=${hacienda.id}`;
+                    if (periodo > 0) str_periodo = str_hacienda !== '' ? `&periodo=${periodo}` : `?periodo=${periodo}`;
+
+                    url += str_hacienda + str_periodo;
+
+                    const request = await fetch(url);
+                    const response = await request.json();
+                    const {code} = response;
+
+                    if (code === 200) {
+                        const {dataChartBarPrimo, dataChartBarSofca, dataOptions} = response;
+                        let data = [];
+                        if (dataChartBarPrimo) {
+                            data.push(dataChartBarPrimo)
                         }
-                    })
-                }
+                        if (dataChartBarSofca) {
+                            data.push(dataChartBarSofca)
+                        }
+                        setData({
+                            ...data,
+                            series: data,
+                            options: {
+                                ...data.options,
+                                xaxis: {
+                                    categories: dataOptions,
+                                },
+                            }
+                        })
+                    }
 
-            } catch (e) {
-                console.log()
-            }
-        })();
-    });
+                } catch (e) {
+                    console.error(e)
+                }
+            })();
+            setLoad(false);
+        }
+    }, [data, hacienda, load, setLoad, periodo]);
 
     return (
-        <ApexChart
-            data={data}
-            type="line"
-            height={300}
-        />
+        <React.Fragment>
+            <div className="col-12">
+                <ApexChart
+                    data={data}
+                    type="line"
+                    height={300}
+                />
+            </div>
+        </React.Fragment>
     )
 }
 
-function GraficoBarrasLote({modal, setModal, hacienda}) {
+function GraficoBarrasLote({modal, setModal, hacienda, load, setLoad, periodo, semanas}) {
     const [data, setData] = useState({
         series: [],
         options: {
@@ -388,7 +451,16 @@ function GraficoBarrasLote({modal, setModal, hacienda}) {
                     dataPointSelection: (event, chartContext, config) => {
                         const id = config.w.config.dataId[config.dataPointIndex];
                         if (config.selectedDataPoints[0].length > 0) {
-                            const data = peticionHttp(`${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-lote-data?idlote=${id}`);
+                            const periodo = config.w.config.dataPeriodo;
+                            const semana = config.w.config.dataSemana;
+                            let url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-lote-data?idlote=${id}`;
+
+                            let str_periodo = '', str_semana = '';
+                            str_periodo = +periodo > 0 ? `&periodo=${periodo}` : '';
+                            str_semana = +semana > 0 ? `&semana=${semana}` : '';
+                            url += str_periodo + str_semana;
+
+                            const data = peticionHttp(url);
                             data.then(
                                 response => {
                                     if (response.code === 200) {
@@ -421,37 +493,49 @@ function GraficoBarrasLote({modal, setModal, hacienda}) {
             },
         }
     });
+    const [semana, setSemana] = useState(0);
+    const [loadComponent, setLoadComponent] = useState(false);
 
-    useState(() => {
-        (async () => {
-            try {
-                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-lote?idhacienda=${hacienda.id}`;
-                const request = await fetch(url);
-                const response = await request.json();
-                const {code} = response;
+    useEffect(() => {
+        if (load || loadComponent) {
+            (async () => {
+                try {
+                    let url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-lote?idhacienda=${hacienda.id}`;
+                    let str_periodo = '';
+                    let str_semana = '';
+                    if (periodo > 0) str_periodo = `&periodo=${periodo}`;
+                    if (semana > 0) str_semana = `&semana=${semana}`;
 
-                if (code === 200) {
-                    const {valueLotes, dataOptions, dataId} = response;
-                    setData({
-                        ...data,
-                        series: [valueLotes],
-                        options: {
-                            ...data.options,
-                            xaxis: {
-                                categories: dataOptions,
-                            },
-                            dataId: dataId
-                        }
-                    })
+                    url += str_periodo + str_semana;
+                    const request = await fetch(url);
+                    const response = await request.json();
+                    const {code} = response;
+
+                    if (code === 200) {
+                        const {valueLotes, dataOptions, dataId} = response;
+                        setData({
+                            ...data,
+                            series: [valueLotes],
+                            options: {
+                                ...data.options,
+                                xaxis: {
+                                    categories: dataOptions,
+                                },
+                                dataId: dataId,
+                                dataPeriodo: periodo,
+                                dataSemana: semana
+                            }
+                        })
+                    }
+                    //await setLoading(false);
+                } catch (e) {
+                    console.error(e)
                 }
-
-                //await setLoading(false);
-
-            } catch (e) {
-                console.log()
-            }
-        })();
-    });
+            })();
+            setLoad(false);
+            setLoadComponent(false);
+        }
+    }, [load, setLoad, loadComponent, setLoadComponent, hacienda, periodo, data, setData, semana]);
 
     function View(data) {
         const totalizar = (dataIndex, sum = true) => {
@@ -524,15 +608,28 @@ function GraficoBarrasLote({modal, setModal, hacienda}) {
     }
 
     return (
-        <ApexChart
-            data={data}
-            type="bar"
-            height={300}
-        />
+        <React.Fragment>
+            <div className="col-12">
+                <Semanas
+                    periodo={periodo}
+                    semana={semana}
+                    setSemana={setSemana}
+                    setLoadData={setLoadComponent}
+                    semanas={semanas}
+                />
+            </div>
+            <div className="col-12">
+                <ApexChart
+                    data={data}
+                    type="bar"
+                    height={300}
+                />
+            </div>
+        </React.Fragment>
     )
 }
 
-function GraficoBarrasLoteros({modal, setModal, hacienda}) {
+function GraficoBarrasLoteros({modal, setModal, hacienda, load, setLoad, periodo, semanas}) {
     const [data, setData] = useState({
         series: [],
         options: {
@@ -543,7 +640,16 @@ function GraficoBarrasLoteros({modal, setModal, hacienda}) {
                         //console.log(chartContext, config);
                         const id = config.w.config.dataId[config.dataPointIndex];
                         if (config.selectedDataPoints[0].length > 0) {
-                            const data = peticionHttp(`${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-lotero-data?idlotero=${id}`);
+                            const periodo = config.w.config.dataPeriodo;
+                            const semana = config.w.config.dataSemana;
+                            let url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-lotero-data?idlotero=${id}`;
+
+                            let str_periodo = '', str_semana = '';
+                            str_periodo = +periodo > 0 ? `&periodo=${periodo}` : '';
+                            str_semana = +semana > 0 ? `&semana=${semana}` : '';
+                            url += str_periodo + str_semana;
+
+                            const data = peticionHttp(url);
                             data.then(
                                 response => {
                                     if (response.code === 200) {
@@ -585,36 +691,50 @@ function GraficoBarrasLoteros({modal, setModal, hacienda}) {
             },
         }
     });
+    const [semana, setSemana] = useState(0);
+    const [loadComponent, setLoadComponent] = useState(false);
 
-    useState(() => {
-        (async () => {
-            try {
-                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-lotero?idhacienda=${hacienda.id}`;
-                const request = await fetch(url);
-                const response = await request.json();
-                const {code} = response;
+    useEffect(() => {
+        if (load || loadComponent) {
+            (async () => {
+                try {
+                    let url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-lotero?idhacienda=${hacienda.id}`;
+                    let str_periodo = '';
+                    let str_semana = '';
+                    if (periodo > 0) str_periodo = `&periodo=${periodo}`;
+                    if (semana > 0) str_semana = `&semana=${semana}`;
 
-                if (code === 200) {
-                    const {values, options, dataId} = response;
-                    console.log(response);
-                    setData({
-                        ...data,
-                        series: [values],
-                        options: {
-                            ...data.options,
-                            xaxis: {
-                                categories: options,
+                    url += str_periodo + str_semana;
+                    const request = await fetch(url);
+                    const response = await request.json();
+                    const {code} = response;
+
+                    if (code === 200) {
+                        const {values, options, dataId} = response;
+
+                        setData({
+                            ...data,
+                            series: [values],
+                            options: {
+                                ...data.options,
+                                xaxis: {
+                                    categories: options,
+                                },
+                                dataId: dataId,
+                                dataPeriodo: periodo,
+                                dataSemana: semana
                             },
-                            dataId: dataId
-                        },
-                    })
-                }
+                        })
+                    }
 
-            } catch (e) {
-                console.log()
-            }
-        })();
-    });
+                } catch (e) {
+                    console.error(e)
+                }
+            })();
+            setLoad(false);
+            setLoadComponent(false);
+        }
+    }, [load, setLoad, loadComponent, setLoadComponent, data, setData, hacienda, periodo, semana]);
 
     function View(data) {
         const totalizar = (dataIndex, sum = true) => {
@@ -686,16 +806,29 @@ function GraficoBarrasLoteros({modal, setModal, hacienda}) {
     }
 
     return (
-        <ApexChart
-            data={data}
-            type="bar"
-            style={{marginLeft: 25, marginRight: 15}}
-            height=""
-        />
+        <React.Fragment>
+            <div className="col-12">
+                <Semanas
+                    periodo={periodo}
+                    semana={semana}
+                    setSemana={setSemana}
+                    setLoadData={setLoadComponent}
+                    semanas={semanas}
+                />
+            </div>
+            <div className="col-12">
+                <ApexChart
+                    data={data}
+                    type="bar"
+                    style={{marginLeft: 25, marginRight: 15}}
+                    height=""
+                />
+            </div>
+        </React.Fragment>
     )
 }
 
-function GraficoBarrasAnual() {
+function GraficoBarrasAnual({hacienda, load, setLoad}) {
     const [data, setData] = useState({
         series: [],
         options: {
@@ -721,44 +854,55 @@ function GraficoBarrasAnual() {
         }
     });
 
-    useState(() => {
-        (async () => {
-            try {
-                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-historico`;
-                const request = await fetch(url);
-                const response = await request.json();
-                const {code} = response;
+    useEffect(() => {
+        if (load) {
+            (async () => {
+                try {
+                    let url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-historico`;
+                    let str_hacienda = '';
+                    if (hacienda) str_hacienda = `?idhacienda=${hacienda.id}`;
+                    url += str_hacienda;
 
-                if (code === 200) {
-                    const {series, categories} = response;
-                    setData({
-                        ...data,
-                        series: series,
-                        options: {
-                            ...data.options,
-                            xaxis: {
-                                categories: categories,
-                            },
-                        }
-                    })
+                    const request = await fetch(url);
+                    const response = await request.json();
+                    const {code} = response;
+
+                    if (code === 200) {
+                        const {series, categories} = response;
+                        setData({
+                            ...data,
+                            series: series,
+                            options: {
+                                ...data.options,
+                                xaxis: {
+                                    categories: categories,
+                                },
+                            }
+                        })
+                    }
+
+                } catch (e) {
+                    console.error(e)
                 }
-
-            } catch (e) {
-                console.log()
-            }
-        })();
-    });
+            })();
+            setLoad(false);
+        }
+    }, [load, setLoad, data, hacienda]);
 
     return (
-        <ApexChart
-            data={data}
-            type="bar"
-            height={300}
-        />
+        <React.Fragment>
+            <div className="col-12">
+                <ApexChart
+                    data={data}
+                    type="bar"
+                    height={300}
+                />
+            </div>
+        </React.Fragment>
     )
 }
 
-function GraficoPastelEnfundeHacienda({setHaciendas}) {
+function GraficoPastelEnfundeHacienda({hacienda, load, setLoad, setHaciendas}) {
     const [data, setData] = useState({
         series: [],
         options: {
@@ -768,9 +912,9 @@ function GraficoPastelEnfundeHacienda({setHaciendas}) {
                 events: {
                     dataPointSelection: (event, chartContext, config) => {
                         //console.log(chartContext, config);
-                        console.log(config.w.config.dataId[config.dataPointIndex]);
+                        /*console.log(config.w.config.dataId[config.dataPointIndex]);
                         console.log(config.w.config.series[config.dataPointIndex]);
-                        console.log(config.w.config.labels[config.dataPointIndex]);
+                        console.log(config.w.config.labels[config.dataPointIndex]);*/
                     },
                 }
             },
@@ -797,45 +941,57 @@ function GraficoPastelEnfundeHacienda({setHaciendas}) {
         }
     });
 
-    useState(() => {
-        (async () => {
-            try {
-                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-hacienda`;
-                const request = await fetch(url);
-                const response = await request.json();
-                const {code} = response;
+    useEffect(() => {
+        if (load) {
+            (async () => {
+                try {
+                    let url = '';
+                    if (hacienda) {
+                        url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-hacienda?idhacienda=${hacienda.id}`;
+                    } else {
+                        url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-hacienda`;
+                    }
+                    const request = await fetch(url);
+                    const response = await request.json();
+                    const {code} = response;
 
-                if (code === 200) {
-                    const {values, options, dataHaciendas, dataId} = response;
-                    setData({
-                        ...data,
-                        series: values,
-                        options: {
-                            ...data.options,
-                            labels: options,
-                            dataId: dataId
-                        }
-                    });
+                    if (code === 200) {
+                        const {values, options, dataHaciendas, dataId} = response;
+                        setData({
+                            ...data,
+                            series: values,
+                            options: {
+                                ...data.options,
+                                labels: options,
+                                dataId: dataId
+                            }
+                        });
 
-                    setHaciendas(dataHaciendas);
+                        setHaciendas(dataHaciendas);
+                    }
+
+                } catch (e) {
+                    console.error(e)
                 }
-
-            } catch (e) {
-                console.log()
-            }
-        })();
-    });
+            })();
+            setLoad(false)
+        }
+    }, [load, setLoad, data, hacienda, setHaciendas]);
 
     return (
-        <ApexChart
-            data={data}
-            type="pie"
-            height={500}
-        />
+        <React.Fragment>
+            <div className="col-12">
+                <ApexChart
+                    data={data}
+                    type="pie"
+                    height={500}
+                />
+            </div>
+        </React.Fragment>
     )
 }
 
-function GraficoVariables({hacienda, modal, setModal}) {
+function GraficoVariables({hacienda, modal, setModal, load, setLoad, periodo, semanas}) {
     const [data, setData] = useState({
         series: [],
         options: {
@@ -852,7 +1008,16 @@ function GraficoVariables({hacienda, modal, setModal}) {
                             id: config.w.config.dataId[config.dataPointIndex]
                         };
                         if (config.selectedDataPoints[0].length > 0) {
-                            const data = peticionHttp(`${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-has-dataLote?idseccion=${lote.id}`);
+                            const periodo = config.w.config.dataPeriodo;
+                            const semana = config.w.config.dataSemana;
+                            let url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-has-dataLote?idseccion=${lote.id}`;
+
+                            let str_periodo = '', str_semana = '';
+                            str_periodo = +periodo > 0 ? `&periodo=${periodo}` : '';
+                            str_semana = +semana > 0 ? `&semana=${semana}` : '';
+                            url += str_periodo + str_semana;
+
+                            const data = peticionHttp(url);
                             data.then(
                                 response => {
                                     if (response.code === 200) {
@@ -882,43 +1047,57 @@ function GraficoVariables({hacienda, modal, setModal}) {
             },
         }
     });
+    const [semana, setSemana] = useState(0);
+    const [loadComponent, setLoadComponent] = useState(false);
 
-    useState(() => {
-        (async () => {
-            try {
-                const url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-has?idhacienda=${hacienda.id}`;
-                const request = await fetch(url);
-                const response = await request.json();
-                const {code} = response;
+    useEffect(() => {
+        if (load || loadComponent) {
+            (async () => {
+                try {
+                    let url = `${API_LINK}/bansis-app/index.php/dashboard/enfunde/enfunde-has?idhacienda=${hacienda.id}`;
+                    let str_periodo = '';
+                    let str_semana = '';
+                    if (periodo > 0) str_periodo = `&periodo=${periodo}`;
+                    if (semana > 0) str_semana = `&semana=${semana}`;
 
-                if (code === 200) {
-                    const {series, dataId} = response;
-                    setData({
-                        ...data,
-                        series: series,
-                        options: {
-                            ...data.options,
-                            xaxis: {
-                                tickAmount: 5,
-                                labels: {
-                                    formatter: function (val) {
-                                        return parseFloat(val).toFixed(2)
+                    url += str_periodo + str_semana;
+                    const request = await fetch(url);
+                    const response = await request.json();
+                    const {code} = response;
+
+                    if (code === 200) {
+                        const {series, dataId} = response;
+                        setData({
+                            ...data,
+                            series: series,
+                            options: {
+                                ...data.options,
+                                xaxis: {
+                                    tickAmount: 5,
+                                    labels: {
+                                        formatter: function (val) {
+                                            return parseFloat(val).toFixed(0)
+                                        }
                                     }
-                                }
-                            },
-                            yaxis: {
-                                tickAmount: 5
-                            },
-                            dataId: dataId
-                        }
-                    })
-                }
+                                },
+                                yaxis: {
+                                    tickAmount: 5
+                                },
+                                dataId: dataId,
+                                dataPeriodo: periodo,
+                                dataSemana: semana
+                            }
+                        })
+                    }
 
-            } catch (e) {
-                console.log()
-            }
-        })();
-    });
+                } catch (e) {
+                    console.error(e)
+                }
+            })();
+            setLoad(false);
+            setLoadComponent(false);
+        }
+    }, [load, setLoad, loadComponent, setLoadComponent, data, setData, hacienda, periodo, semana]);
 
     function View({series, categories}) {
         const data = {
@@ -949,11 +1128,24 @@ function GraficoVariables({hacienda, modal, setModal}) {
     }
 
     return (
-        <ApexChart
-            data={data}
-            type="scatter"
-            height={300}
-        />
+        <React.Fragment>
+            <div className="col-12">
+                <Semanas
+                    periodo={periodo}
+                    semana={semana}
+                    setSemana={setSemana}
+                    setLoadData={setLoadComponent}
+                    semanas={semanas}
+                />
+            </div>
+            <div className="col-12">
+                <ApexChart
+                    data={data}
+                    type="scatter"
+                    height={300}
+                />
+            </div>
+        </React.Fragment>
     )
 }
 
@@ -1011,10 +1203,12 @@ function configuracionModal() {
 
 function AlertInfo({icon, type, title, message, ...data}) {
     return (
-        <div className={`row ${data.padding}`}>
-            <div className="col-12">
-                <div className={`alert alert-${type}`}>
-                    <b><i className={icon}/> {title}</b> {message}
+        <div className="col-12">
+            <div className={`row ${data.padding}`}>
+                <div className="col-12">
+                    <div className={`alert alert-${type}`}>
+                        <b><i className={icon}/> {title}</b> {message}
+                    </div>
                 </div>
             </div>
         </div>
@@ -1024,7 +1218,7 @@ function AlertInfo({icon, type, title, message, ...data}) {
 function CardDataItem({data}) {
     return (
         <li className="list-group-item">
-            Enfunde {data.detalle} <h2 className="m-0"><i
+            {data.detalle} <h2 className="m-0"><i
             className="fas fa-sort-numeric-up-alt"/> {parseInt(data.enfunde).toLocaleString()}
         </h2>
         </li>
@@ -1083,6 +1277,146 @@ function CardLotero() {
     );
 }
 
+function Periodos({periodo, setPeriodo, setLoad, setSemanas}) {
+    const [periodo1, setPeriodo1] = useState([
+        {value: 1, status: false}, {value: 2, status: false}, {value: 3, status: false},
+        {value: 4, status: false}, {value: 5, status: false}, {value: 6, status: false}]);
+    const [periodo2, setPeriodo2] = useState([
+        {value: 7, status: false}, {value: 8, status: false}, {value: 9, status: false},
+        {value: 10, status: false}, {value: 11, status: false}, {value: 12, status: false},
+        {value: 13, status: false}]);
+
+    const changeStatus = (value, status) => {
+        let items1 = [...periodo1];
+        let items2 = [...periodo2];
+
+        for (const x of items1) x.status = false;
+        for (const x of items2) x.status = false;
+
+        for (const item of items1) {
+            if (item.value === value) {
+                item.status = !status;
+                break;
+            }
+        }
+
+        for (const item of items2) {
+            if (item.value === value) {
+                item.status = !status;
+                break;
+            }
+        }
+
+        if (periodo !== value) {
+            setPeriodo(value);
+            /*Cargar las semanas con las que se van a filtrar en todo el dashboard*/
+            loadSemanas(value).then(
+                response => setSemanas(response),
+                error => console.error(error)
+            );
+        } else {
+            setPeriodo(0);
+            setSemanas([]);
+        }
+
+        setLoad(true);
+
+        setPeriodo1(items1);
+        setPeriodo2(items2);
+    };
+
+    return (
+        <div className="col-12 mb-n3">
+            <small className="">
+                <em>Periodos Anual (Para visualizar la información por periodo, debe seleccionar uno de ellos)</em>
+            </small>
+            <div className="row mt-2">
+                <div className="btn-group col-xl-6 mb-3" role="group" aria-label="button group" data-toggle="button">
+                    {periodo1.map(({status, value}, i) =>
+                        <button key={i} className={`btn btn-outline-secondary ${status && 'active'}`}
+                                onClick={() => changeStatus(value, status)}>{value}</button>
+                    )}
+                </div>
+                <div className="btn-group col-xl-6 mb-3" role="group" aria-label="button group" data-toggle="button">
+                    {periodo2.map(({status, value}, i) =>
+                        <button key={i} className={`btn btn-outline-secondary ${status && 'active'}`}
+                                onClick={() => changeStatus(value, status)}>{value}</button>
+                    )}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+const loadSemanas = async (periodo) => {
+    try {
+        const url = `${API_LINK}/bansis-app/calendario.php/semanasPeriodo?periodo=${periodo}&year=${yearNumber()}`;
+        const request = await fetch(url);
+        const response = await request.json();
+        const {code} = response;
+        if (code === 200) {
+            //Retornan 4 items por periodo
+            let list = [];
+            for (const i of response.semanas) {
+                list.push({value: +i, status: false})
+            }
+            return list;
+        }
+    } catch (e) {
+        return e;
+    }
+};
+
+function Semanas({periodo, semana, setSemana, setLoadData, semanas}) {
+    const [semanasList, setSemanasList] = useState([]);
+
+    useEffect(() => {
+        setSemanasList(semanas);
+    }, [semanas]);
+
+    const changeStatus = (value, status) => {
+        let semanas = [...semanasList];
+
+        for (const x of semanas) x.status = false;
+        for (const item of semanas) {
+            if (+item.value === +value) {
+                item.status = !status;
+                break;
+            }
+        }
+
+        if (semana !== value) {
+            setSemana(value);
+        } else {
+            setSemana(0);
+        }
+
+        setLoadData(true);
+        setSemanasList(semanas);
+    };
+
+    if (periodo === 0) {
+        return <React.Fragment/>;
+    }
+
+
+    return (
+        <div className="row mb-3">
+            <div className="col-12">
+                <div className="btn-group col-12" role="group" aria-label="button group" data-toggle="button">
+                    {(setSemanasList.length > 0) && semanasList.map(({value, status}, i) =>
+                        <button
+                            key={i}
+                            className={`btn btn-outline-secondary ${status && 'active'}`}
+                            onClick={() => changeStatus(value, status)}>{status &&
+                        <i className="fas fa-filter"/>} Semana {value}</button>
+                    )}
+                </div>
+            </div>
+        </div>
+    )
+}
+
 const peticionHttp = async (url) => {
     try {
         const request = await fetch(url);
@@ -1090,4 +1424,8 @@ const peticionHttp = async (url) => {
     } catch (e) {
         return e;
     }
+};
+
+const yearNumber = () => {
+    return 2020;
 };

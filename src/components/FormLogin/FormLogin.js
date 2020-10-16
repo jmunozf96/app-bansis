@@ -34,9 +34,8 @@ export default function FormLogin() {
         status: false,
         message: 'Credenciales Incorrectas'
     });
-    const authentication = useSelector(
-        (state) => state.auth._token
-    );
+
+    const authentication = useSelector((state) => state.auth._token);
 
     //En caso de loguearse se debe dejar el token
     const dispatch = useDispatch();

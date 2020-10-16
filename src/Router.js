@@ -16,7 +16,7 @@ import FormGrupo from "./pages/bodega/formGrupo";
 import FormMaterial from "./pages/bodega/formMaterial";
 import Material from "./pages/bodega/material";
 import Maps from "./pages/hacienda/Mapa/maps";
-import FormEgreso from "./pages/bodega/Egreso/Formulario/formEgreso";
+import FormEgreso from "./pages/bodega/Egreso/Formulario_nw/FormEgreso";
 import Egreso from "./pages/bodega/Egreso";
 import FormularioLote from "./pages/hacienda/Lote/Formulario/formLote";
 import Lote from "./pages/hacienda/Lote";
@@ -137,7 +137,7 @@ export const routes = [
     },
     {
         path: "/bodega/egreso-material/:idmodulo",
-        component: Egreso
+        component: FormEgreso
     },
     {
         path: "/bodega/egreso-material/:idmodulo/formulario/:id?",

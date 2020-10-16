@@ -191,6 +191,7 @@ export default function FormEgreso() {
             setDetalleEgreso([]);
             setMaterial(null);
             setStock(0);
+            setEgresoDevolucion(true);
             //setAlert(false);
         } else {
             setMaterial(null);

@@ -10,6 +10,7 @@ import bodegaReducers from "./bodega/bodegaReducers";
 import grupoReducers from "./bodega/grupoReducers";
 import recursosReducers from "./recursosReducers";
 import cosechaReducers from "./cosecha/cosechaReducers";
+import egresoBodegaDucks from "./bodega/egresoBodegaDucks";
 
 export default combineReducers({
     auth: authReducer,
@@ -22,5 +23,6 @@ export default combineReducers({
     dataBodega: bodegaReducers,
     dataGrupo: grupoReducers,
     statusForm: statusFormReducers,
-    cosecha: cosechaReducers
+    cosecha: cosechaReducers,
+    egresoBodega: egresoBodegaDucks
 });

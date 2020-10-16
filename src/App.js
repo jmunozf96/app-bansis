@@ -6,7 +6,7 @@ import RouterConfig from "./RouterConfig";
 //import Footer from "./components/Footer";
 
 //Redux
-import store from "./store";
+import store from "./reducers/store";
 import {Provider} from "react-redux";
 
 function App() {
