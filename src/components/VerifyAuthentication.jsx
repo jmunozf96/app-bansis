@@ -18,8 +18,9 @@ export default function VerifyAuthentication({children}) {
     const [loguinStatus, setLoguinStatus] = useState(true);
     const [renderiza, setRenderiza] = useState(false);
 
-    const authentication = useSelector((state) => state.auth._token);
-    const credentialCard = useSelector((state) => state.credential);
+    const authentication = useSelector((state) => state.login.token);
+    const credentialCard = useSelector((state) => state.login.credential);
+
     const dispatch = useDispatch();
 
     const {idmodulo} = useParams();
@@ -122,7 +123,7 @@ export default function VerifyAuthentication({children}) {
     }, [checkModule, idmodulo, history, authentication, credentialCard]);
 
 
-    if (!loguinStatus && !renderiza) {
+    if (authentication === '') {
         return (
             <Redirect
                 to="/login"
@@ -136,7 +137,7 @@ export default function VerifyAuthentication({children}) {
                 mensaje="Lo sentimos, usted no tiene acceso a este modulo."
             />;
         }else{
-            return <SpinnerLoadingVerify/>;
+            return children;
         }
     }
 }

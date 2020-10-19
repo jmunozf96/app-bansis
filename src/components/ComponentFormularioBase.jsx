@@ -1,7 +1,7 @@
     import React from "react";
 import {useHistory} from "react-router-dom";
 
-const FormularioBase = (props) => {
+const ComponentFormularioBase = (props) => {
     const {icon, title, children, ...events} = props;
     const history = useHistory();
 
@@ -48,4 +48,4 @@ const FormularioBase = (props) => {
     )
 };
 
-export default FormularioBase;
+export default ComponentFormularioBase;

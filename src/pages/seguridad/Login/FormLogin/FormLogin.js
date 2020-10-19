@@ -9,14 +9,9 @@ import VpnKeyIcon from '@material-ui/icons/VpnKey';
 
 import {useHistory} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
-import {authVerifyActions} from "../../actions/authActions";
-import {credentialAction} from "../../actions/credentialActions";
 
 import "./FormLogin.scss"
-import {progressActions} from "../../actions/progressActions";
-
-import {API_LINK} from "../../utils/constants";
-import {recursosAction} from "../../actions/recursosActions";
+import {loginSystem} from "../../../../reducers/seguridad/loginDucks";
 
 export default function FormLogin() {
     const history = useHistory();
@@ -35,14 +30,10 @@ export default function FormLogin() {
         message: 'Credenciales Incorrectas'
     });
 
-    const authentication = useSelector((state) => state.auth._token);
+    const authentication = useSelector((state) => state.login.token);
 
     //En caso de loguearse se debe dejar el token
     const dispatch = useDispatch();
-    const authorization = (state) => dispatch(authVerifyActions(state));
-    const progessbarStatus = (state) => dispatch(progressActions(state));
-    const credentialCard = (state) => dispatch(credentialAction(state));
-    const recursosUser = (state) => dispatch(recursosAction(state));
 
     useEffect(() => {
         if (credentialStatus) {
@@ -52,11 +43,13 @@ export default function FormLogin() {
                 password: userAcount.password,
                 getToken: true
             });
+
             setCredentialStatus(false);
         }
         if (authentication !== '') {
             history.push("/");
         }
+
     }, [history, authentication, userAcount, getCredential, credentialStatus]);
 
     const onChangeHandler = (e) => {
@@ -70,7 +63,6 @@ export default function FormLogin() {
     const login = (e) => {
             e.preventDefault();
             const {user, password} = userAcount;
-            const form = e.currentTarget;
 
             if (!user || !password) {
                 setStatusForm({
@@ -80,78 +72,9 @@ export default function FormLogin() {
                 return;
             }
 
-            let data = new FormData();
-            data.append('json', JSON.stringify(userAcount));
-
-            const config = {
-                timeout: 10000,
-                onUploadProgress: function (progressEvent) {
-                    progessbarStatus(true);
-                }
-            };
-
-            const response = getUser(`${API_LINK}/bansis/login`, data, config);
-            response.then((data) => {
-                if (data) {
-                    const {code, message, token, credential} = data;
-                    if (code === 400) {
-                        setStatusForm({
-                            status: true,
-                            message: message
-                        });
-                    } else {
-                        if (code === 200) {
-                            if (token) {
-                                authorization(credential);
-                                form.reset();
-                            }
-                        } else {
-                            setStatusForm({
-                                status: true,
-                                message: message
-                            });
-                        }
-                    }
-                }
-            });
-
-            const dataCard = new FormData();
-            dataCard.append('json', JSON.stringify(getCredential));
-
-            axios.post(`${API_LINK}/bansis/login`, dataCard, null).then((response) => {
-                const {code, credential} = response.data;
-                if (code === 200) {
-                    const data_user = {
-                        sub: credential.sub,
-                        nick: credential.nick,
-                        nombres: credential.nombres,
-                        apellidos: credential.apellidos,
-                        idhacienda: credential.idhacienda
-                    };
-                    credentialCard(data_user);
-                    if (response.data.recursos) {
-                        recursosUser(response.data.recursos);
-                    }
-                }
-            });
+            dispatch(loginSystem(userAcount));
         }
     ;
-
-    async function getUser(url, data, config = null) {
-        try {
-            return await axios.post(url, data, config)
-                .then((response) => {
-                    progessbarStatus(false);
-                    return response.data;
-                })
-                .catch((error) => {
-                    progessbarStatus(false);
-                    return error;
-                });
-        } catch (error) {
-            console.error(error);
-        }
-    }
 
     return (
         <Form

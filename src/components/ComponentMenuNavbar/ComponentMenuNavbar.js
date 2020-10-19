@@ -6,7 +6,7 @@ import {Link} from "react-router-dom"
 
 import {useDispatch, useSelector} from "react-redux";
 
-import "./MenuTop.scss"
+import "./ComponentMenuNavbar.scss"
 import LinearProgress from "@material-ui/core/LinearProgress";
 import {logoutActions} from "../../actions/authActions";
 import {cleanCredentialAction, credentialAction} from "../../actions/credentialActions";
@@ -14,11 +14,12 @@ import Cookies from "js-cookie";
 import qs from "qs";
 import {recursosAction} from "../../actions/recursosActions";
 
-export default function MenuTop() {
-    const authentication = useSelector((state) => state.auth._token);
+export default function ComponentMenuNavbar() {
+    const authentication = useSelector((state) => state.login.auth);
+    const credentialCard = useSelector((state) => state.login.credential);
+    const recursos = useSelector((state) => state.login.recursos);
+
     const progressbarStatus = useSelector((state) => state.progressbar.loading);
-    const credentialCard = useSelector((state) => state.credential);
-    const recursos = useSelector((state) => state.recursos);
 
     const localStorageAuth = localStorage.getItem('_sessionId') === undefined || localStorage.getItem('_sessionId') === null;
     const credentialsCookie = Cookies.get('sessionId') === undefined || Cookies.get('sessionId') === null;
@@ -101,7 +102,7 @@ export default function MenuTop() {
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="responsive-navbar-nav"/>
                 <Navbar.Collapse id="responsive-navbar-nav">
-                    {authentication !== '' && !checkAuth && credentialCard ? (
+                    {authentication !== '' && credentialCard ? (
                         <>
                             <Nav className="mr-auto">
                                 <Nav.Link as={Link} to="/">Inicio</Nav.Link>

@@ -1,5 +1,5 @@
 import React from "react";
-import FormularioBase from "../../../../components/FormularioBase";
+import ComponentFormularioBase from "../../../../components/ComponentFormularioBase";
 import {useParams} from "react-router-dom";
 import CabeceraEgreso from "./CabeceraEgreso";
 import DetalleEgreso from "./DetalleEgreso";
@@ -39,7 +39,7 @@ export default function FormEgreso() {
     };
 
     return (
-        <FormularioBase
+        <ComponentFormularioBase
             icon='fas fa-street-view'
             title={'Formulario Egreso de Bodega'}
             nuevo={nuevo}
@@ -57,6 +57,6 @@ export default function FormEgreso() {
             {/*Detalle de la transacción*/}
             <DetalleEgreso/>
 
-        </FormularioBase>
+        </ComponentFormularioBase>
     )
 }

@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import SnackbarComponent from "../../../../../components/Snackbar/Snackbar";
 import Buscador from "../../../../../components/Buscador";
 import InputSearch from "../../../../../components/InputSearch/InputSearch";
-import FormularioBase from "../../../../../components/FormularioBase";
+import ComponentFormularioBase from "../../../../../components/ComponentFormularioBase";
 import {API_LINK, idGrupoMaterialEnfunde} from "../../../../../utils/constants";
 import {FormHelperText} from "@material-ui/core";
 import {progressActions} from "../../../../../actions/progressActions";
@@ -438,7 +438,7 @@ export default function FormEnfunde() {
     }
 
     return (
-        <FormularioBase
+        <ComponentFormularioBase
             icon='fas fa-street-view'
             title={'Formulario Secciones por Formulario'}
             nuevo={nuevoAvanceLabor}
@@ -614,7 +614,7 @@ export default function FormEnfunde() {
                     </div>
                 </div>
             </div>
-        </FormularioBase>
+        </ComponentFormularioBase>
     );
 }
 

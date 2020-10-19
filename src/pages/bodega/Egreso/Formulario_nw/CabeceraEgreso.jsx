@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import OptionsComponent from "../../../../components/OptionsComponent";
+import ComponentOptions from "../../../../components/ComponentOptions";
 
 import {useDispatch, useSelector} from 'react-redux'
 import {
@@ -72,7 +72,7 @@ export default function CabeceraEgreso() {
                 <div className="col-md-4">
                     <div className="row">
                         <div className="col-md-12 mb-3">
-                            <OptionsComponent
+                            <ComponentOptions
                                 api={api_haciendas}
                                 label="Hacienda"
                                 name="hacienda"
@@ -82,7 +82,7 @@ export default function CabeceraEgreso() {
                             />
                         </div>
                         <div className="col-md-12 mb-3">
-                            <OptionsComponent
+                            <ComponentOptions
                                 api={cabecera.hacienda !== null ? api_bodegas + `?hacienda=${cabecera.hacienda.id}` : api_bodegas}
                                 label="Bodega"
                                 name="bodega"
@@ -92,7 +92,7 @@ export default function CabeceraEgreso() {
                             />
                         </div>
                         <div className="col-md-12 mb-1">
-                            <OptionsComponent
+                            <ComponentOptions
                                 api={api_grupos_bodega}
                                 label="Grupo"
                                 name="grupo"

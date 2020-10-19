@@ -11,8 +11,10 @@ import grupoReducers from "./bodega/grupoReducers";
 import recursosReducers from "./recursosReducers";
 import cosechaReducers from "./cosecha/cosechaReducers";
 import egresoBodegaDucks from "./bodega/egresoBodegaDucks";
+import loginDucks from "./seguridad/loginDucks";
 
 export default combineReducers({
+    login: loginDucks,
     auth: authReducer,
     progressbar: progressNavReducers,
     credential: credentialReducers,

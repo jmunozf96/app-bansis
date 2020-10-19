@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import FormularioBase from "../../../../components/FormularioBase";
+import ComponentFormularioBase from "../../../../components/ComponentFormularioBase";
 import {API_LINK, focuselement} from "../../../../utils/constants";
 import Buscador from "../../../../components/Buscador";
 
@@ -619,7 +619,7 @@ export default function FormSeccionLabor() {
     };
 
     return (
-        <FormularioBase
+        <ComponentFormularioBase
             icon='fas fa-location-arrow'
             title={'Formulario Secciones por Formulario'}
             nuevo={nuevaSeccionLabor}
@@ -779,7 +779,7 @@ export default function FormSeccionLabor() {
                 </div>
             </div>
             }
-        </FormularioBase>
+        </ComponentFormularioBase>
     );
 }
 

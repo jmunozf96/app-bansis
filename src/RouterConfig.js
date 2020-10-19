@@ -2,7 +2,7 @@ import React from "react";
 import {Route, Switch} from "react-router-dom";
 import {routes} from "./Router";
 
-import Login from "./pages/login";
+import Login from "./pages/seguridad/Login/login";
 import VerifyAuthentication from "./components/VerifyAuthentication";
 
 export default function RouterConfig() {

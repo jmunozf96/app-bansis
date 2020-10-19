@@ -1,8 +1,8 @@
 import React from "react";
-import Spinner from "../components/Spinner";
+import Spinner from "../../../components/Spinner";
 
 import {Col, Container, Row} from "react-bootstrap";
-import FormLogin from "../components/FormLogin";
+import FormLogin from "./FormLogin";
 
 export default function Login() {
 

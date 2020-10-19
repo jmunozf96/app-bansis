@@ -1,18 +1,18 @@
 import {createStore, compose, applyMiddleware} from "redux";
 import thunk from 'redux-thunk'
 import reducer from "./index";
-import {getStateLocalStorage, setCookie, setCookieRecursos, setStateLocalStorage,} from "../utils/localStorage";
+import {setCookie, setCookieRecursos, setStateLocalStorage,} from "../utils/localStorage";
+import {loadCredentials, loadStorageAuth} from "./seguridad/loginDucks";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const store = createStore(
-    reducer,
-    getStateLocalStorage(),
-    composeEnhancers(applyMiddleware(thunk))
-);
+    reducer, composeEnhancers(applyMiddleware(thunk)));
 
+store.dispatch(loadStorageAuth());
 
 store.subscribe(() => {
+    store.dispatch(loadCredentials());
     setStateLocalStorage(store.getState().auth._token);
     setCookie(store.getState().credential);
     setCookieRecursos(store.getState().recursos);

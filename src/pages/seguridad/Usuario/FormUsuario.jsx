@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import FormularioBase from "../../../components/FormularioBase";
+import ComponentFormularioBase from "../../../components/ComponentFormularioBase";
 import {Link, useParams} from "react-router-dom";
 import {API_LINK} from "../../../utils/constants";
 import Buscador from "../../../components/Buscador";
@@ -197,7 +197,7 @@ export default function FormUsuario() {
     };
 
     return (
-        <FormularioBase
+        <ComponentFormularioBase
             icon='fas fa-users'
             title={'Formulario de creacion de usuarios'}
             nuevo={nuevoUsuario}
@@ -355,6 +355,6 @@ export default function FormUsuario() {
                 }
             </div>
             }
-        </FormularioBase>
+        </ComponentFormularioBase>
     );
 }

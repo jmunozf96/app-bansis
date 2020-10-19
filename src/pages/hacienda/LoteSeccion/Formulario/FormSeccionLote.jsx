@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import FormularioBase from "../../../../components/FormularioBase";
+import ComponentFormularioBase from "../../../../components/ComponentFormularioBase";
 import Buscador from "../../../../components/Buscador";
 import {API_LINK, focuselement} from "../../../../utils/constants";
 import ExploreIcon from "@material-ui/icons/Explore";
@@ -621,7 +621,7 @@ const FormSeccionLote = () => {
 
 
     return (
-        <FormularioBase
+        <ComponentFormularioBase
             icon='fas fa-location-arrow'
             title={'Formulario Secciones por Lote'}
             nuevo={NuevaSeccion}
@@ -779,7 +779,7 @@ const FormSeccionLote = () => {
                     </table>
                 </div>
             </div>
-        </FormularioBase>
+        </ComponentFormularioBase>
     );
 };
 

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import FormularioBase from "../../../components/FormularioBase";
+import ComponentFormularioBase from "../../../components/ComponentFormularioBase";
 import {useParams} from "react-router-dom";
 import {API_LINK} from "../../../utils/constants";
 import {useDispatch, useSelector} from "react-redux";
@@ -217,7 +217,7 @@ export default function FormRecursoUsuario() {
         <div className="container-fluid">
             <div className="row">
                 <div className="col-md-6" style={{marginTop: "-2.5rem"}}>
-                    <FormularioBase
+                    <ComponentFormularioBase
                         icon='far fa-address-card'
                         title={'Formulario de asignacion de rol a usuarios'}
                         nuevo={nuevoRolUsuario}
@@ -326,7 +326,7 @@ export default function FormRecursoUsuario() {
                                 </div>
                             </div>
                         </div>
-                    </FormularioBase>
+                    </ComponentFormularioBase>
                 </div>
                 <div className="col-md-6" style={{marginTop: "1.5rem"}}>
                     <div className="row p-0 m-0">

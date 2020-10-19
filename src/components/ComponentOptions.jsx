@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function OptionsComponent({api, label, name, value, changeValue, disabled}) {
+export default function ComponentOptions({api, label, name, value, changeValue, disabled}) {
     const classes = useStyles();
     let options = [];
 
