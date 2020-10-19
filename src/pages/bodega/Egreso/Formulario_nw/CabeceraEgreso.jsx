@@ -4,7 +4,7 @@ import OptionsComponent from "../../../../components/OptionsComponent";
 import {useDispatch, useSelector} from 'react-redux'
 import {
     setDataCabeceraHacienda, setDataCabeceraEmpleado,
-    setDataCabeceraBodega, setDataCabeceraGrupo, setDataCabeceraParcial, existEgreso
+    setDataCabeceraBodega, setDataCabeceraGrupo, setDataCabeceraParcial, existEgreso, clearDetalle, clearDespacho
 } from "../../../../reducers/bodega/egresoBodegaDucks"
 
 import {API_LINK} from "../../../../utils/constants";
@@ -54,6 +54,8 @@ export default function CabeceraEgreso() {
 
     const changeEmpleado = (e, value) => {
         dispatch(setDataCabeceraEmpleado(value));
+        dispatch(clearDespacho());
+        dispatch(clearDetalle());
 
         if (!value) {
             setSearchEmpleado('');

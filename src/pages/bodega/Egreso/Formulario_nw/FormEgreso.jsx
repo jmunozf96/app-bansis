@@ -4,7 +4,13 @@ import {useParams} from "react-router-dom";
 import CabeceraEgreso from "./CabeceraEgreso";
 import DetalleEgreso from "./DetalleEgreso";
 import {useDispatch, useSelector} from "react-redux";
-import {existEgreso, saveEgresoBodega, updateEgresoBodega} from "../../../../reducers/bodega/egresoBodegaDucks";
+import {
+    changeStatusBtnsave,
+    clearCabecera,
+    clearDespacho, clearDetalle, clearRespaldo,
+    saveEgresoBodega, setDataCabeceraEmpleado,
+    updateEgresoBodega
+} from "../../../../reducers/bodega/egresoBodegaDucks";
 
 export default function FormEgreso() {
     const {idmodulo} = useParams();
@@ -15,7 +21,11 @@ export default function FormEgreso() {
     const saveTransaction = useSelector(state => state.egresoBodega.save);
 
     const nuevo = () => {
-
+        dispatch(setDataCabeceraEmpleado(null));
+        dispatch(clearDespacho());
+        dispatch(clearDetalle());
+        dispatch(clearRespaldo());
+        dispatch(changeStatusBtnsave(true));
     };
 
     const guardar = () => {
@@ -25,6 +35,9 @@ export default function FormEgreso() {
             console.warn("Se actualizo la transacción...");
             dispatch(updateEgresoBodega());
         }
+
+        //Limpiar formulario
+        dispatch(clearDespacho());
     };
 
     return (

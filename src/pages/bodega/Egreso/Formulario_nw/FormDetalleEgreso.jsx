@@ -6,15 +6,7 @@ import {
     deleteItemDetalle, registerChangesItemsProcess
 } from "../../../../reducers/bodega/egresoBodegaDucks";
 
-const style = {
-    table: {
-        textCenter: {
-            textAlign: "center",
-            verticalAlign: "middle",
-            fontSize: 18
-        }
-    }
-};
+const style = {table: {textCenter: {textAlign: "center", verticalAlign: "middle", fontSize: 18}}};
 
 export default function FormDetalleEgreso({index, data}) {
     const dispatch = useDispatch();
@@ -42,7 +34,7 @@ export default function FormDetalleEgreso({index, data}) {
 
     const stockReservado = () => {
         const respaldo = respaldos.filter((item) => item.idmaterial === data.material.id && item.fecha === data.fecha);
-        return (respaldo.length > 0) ? respaldo.reduce((total, item) => item.adicion ? (+total + +item.diferencia) : -(+total + +item.diferencia), 0) : 0;
+        return (respaldo.length > 0) ? respaldo.reduce((total, item) => +total + +item.diferencia, 0) : 0;
     };
 
     const stockMaterial = () => {
@@ -81,18 +73,49 @@ export default function FormDetalleEgreso({index, data}) {
         setCantidad(data.cantidad);
     };
 
+    const getColor = (movimiento) => {
+        switch (movimiento) {
+            case 'CREDIT-SLD':
+                return 'warning';
+            case 'DEBIT-SLD':
+                return 'danger';
+            default:
+                return 'success'
+        }
+    };
+
     return (
         <tr>
-            <td width="3%">
-                <button className="btn btn-lg btn-danger btn-block" onClick={() => dispatch(deleteItemDetalle(data))}>
-                    <i className="fas fa-minus"/>
-                </button>
+            <td width="3%" style={style.table.textCenter}>
+                {data.movimiento === 'EGRE-ART' ?
+                    <React.Fragment>
+                        {cabecera.fecha === data.fecha ?
+                            <button className="btn btn-lg btn-danger btn-block"
+                                    onClick={() => dispatch(deleteItemDetalle(data))}>
+                                <i className="fas fa-minus"/>
+                            </button>
+                            :
+                            <button className="btn btn-lg btn-success btn-block">
+                                <i className="far fa-check-circle"/>
+                            </button>
+                        }
+                    </React.Fragment>
+                    :
+                    <button className="btn btn-lg btn-danger btn-block">
+                        <i className="fas fa-minus"/>
+                    </button>
+                }
             </td>
-            <td style={style.table.textCenter}>{data.material.codigo}</td>
+            {/*<td style={style.table.textCenter}>{data.material.codigo}</td>*/}
             <td width="10%" style={style.table.textCenter}>{data.fecha}</td>
+            <td width="8%" style={style.table.textCenter}>
+                <span className={`badge badge-${getColor(data.movimiento)}`}>{data.movimiento}</span>
+            </td>
             <td style={style.table.textCenter}>{data.material.descripcion}</td>
-            <td width="10%" style={style.table.textCenter}>{stockMaterial()}</td>
-            <td width="20%" style={style.table.textCenter}>
+            <td width="10%" style={style.table.textCenter}>{
+                data.hasOwnProperty('idSQL') && data.fecha !== cabecera.fecha ? data.material.stock : stockMaterial()
+            }</td>
+            <td width="15%" style={style.table.textCenter}>
                 {!edit && !editProcess ? data.cantidad : editProcess ? <input
                         type="number"
                         className="form-control form-control-lg text-center" value={cantidad}
@@ -110,40 +133,48 @@ export default function FormDetalleEgreso({index, data}) {
                 }
             </td>
             <td width="3%">
-                {!data.hasOwnProperty('idSQL') ?
+                {data.movimiento === 'EGRE-ART' ?
                     <React.Fragment>
-                        {!edit ?
-                            <button className="btn btn-lg btn-primary btn-block" onClick={() => editItem()}>
-                                <i className="fas fa-edit"/>
-                            </button>
-                            :
-                            <button className="btn btn-lg btn-success btn-block" onClick={() => saveItem()}>
-                                <i className="fas fa-save"/>
-                            </button>
-                        }
-                    </React.Fragment>
-                    :
-                    <React.Fragment>
-                        {cabecera.fecha === data.fecha ?
+                        {!data.hasOwnProperty('idSQL') ?
                             <React.Fragment>
-                                {!editProcess ?
-                                    <button className="btn btn-lg btn-primary btn-block"
-                                            onClick={() => editItemProcess()}>
+                                {!edit ?
+                                    <button className="btn btn-lg btn-primary btn-block" onClick={() => editItem()}>
                                         <i className="fas fa-edit"/>
                                     </button>
                                     :
-                                    <button className="btn btn-lg btn-success btn-block"
-                                            onClick={() => saveItemProcess()}>
-                                        <i className="fas fa-edit"/>
+                                    <button className="btn btn-lg btn-success btn-block" onClick={() => saveItem()}>
+                                        <i className="fas fa-save"/>
                                     </button>
                                 }
                             </React.Fragment>
                             :
-                            <button className="btn btn-lg btn-info btn-block">
-                                <i className="fas fa-lock"/>
-                            </button>
+                            <React.Fragment>
+                                {cabecera.fecha === data.fecha ?
+                                    <React.Fragment>
+                                        {!editProcess ?
+                                            <button className="btn btn-lg btn-primary btn-block"
+                                                    onClick={() => editItemProcess()}>
+                                                <i className="fas fa-edit"/>
+                                            </button>
+                                            :
+                                            <button className="btn btn-lg btn-success btn-block"
+                                                    onClick={() => saveItemProcess()}>
+                                                <i className="fas fa-edit"/>
+                                            </button>
+                                        }
+                                    </React.Fragment>
+                                    :
+                                    <button className="btn btn-lg btn-info btn-block">
+                                        <i className="fas fa-lock"/>
+                                    </button>
+                                }
+                            </React.Fragment>
                         }
                     </React.Fragment>
+                    :
+                    <button className="btn btn-lg btn-dark btn-block">
+                        <i className="fas fa-eye"/>
+                    </button>
                 }
             </td>
         </tr>

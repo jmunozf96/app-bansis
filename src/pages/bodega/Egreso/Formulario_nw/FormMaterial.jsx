@@ -47,7 +47,7 @@ export default function FormMaterial() {
 
     const stockReservado = (data) => {
         const respaldo = respaldos.filter((item) => item.idmaterial === data.material.id && item.fecha === data.fecha);
-        return (respaldo.length > 0) ? respaldo.reduce((total, item) => !item.adicion ? (+total + +item.diferencia) : -(+total + +item.diferencia), 0) : 0;
+        return (respaldo.length > 0) ? respaldo.reduce((total, item) => +total + +item.diferencia, 0) : 0;
     };
 
     const stockMaterial = () => {
@@ -56,7 +56,7 @@ export default function FormMaterial() {
             const data_material_detalle = detalle.filter(data => data.material.id === despacho.material.id
                 && (!data.hasOwnProperty('idSQL')));
             const consumo = data_material_detalle.reduce((total, data) => total + data.cantidad, 0);
-            stock = (parseFloat(despacho.material.stock) - stockReservado(despacho)) - parseInt(consumo);
+            stock = (parseFloat(despacho.material.stock) + stockReservado(despacho)) - parseInt(consumo);
         }
         return stock.toFixed(2);
     };
