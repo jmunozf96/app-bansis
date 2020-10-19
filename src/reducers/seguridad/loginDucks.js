@@ -70,12 +70,10 @@ export const setCredentials = (credential) => async (dispatch) => {
 export const loadCredentials = () => (dispatch, getState) => {
     let credential = getState().login.credential;
     if (!credential) {
-        console.log(localStorage.getItem('_credentialUser'))
         if (localStorage.getItem('_credentialUser')) {
             credential = JSON.parse(localStorage.getItem('_credentialUser'));
             dispatch({type: SET_CREDENTIALS, payload: credential});
-        } else {
-            //localStorage.removeItem('_token');
+            console.log('esta pasando');
         }
     }
 };
