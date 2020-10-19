@@ -47,7 +47,7 @@ export default function FormTransferenciaSaldosDetail({data}) {
         setActive(false);
 
         if (cantidad === "" || parseInt(cantidad) === 0) {
-            dispatch(deleteTransfer({material: data.material}));
+            dispatch(deleteTransfer({id: data.id}));
             return;
         }
 
@@ -59,10 +59,7 @@ export default function FormTransferenciaSaldosDetail({data}) {
     };
 
     const removeItem = () => {
-        dispatch(deleteTransfer({
-            idInv: data.id,
-            material: data.material,
-        }));
+        dispatch(deleteTransfer({id: data.id}));
         setCantidad("0");
     };
 

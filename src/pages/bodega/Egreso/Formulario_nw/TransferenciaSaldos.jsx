@@ -3,7 +3,6 @@ import ModalForm from "../../../../components/ModalForm";
 import FormTransferenciaSaldos from "./FormTransferenciaSaldos";
 import {useDispatch, useSelector} from "react-redux";
 import {
-    clearCabeceraTransfer,
     clearDetallesEmpleadoSinConfirmar, procesarDetallesEmpleados,
     showTransferModal
 } from "../../../../reducers/bodega/egresoBodegaDucks";

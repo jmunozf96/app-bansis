@@ -5,12 +5,9 @@ import CabeceraEgreso from "./CabeceraEgreso";
 import DetalleEgreso from "./DetalleEgreso";
 import {useDispatch, useSelector} from "react-redux";
 import {
-    changeStatusBtnsave,
-    clearCabecera,
-    clearDespacho, clearDetalle, clearRespaldo,
-    saveEgresoBodega, setDataCabeceraEmpleado,
-    updateEgresoBodega
+    clearDespacho, clearFormulario, clearNotificacion, saveEgresoBodega, updateEgresoBodega
 } from "../../../../reducers/bodega/egresoBodegaDucks";
+import ComponentNotificacion from "../../../../components/ComponentNotificacion";
 
 export default function FormEgreso() {
     const {idmodulo} = useParams();
@@ -19,13 +16,10 @@ export default function FormEgreso() {
     const dispatch = useDispatch();
     const disabledBtn = useSelector(state => state.egresoBodega.disabledBtn);
     const saveTransaction = useSelector(state => state.egresoBodega.save);
+    const state_notificacion = useSelector(state => state.egresoBodega.notificacion);
 
     const nuevo = () => {
-        dispatch(setDataCabeceraEmpleado(null));
-        dispatch(clearDespacho());
-        dispatch(clearDetalle());
-        dispatch(clearRespaldo());
-        dispatch(changeStatusBtnsave(true));
+        dispatch(clearFormulario());
     };
 
     const guardar = () => {
@@ -40,6 +34,10 @@ export default function FormEgreso() {
         dispatch(clearDespacho());
     };
 
+    const closeNotificacion = () => {
+        dispatch(clearNotificacion());
+    };
+
     return (
         <FormularioBase
             icon='fas fa-street-view'
@@ -49,6 +47,11 @@ export default function FormEgreso() {
             volver={Regresar}
             disabledElements={disabledBtn}
         >
+            <ComponentNotificacion
+                notificacion={state_notificacion}
+                closeNotificacion={closeNotificacion}
+            />
+
             {/*Cabecera de la transacción*/}
             <CabeceraEgreso/>
             {/*Detalle de la transacción*/}

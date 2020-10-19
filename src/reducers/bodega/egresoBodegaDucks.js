@@ -48,6 +48,11 @@ const dataInicial = {
             },
             detalle: [],
             error: null
+        },
+        notificacion: {
+            open: false,
+            message: '',
+            error: [],
         }
     }
 ;
@@ -85,6 +90,8 @@ const GET_CABECERA_TRANSFER_EMPLEADO_SALDOS = 'GET_CABECERA_TRANSFER_EMPLEADO_SA
 const ERROR_TRANSFER = 'ERROR_TRANSFER';
 const CLEAR_TRANSFER_CABECERA = 'CLEAR_TRANSFER_CABECERA';
 const CLEAR_TRANSFER_DETALLE = 'CLEAR_TRANSFER_DETALLE';
+
+const SET_DATA_NOTIFICACION = 'SET_DATA_NOTIFICACION';
 
 export default function reducer(state = dataInicial, action) {
     switch (action.type) {
@@ -181,6 +188,8 @@ export default function reducer(state = dataInicial, action) {
             return {
                 ...state, transferencia: {...state.transferencia, detalle: action.payload}
             };
+        case SET_DATA_NOTIFICACION:
+            return {...state, notificacion: action.payload};
         default:
             return state
     }
@@ -468,8 +477,14 @@ export const saveEgresoBodega = () => async (dispatch, getState) => {
             }
         });
 
-        console.log(respuesta.data);
-        await dispatch(existEgreso(data.cabecera.empleado.id, data.cabecera.fecha));
+        //console.log(respuesta.data);
+        const {code, message, error} = respuesta.data;
+        await dispatch(setNotificacion(true, message, error));
+
+        if (code === 200) {
+            await dispatch(existEgreso(data.cabecera.empleado.id, data.cabecera.fecha));
+        }
+
         await dispatch(clearRespaldo());
 
         await dispatch(clearCabeceraTransfer());
@@ -505,6 +520,10 @@ export const updateEgresoBodega = () => async (dispatch, getState) => {
         }))
     };
 
+    //Borramos los items que se van a eliminar
+    const clear_items = data.detalle.filter(data => !data.hasOwnProperty('delete'));
+    dispatch({type: UPDATE_DESPACHOS, payload: clear_items});
+
     dispatch({type: ESPERAR_PETICION, payload: true});
     dispatch(changeStatusBtnsave(true));
     //Peticion async
@@ -526,8 +545,14 @@ export const updateEgresoBodega = () => async (dispatch, getState) => {
             }
         });
 
-        console.log(respuesta.data);
-        await dispatch(existEgreso(data.cabecera.empleado.id, data.cabecera.fecha));
+        //console.log(respuesta.data);
+        const {code, message, error} = respuesta.data;
+        await dispatch(setNotificacion(true, message, error));
+
+        if (code === 200) {
+            await dispatch(existEgreso(data.cabecera.empleado.id, data.cabecera.fecha));
+        }
+
         await dispatch(clearRespaldo());
 
         //Clear Transferencias
@@ -553,6 +578,7 @@ export const existEgreso = (idempleado, fecha) => async (dispatch, getState) => 
         });
 
         const {code} = respuesta.data;
+
         if (code === 200) {
             const {transaccion} = respuesta.data;
 
@@ -573,11 +599,11 @@ export const existEgreso = (idempleado, fecha) => async (dispatch, getState) => 
             //No va a guardar, sino actualizar.
             dispatch({type: CHANGE_STATUS_BTN_SAVE, payload: false});
             dispatch({type: SAVE_DATA, payload: false});
-        } else {
-            dispatch({type: CHANGE_STATUS_BTN_SAVE, payload: true});
-            dispatch({type: SAVE_DATA, payload: true});
         }
+
     } catch (e) {
+        dispatch({type: CHANGE_STATUS_BTN_SAVE, payload: true});
+        dispatch({type: SAVE_DATA, payload: true});
         console.error(e);
     }
 };
@@ -637,25 +663,24 @@ export const procesarDetallesEmpleados = (empleado) => (dispatch, getState) => {
         let procesados = []; //...array_transfers.map(item => ({...item, procesado: true}))
         if (transfer_unprocess.length > 0) {
             if (transfer_process.length > 0) {
-                let backup_procesados = [];
-                for (let unprocess of transfer_unprocess) {
-                    let filter = transfer_process.filter(item => item.idInv === unprocess.idInv);
 
-                    if (backup_procesados.length === 0) {
-                        backup_procesados = [...transfer_process.filter(item => item.idInv !== unprocess.idInv)];
-                    }
+                transfer_process.forEach((process, index) => {
+                    procesados.push({...process});
+                    let existe_en_sin_procesar = transfer_unprocess.filter(item => item.idInv === process.idInv).length > 0;
+                    existe_en_sin_procesar && transfer_unprocess.filter(item => item.idInv === process.idInv)
+                        .map(item => procesados[index] = {
+                                ...process, //Solo es un tipo de material por semana del inventario
+                                cantidad: +process.cantidad + +item.cantidad,
+                                procesado: true
+                            }
+                        );
+                });
 
-                    if (filter.length > 0) {
-                        procesados.push({
-                            ...filter[0], //Solo es un tipo de material por semana del inventario
-                            cantidad: +filter[0].cantidad + +unprocess.cantidad,
-                            procesado: true
-                        });
-                    } else {
-                        procesados.push({...unprocess, procesado: true});
-                    }
-                }
-                procesados = [...backup_procesados.concat([...procesados])];
+                transfer_unprocess.forEach((unprocess) => {
+                    let existe_en_procesados = transfer_process.filter(item => item.idInv === unprocess.idInv).length > 0;
+                    !existe_en_procesados && procesados.push({...unprocess, procesado: true});
+                });
+
             } else {
                 procesados = [...transfer_unprocess.map(item => ({...item, procesado: true}))];
             }
@@ -749,9 +774,9 @@ export const setAddSaldoToTransfer = (transferencia) => (dispatch, getState) => 
     })
 };
 
-export const deleteTransfer = (transferencia) => (dispatch, getState) => {
+export const deleteTransfer = (id) => (dispatch, getState) => {
     const data_detalle = getState().egresoBodega.transferencia.detalle;
-    const status = (item) => (item.material.id !== transferencia.material.id && item.idInv !== transferencia.idInv);
+    const status = (item) => (item.id !== id && item.procesado);
     const array_transfers = data_detalle.filter(item => status(item));
     dispatch({
         type: UPDATE_DETALLE_TRANSFER,
@@ -767,4 +792,34 @@ export const deleteTransferProcess = (id) => (dispatch, getState) => {
         type: UPDATE_DETALLE_TRANSFER,
         payload: array_transfers
     })
+};
+
+//Manejo de notificaciones
+export const setNotificacion = (open, message, error) => (dispatch) => {
+    dispatch({
+        type: SET_DATA_NOTIFICACION,
+        payload: {open, message, error}
+    })
+};
+
+export const clearNotificacion = () => (dispatch) => {
+    dispatch({
+        type: SET_DATA_NOTIFICACION,
+        payload: {open: false, message: '', error: []}
+    })
+};
+
+//Setear formulario
+export const clearFormulario = () => (dispatch) => {
+    dispatch(setDataCabeceraEmpleado(null));
+    dispatch(clearDespacho());
+    dispatch(clearDetalle());
+    dispatch(clearRespaldo());
+    dispatch(changeStatusBtnsave(true));
+
+    //Limpiar toda transferencia hecha anteriormente
+    dispatch(clearCabeceraTransfer());
+    dispatch(clearDetallesTransfer());
+
+    dispatch({type: SAVE_DATA, payload: true});
 };
