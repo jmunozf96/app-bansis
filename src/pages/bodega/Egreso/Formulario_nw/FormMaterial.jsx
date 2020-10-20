@@ -73,7 +73,7 @@ export default function FormMaterial() {
         <div className="card">
             <div className="card-body">
                 <div className="row">
-                    <div className="col-12 mb-3">
+                    <div className="col-12 mb-1">
                         <InputSearch
                             id="asynchronous-material"
                             label="Listado de Materiales"
@@ -87,11 +87,11 @@ export default function FormMaterial() {
                     </div>
                     <div className="col-12">
                         <form className="form-inline">
-                            <div className="form-group">
+                            <div className="form-group mt-2">
                                 <input type="number" className="form-control form-control-lg" value={stockMaterial()}
                                        readOnly/>
                             </div>
-                            <div className="form-group mx-sm-3">
+                            <div className="form-group mx-sm-2 mt-2">
                                 <input
                                     type="number" className="form-control form-control-lg"
                                     value={despacho.cantidad}
@@ -100,7 +100,7 @@ export default function FormMaterial() {
                                     onChange={(e) => changeCantidad(e)}
                                 />
                             </div>
-                            <div className="form-group">
+                            <div className="form-group mt-2">
                                 <button type="button" className="btn btn-primary btn-lg"
                                         onClick={(despacho.material && +despacho.cantidad > 0) ? () => addDespacho() : () => console.error('No puedes usar esta opcion')}>
                                     <i className="fas fa-cart-plus"/> Agregar
