@@ -62,7 +62,7 @@ export default function Recepcion() {
     //const getUpdateCajasDia = useSelector((state) => state.cosecha.updateCajasDia);
     const getRequestData = useSelector((state) => state.cosecha.loadRequestData);
     const getUpdateLotesRecobro = useSelector((state) => state.cosecha.updateLotesRecobro);
-    const credential = useSelector((state) => state.credential);
+    const credential = useSelector((state) => state.login.credential);
     const api_buscador = `${API_LINK}/bansis-app/index.php/haciendas-select`;
     const [loadDataSelectHacienda, setLoadDataSelectHacienda] = useState(true);
     const [hacienda, setHacienda] = useState(credential.idhacienda ? credential.idhacienda.id : "");

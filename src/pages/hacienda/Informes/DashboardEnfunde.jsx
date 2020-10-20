@@ -8,7 +8,7 @@ import ModalForm from "../../../components/ModalForm";
 //import login from "../../login";
 
 export default function DashboardEnfunde() {
-    const credential = useSelector((state) => state.credential);
+    const credential = useSelector((state) => state.login.credential);
 
     //Filttros
     const [periodo, setPeriodo] = useState(0);

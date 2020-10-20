@@ -25,7 +25,7 @@ export default function FormEgreso() {
         id
     });
 
-    const credential = useSelector((state) => state.credential);
+    const credential = useSelector((state) => state.login.credential);
     const [searchEmpleado, setSearchEmpleado] = useState('');
     const [searchMaterial, setSearchMaterial] = useState('');
     const [changeURL, setChangeURL] = useState(false);
@@ -71,7 +71,7 @@ export default function FormEgreso() {
     const history = useHistory();
     const dispatch = useDispatch();
     const progressbarStatus = (state) => dispatch(progressActions(state));
-    const authentication = useSelector(state => state.auth._token);
+    const authentication = useSelector((state) => state.login.token);
 
     //Estados de transferencia de saldo
     const [openFullScreen, setOpenFullScreen] = useState(false);

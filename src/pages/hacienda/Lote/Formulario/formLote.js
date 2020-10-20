@@ -39,7 +39,7 @@ export default function FormularioLote() {
     const history = useHistory();
     const dispatch = useDispatch();
     const progressBarStatus = (state) => dispatch(progressActions(state));
-    const authentication = useSelector((state) => state.auth._token);
+    const authentication = useSelector((state) => state.login.token);
 
     useEffect(() => {
         if (loadLoteEdit.load) {

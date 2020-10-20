@@ -38,7 +38,7 @@ export default function FormLabor() {
     const setEditForm = (state) => dispatch(editFormAction(state));
 
     const labor = useSelector((state) => state.dataLabor.labor);
-    const authentication = useSelector((state) => state.auth._token);
+    const authentication = useSelector((state) => state.login.token);
     const statusForm = useSelector((state) => state.statusForm.status);
     //------------------------------------------------------------------------------------
 

@@ -49,7 +49,7 @@ const FormSeccionLote = () => {
     const dispatch = useDispatch();
     const progessbarStatus = (state) => dispatch(progressActions(state));
 
-    const authentication = useSelector((state) => state.auth._token);
+    const authentication = useSelector((state) => state.login.token);
     const progressbar = useSelector((state) => state.progressbar.loading);
 
     const [distribucion, setDistribucion] = useState({

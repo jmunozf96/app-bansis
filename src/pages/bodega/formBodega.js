@@ -41,7 +41,7 @@ export default function FormBodega() {
     const setEditForm = (state) => dispatch(editFormAction(state));
 
     const bodega = useSelector((state) => state.dataBodega.bodega);
-    const authentication = useSelector((state) => state.auth._token);
+    const authentication = useSelector((state) => state.login.token);
     const statusForm = useSelector((state) => state.statusForm.status);
 
     //------------------------------------------------------------------------------------

@@ -47,7 +47,7 @@ export default function Lote() {
     const history = useHistory();
     const dispatch = useDispatch();
     const progessbarStatus = (state) => dispatch(progressActions(state));
-    const authentication = useSelector((state) => state.auth._token);
+    const authentication = useSelector((state) => state.login.token);
 
     useEffect(() => {
         if (reload) {

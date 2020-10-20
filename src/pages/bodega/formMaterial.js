@@ -61,7 +61,7 @@ export default function FormMaterial() {
     const history = useHistory();
     const dispatch = useDispatch();
     const progressbarStatus = (state) => dispatch(progressActions(state));
-    const authentication = useSelector(state => state.auth._token);
+    const authentication = useSelector((state) => state.login.token);
 
     useEffect(() => {
         if (dataApiHaciendaOrigen) {

@@ -42,7 +42,7 @@ export default function EnfundeLoteroList() {
         colorf: ''
     });
 
-    const credential = useSelector((state) => state.credential);
+    const credential = useSelector((state) => state.login.credential);
     const [loadLoteros, setLoadLoteros] = useState(!!credential.idhacienda);
     const [loterosSemanal, setLoterosSemanal] = useState(null);
     const [loterosSemanaPendiente, setLoterosSemanaPendiente] = useState([]);

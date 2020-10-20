@@ -52,7 +52,7 @@ export default function FormUsuario() {
     const [empleado, setEmpleado] = useState(null);
     const [changeURL, setChangeURL] = useState(false);
 
-    const authentication = useSelector((state) => state.auth._token);
+    const authentication = useSelector((state) => state.login.token);
 
     useEffect(() => {
         if (changeURL) {

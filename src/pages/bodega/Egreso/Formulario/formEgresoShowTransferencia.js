@@ -18,7 +18,7 @@ export default function EgresoShowTransferencia(props) {
     const {data: {id, transfer, debito, movimiento, cantidad}, setOpen, setNotificacion, setSearchTransaccionSemana} = props;
     const dispatch = useDispatch();
     const progressbarStatus = (state) => dispatch(progressActions(state));
-    const authentication = useSelector(state => state.auth._token);
+    const authentication = useSelector((state) => state.login.token);
 
     const destroyTransaction = (id) => {
         (async () => {

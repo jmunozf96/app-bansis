@@ -41,7 +41,7 @@ export default function FormHacienda() {
     const setEditForm = (state) => dispatch(editFormAction(state));
 
     const hacienda = useSelector((state) => state.dataHacienda.hacienda);
-    const authentication = useSelector((state) => state.auth._token);
+    const authentication = useSelector((state) => state.login.token);
     const statusForm = useSelector((state) => state.statusForm.status);
     //------------------------------------------------------------------------------------
 

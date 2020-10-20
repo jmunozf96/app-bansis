@@ -41,7 +41,7 @@ export default function FormEmpleado() {
     const setEditForm = (state) => dispatch(editFormAction(state));
 
     const empleado = useSelector((state) => state.empleado.empleado);
-    const authentication = useSelector((state) => state.auth._token);
+    const authentication = useSelector((state) => state.login.token);
     const statusForm = useSelector((state) => state.statusForm.status);
 
     //------------------------------------------------------------------------------------

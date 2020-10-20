@@ -12,9 +12,11 @@ import recursosReducers from "./recursosReducers";
 import cosechaReducers from "./cosecha/cosechaReducers";
 import egresoBodegaDucks from "./bodega/egresoBodegaDucks";
 import loginDucks from "./seguridad/loginDucks";
+import accessModuleDucks from "./seguridad/accessModuleDucks";
 
 export default combineReducers({
     login: loginDucks,
+    accesoModulo: accessModuleDucks,
     auth: authReducer,
     progressbar: progressNavReducers,
     credential: credentialReducers,

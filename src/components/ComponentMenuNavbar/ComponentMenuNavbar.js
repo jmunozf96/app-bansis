@@ -1,97 +1,27 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import {Navbar, Nav, NavDropdown} from "react-bootstrap";
 import EqualizerIcon from '@material-ui/icons/Equalizer';
-import {API_LINK, APP_TITLE} from "../../utils/constants";
+import {APP_TITLE} from "../../utils/constants";
 import {Link} from "react-router-dom"
 
 import {useDispatch, useSelector} from "react-redux";
 
 import "./ComponentMenuNavbar.scss"
 import LinearProgress from "@material-ui/core/LinearProgress";
-import {logoutActions} from "../../actions/authActions";
-import {cleanCredentialAction, credentialAction} from "../../actions/credentialActions";
-import Cookies from "js-cookie";
-import qs from "qs";
-import {recursosAction} from "../../actions/recursosActions";
+import {clearAuthentication, clearStorageAuth} from "../../reducers/seguridad/loginDucks";
 
 export default function ComponentMenuNavbar() {
+    const dispatch = useDispatch();
     const authentication = useSelector((state) => state.login.auth);
     const credentialCard = useSelector((state) => state.login.credential);
     const recursos = useSelector((state) => state.login.recursos);
 
     const progressbarStatus = useSelector((state) => state.progressbar.loading);
 
-    const localStorageAuth = localStorage.getItem('_sessionId') === undefined || localStorage.getItem('_sessionId') === null;
-    const credentialsCookie = Cookies.get('sessionId') === undefined || Cookies.get('sessionId') === null;
-    const recursosCookie = Cookies.get('sessionRecursos') === undefined || Cookies.get('sessionRecursos') === null;
-    const [checkAuth, setCheckAuth] = useState((localStorageAuth || credentialsCookie || recursosCookie));
-    const dispatch = useDispatch();
-    const logout = (state) => dispatch(logoutActions(state));
-    const credential = (state) => dispatch(cleanCredentialAction(state));
-
-    useEffect(() => {
-        if (checkAuth) {
-            (async () => {
-                const logout = (state) => dispatch(logoutActions(state));
-                const credential = (state) => dispatch(cleanCredentialAction(state));
-                const recursosLoad = (state) => dispatch(recursosAction(state));
-                const credentialLoad = (state) => dispatch(credentialAction(state));
-                if (localStorageAuth) {
-                    logout('');
-                    credential(true);
-                    credentialsCookie && Cookies.remove('sessionId');
-                    recursosCookie && Cookies.remove('sessionRecursos');
-                } else {
-                    const url = `${API_LINK}/bansis/verifyToken`;
-                    const configuracion = {
-                        method: 'POST',
-                        body: qs.stringify({
-                            json: JSON.stringify({
-                                credentials: credentialsCookie,
-                                recursos: recursosCookie
-                            })
-                        }),
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'Authorization': authentication
-                        }
-                    };
-                    const request = await fetch(url, configuracion);
-                    const response = await request.json();
-                    const {logueado} = response;
-                    if (!logueado) {
-                        logout('');
-                        credential(true);
-                    } else {
-                        const {credentials, recursos} = response;
-                        if (credentialsCookie) {
-                            const credentialObject = {
-                                sub: credentials.sub,
-                                nick: credentials.nick,
-                                nombres: credentials.nombres,
-                                apellidos: credentials.apellido1,
-                                idhacienda: credentials.idhacienda
-                            };
-                            Cookies.set('sessionId', credentialObject, {expires: 1});
-                            credentialLoad(credentialObject);
-                        }
-                        if (recursosCookie) {
-                            Cookies.set('sessionRecursos', recursos, {expires: 1});
-                            recursosLoad(recursos);
-                        }
-                    }
-                }
-            })();
-            setCheckAuth(false);
-        }
-    }, [checkAuth, authentication, credentialCard, dispatch, localStorageAuth, credentialsCookie, recursosCookie]);
 
     const logoutSite = () => {
-        logout('');
-        credential(true);
-        localStorage.getItem('_sessionId') !== null && localStorage.removeItem('_sessionId');
-        Cookies.get('sessionId') !== undefined && Cookies.remove('sessionId');
-        Cookies.get('sessionRecursos') !== undefined && Cookies.remove('sessionRecursos');
+        dispatch(clearAuthentication());
+        dispatch(clearStorageAuth());
     };
 
     return (
@@ -151,17 +81,12 @@ export default function ComponentMenuNavbar() {
                                 </NavDropdown>
                             </Nav>
                         </>
-                    ) : (
-                        <>
-                            {authentication === '' && !checkAuth &&
-                            <Nav className="ml-auto">
-                                <Nav.Link as={Link} to="/login">Login</Nav.Link>
-                                <Nav.Link eventKey={2} href="#memes">
-                                    Registro
-                                </Nav.Link>
-                            </Nav>
-                            }</>
-                    )}
+                    ) : <Nav className="ml-auto">
+                        <Nav.Link as={Link} to="/login">Login</Nav.Link>
+                        <Nav.Link eventKey={2} href="#memes">
+                            Registro
+                        </Nav.Link>
+                    </Nav>}
                 </Navbar.Collapse>
             </Navbar>
             {progressbarStatus &&

@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from "react";
 import {Alert, Col, Form, Row} from "react-bootstrap";
-import axios from "axios";
 import {
     FormControl,
     Button, TextField, FormControlLabel, Checkbox

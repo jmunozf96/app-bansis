@@ -29,7 +29,7 @@ export default function Material() {
     const history = useHistory();
     const dispatch = useDispatch();
     const progressbarStatus = (state) => dispatch(progressActions(state));
-    const authentication = useSelector((state) => state.auth._token);
+    const authentication = useSelector((state) => state.login.token);
 
     const [notificacion, setNotificacion] = useState({
         open: false,

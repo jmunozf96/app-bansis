@@ -86,7 +86,7 @@ export default function FormEnfunde() {
     const dispatch = useDispatch();
     //const progessbarStatus = (state) => dispatch(progressActions(state));
 
-    const authentication = useSelector((state) => state.auth._token);
+    const authentication = useSelector((state) => state.login.token);
     //const progressbar = useSelector((state) => state.progressbar.loading);
 
     const [distribucionSelect, setDistribucionSelect] = useState(null); //Variable para ecpecificar el lote de registro de avance por labor

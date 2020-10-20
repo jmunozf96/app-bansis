@@ -1,22 +1,39 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import ComponentFormularioBase from "../../../../components/ComponentFormularioBase";
 import {useParams} from "react-router-dom";
 import CabeceraEgreso from "./CabeceraEgreso";
 import DetalleEgreso from "./DetalleEgreso";
 import {useDispatch, useSelector} from "react-redux";
 import {
-    clearDespacho, clearFormulario, clearNotificacion, saveEgresoBodega, updateEgresoBodega
+    clearDespacho,
+    clearFormulario,
+    clearNotificacion,
+    saveEgresoBodega,
+    setDataCabeceraBodega, setDataCabeceraGrupo,
+    setDataCabeceraHacienda,
+    updateEgresoBodega
 } from "../../../../reducers/bodega/egresoBodegaDucks";
 import ComponentNotificacion from "../../../../components/ComponentNotificacion";
 
 export default function FormEgreso() {
     const {idmodulo} = useParams();
     const Regresar = `/bodega/egreso-material/${idmodulo}`;
-
     const dispatch = useDispatch();
     const disabledBtn = useSelector(state => state.egresoBodega.disabledBtn);
     const saveTransaction = useSelector(state => state.egresoBodega.save);
     const state_notificacion = useSelector(state => state.egresoBodega.notificacion);
+
+    const [loadFormulario, setLoadFormulario] = useState(true);
+
+    useEffect(() => {
+        if (loadFormulario) {
+            dispatch(setDataCabeceraHacienda(null));
+            dispatch(setDataCabeceraBodega(null));
+            dispatch(setDataCabeceraGrupo(null));
+            dispatch(clearFormulario());
+            setLoadFormulario(false);
+        }
+    }, [loadFormulario, setLoadFormulario, dispatch]);
 
     const nuevo = () => {
         dispatch(clearFormulario());

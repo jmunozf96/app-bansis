@@ -33,7 +33,7 @@ export default function FormRecursoUsuario() {
     const [empleado, setEmpleado] = useState(null);
     const [changeURL, setChangeURL] = useState(false);
 
-    const authentication = useSelector((state) => state.auth._token);
+    const authentication = useSelector((state) => state.login.token);
 
     const [loadRecursos, setLoadRecursos] = useState(false);
     const [recursos, setRecursos] = useState([]);
