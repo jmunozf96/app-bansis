@@ -1,22 +1,23 @@
 import React, {useEffect, useState} from "react";
 import ComponentFormularioBase from "../../../../components/ComponentFormularioBase";
-import {useParams} from "react-router-dom";
+import {useParams, useLocation} from "react-router-dom";
 import CabeceraEgreso from "./CabeceraEgreso";
 import DetalleEgreso from "./DetalleEgreso";
 import {useDispatch, useSelector} from "react-redux";
 import {
     clearDespacho,
     clearFormulario,
-    clearNotificacion,
+    clearNotificacion, existEgreso,
     saveEgresoBodega,
     setDataCabeceraBodega, setDataCabeceraGrupo,
     setDataCabeceraHacienda,
     updateEgresoBodega
 } from "../../../../reducers/bodega/egresoBodegaDucks";
 import ComponentNotificacion from "../../../../components/ComponentNotificacion";
+import {loginSystem} from "../../../../reducers/seguridad/loginDucks";
 
 export default function FormEgreso() {
-    const {idmodulo} = useParams();
+    const {idmodulo, id} = useParams();
     const Regresar = `/bodega/egreso-material/${idmodulo}`;
     const dispatch = useDispatch();
     const credential = useSelector(state => state.login.credential);
@@ -34,11 +35,15 @@ export default function FormEgreso() {
             dispatch(clearFormulario());
             setLoadFormulario(false);
 
+            if (id !== undefined) {
+                dispatch(existEgreso(null, null, id));
+            }
+
             if (credential.idhacienda) {
                 dispatch(setDataCabeceraHacienda({...credential.idhacienda, ruc: null}));
             }
         }
-    }, [loadFormulario, setLoadFormulario, dispatch, credential]);
+    }, [loadFormulario, setLoadFormulario, dispatch, credential, id]);
 
     const nuevo = () => {
         dispatch(clearFormulario());

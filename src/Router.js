@@ -137,7 +137,7 @@ export const routes = [
     },
     {
         path: "/bodega/egreso-material/:idmodulo",
-        component: FormEgreso
+        component: Egreso
     },
     {
         path: "/bodega/egreso-material/:idmodulo/formulario/:id?",

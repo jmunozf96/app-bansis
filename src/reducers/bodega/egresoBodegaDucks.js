@@ -563,10 +563,16 @@ export const updateEgresoBodega = () => async (dispatch, getState) => {
     }
 };
 
-export const existEgreso = (idempleado, fecha) => async (dispatch, getState) => {
+export const existEgreso = (idempleado, fecha, idTransaccion = null) => async (dispatch, getState) => {
     const data = getState().egresoBodega;
     try {
-        const url = `${API_LINK}/bansis-app/index.php/bodega/search-egresos/${idempleado}?fecha=${fecha}`;
+        let url = '';
+        url = `${API_LINK}/bansis-app/index.php/bodega/search-egresos/empleado/${idempleado}?fecha=${fecha}`;
+
+        if (idTransaccion !== null) {
+            url = `${API_LINK}/bansis-app/index.php/bodega/search-egresos/id/${idTransaccion}`;
+        }
+
         const respuesta = await axios.get(url, {
             onDownloadProgress: function () {
                 dispatch({type: ESPERAR_PETICION, payload: false});
@@ -584,6 +590,8 @@ export const existEgreso = (idempleado, fecha) => async (dispatch, getState) => 
 
             const cabecera = {...data.cabecera};
             cabecera.idSQL = transaccion.id;
+            cabecera.hacienda = transaccion.egreso_empleado.hacienda;
+            cabecera.empleado = transaccion.egreso_empleado;
 
             let detalle = [...transaccion.egreso_detalle.map(data => ({
                 'id': uuidv4(),

@@ -2,7 +2,6 @@ import React from "react";
 import {FormControl, InputLabel, MenuItem, Select} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import useFetch from "../hooks/useFetch";
-import {useSelector} from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -15,6 +14,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function ComponentOptions({api, label, name, value, changeValue, disabled}) {
+    /*Tomar en cuenta que todas las api deben traer en su formato el atributo descripcion*/
+
     const classes = useStyles();
     let options = [];
 
@@ -35,7 +36,7 @@ export default function ComponentOptions({api, label, name, value, changeValue, 
                 id="demo-simple-select-outlined"
                 name={name}
                 value={options.length > 0 ? value : ""}
-                onChange={e => changeValue(e)}
+                onChange={(e, {props}) => changeValue(e, props)}
                 label={label}
                 disabled={disabled}
             >
@@ -43,8 +44,8 @@ export default function ComponentOptions({api, label, name, value, changeValue, 
                     <em>{label}</em>
                 </MenuItem>
                 {options.length > 0 && options.map((data) => (
-                    <MenuItem key={data.id} value={data}>
-                        {data.hasOwnProperty('descripcion') && data.descripcion}
+                    <MenuItem key={data.id} value={data.descripcion} data-json={data}>
+                        {data.descripcion}
                     </MenuItem>
                 ))}
             </Select>

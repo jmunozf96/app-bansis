@@ -70,7 +70,7 @@ export default function Egreso() {
         if (reload) {
             (async () => {
                 const progessbarStatus = (state) => dispatch(progressActions(state));
-                let api_egresos = `${API_LINK}/bansis-app/index.php/egreso-bodega?page=${page}${filter}`;
+                let api_egresos = `${API_LINK}/bansis-app/index.php/bodega/egresos?page=${page}${filter}`;
 
                 const response = await fetch(api_egresos).then(
                     (response) => response.json()
@@ -343,7 +343,10 @@ function TablaDetalle(props) {
                             </Button>*/}
                                 <Button
                                     variant="primary"
-                                    onClick={() => history.push(`${history.location.pathname}/formulario/${data.id}`)}
+                                    onClick={() => history.push({
+                                        pathname: `${history.location.pathname}/formulario/${data.id}`,
+                                        state: {idTransaccion: data.id}
+                                    })}
                                 >
                                     <SyncIcon/>
                                 </Button>

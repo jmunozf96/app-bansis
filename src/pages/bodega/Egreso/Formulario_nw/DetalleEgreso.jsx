@@ -66,10 +66,13 @@ export default function DetalleEgreso() {
                         </tbody>
                     </table>
                 </div>
+                {cabecera.empleado &&
                 <React.Fragment>
                     <div className="col-12 d-flex justify-content-end">
                         <div className="btn-group btn-group-lg">
-                            <button className="btn btn-outline-danger" onClick={() => showModalTransfer()}>
+                            <button className="btn btn-outline-danger"
+                                    disabled={!cabecera.empleado}
+                                    onClick={() => cabecera.empleado ? showModalTransfer() : console.error('No ha seleccionado un empleado.')}>
                                 <i className="fas fa-exchange-alt"/> Transferir saldos de otro empleado.
                             </button>
                             <button className="btn btn-danger">
@@ -79,6 +82,7 @@ export default function DetalleEgreso() {
                     </div>
                     {configuracionModal.show && <TransferenciaSaldos/>}
                 </React.Fragment>
+                }
             </div>
         </React.Fragment>
     )

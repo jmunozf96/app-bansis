@@ -32,21 +32,22 @@ export default function CabeceraEgreso() {
         }
     }, [changeURL, searchEmpleado, setApi_Empleado]);
 
-    const changeOption = (e) => {
-        const value = e.target.value === "" ? null : e.target.value;
+    const changeOption = (e, data) => {
+        const data_option = data['data-json'] !== undefined ? data['data-json'] : null;
+
         switch (e.target.name) {
             case 'hacienda':
-                dispatch(setDataCabeceraHacienda(value));
+                dispatch(setDataCabeceraHacienda(data_option));
                 //Borrar bodega y grupo
                 dispatch(setDataCabeceraBodega(null));
                 return;
             case 'bodega':
-                dispatch(setDataCabeceraBodega(value));
+                dispatch(setDataCabeceraBodega(data_option));
                 //Borrar grupo
                 dispatch(setDataCabeceraGrupo(null));
                 return;
             case 'grupo':
-                dispatch(setDataCabeceraGrupo(value));
+                dispatch(setDataCabeceraGrupo(data_option));
                 return;
             default:
                 return;
@@ -78,7 +79,7 @@ export default function CabeceraEgreso() {
                                 api={api_haciendas}
                                 label="Hacienda"
                                 name="hacienda"
-                                value={cabecera.hacienda !== null ? cabecera.hacienda : ""}
+                                value={cabecera.hacienda !== null ? cabecera.hacienda.descripcion : ""}
                                 changeValue={changeOption}
                                 disabled={false}
                             />
@@ -89,7 +90,7 @@ export default function CabeceraEgreso() {
                                 api={cabecera.hacienda !== null ? api_bodegas + `?hacienda=${cabecera.hacienda.id}` : api_bodegas}
                                 label="Bodega"
                                 name="bodega"
-                                value={cabecera.bodega !== null ? cabecera.bodega : ""}
+                                value={cabecera.bodega !== null ? cabecera.bodega.descripcion : ""}
                                 changeValue={changeOption}
                                 disabled={cabecera.hacienda == null}
                             />
@@ -99,7 +100,7 @@ export default function CabeceraEgreso() {
                                 api={api_grupos_bodega}
                                 label="Grupo"
                                 name="grupo"
-                                value={cabecera.grupo !== null ? cabecera.grupo : ""}
+                                value={cabecera.grupo !== null ? cabecera.grupo.descripcion : ""}
                                 changeValue={changeOption}
                                 disabled={cabecera.bodega == null}
                             />
