@@ -3,7 +3,7 @@ import {Route, Switch} from "react-router-dom";
 import {routes} from "./Router";
 
 import Login from "./pages/seguridad/Login/login";
-import VerifyAuthentication from "./components/VerifyAuthentication";
+import ComponentVerificacionAuth from "./components/ComponentVerificacionAuth";
 
 export default function RouterConfig() {
     return (
@@ -15,9 +15,9 @@ export default function RouterConfig() {
                     path={route.path}
                     exact={true}
                     render={() => (
-                        <VerifyAuthentication>
+                        <ComponentVerificacionAuth>
                             <route.component/>
-                        </VerifyAuthentication>
+                        </ComponentVerificacionAuth>
                     )}
                 />
             ))}

@@ -4,7 +4,7 @@ import {Redirect, useHistory, useParams} from "react-router-dom";
 import {checkToken} from "../reducers/seguridad/loginDucks";
 import {checkModule, defaultAccess} from "../reducers/seguridad/accessModuleDucks";
 
-export default function VerifyAuthentication({children}) {
+export default function ComponentVerificacionAuth({children}) {
     const authentication = useSelector((state) => state.login.token);
     //const credentialCard = useSelector((state) => state.login.credential);
 
