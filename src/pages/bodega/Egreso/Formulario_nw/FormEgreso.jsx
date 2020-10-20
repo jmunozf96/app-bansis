@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import ComponentFormularioBase from "../../../../components/ComponentFormularioBase";
-import {useParams, useLocation} from "react-router-dom";
+import {useParams} from "react-router-dom";
 import CabeceraEgreso from "./CabeceraEgreso";
 import DetalleEgreso from "./DetalleEgreso";
 import {useDispatch, useSelector} from "react-redux";
@@ -14,7 +14,6 @@ import {
     updateEgresoBodega
 } from "../../../../reducers/bodega/egresoBodegaDucks";
 import ComponentNotificacion from "../../../../components/ComponentNotificacion";
-import {loginSystem} from "../../../../reducers/seguridad/loginDucks";
 
 export default function FormEgreso() {
     const {idmodulo, id} = useParams();

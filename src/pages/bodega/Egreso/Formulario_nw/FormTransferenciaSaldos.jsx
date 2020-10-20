@@ -25,13 +25,11 @@ export default function FormTransferenciaSaldos() {
 
     const changeEmpleado = (e, value) => {
         dispatch(setDataCabeceraTransferEmpleado(value));
-
         if (!value) {
             setSearchEmpleado('');
             setChangeURL(true);
             return;
         }
-
         dispatch(getSaldostoTransfer());
     };
 

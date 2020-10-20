@@ -739,12 +739,10 @@ export const getSaldostoTransfer = () => async (dispatch, getState) => {
         const url = `${API_LINK}/bansis-app/index.php/bodega/transferencia/search-saldos?empleado=${empleado.id}&grupo=${datos.grupo.id}`;
         const respuesta = await axios.get(url);
         const {code} = await respuesta.data;
-
         if (code === 200) {
             await dispatch({type: GET_CABECERA_TRANSFER_EMPLEADO_SALDOS, payload: respuesta.data.saldos});
             return;
         }
-
         await dispatch({type: GET_CABECERA_TRANSFER_EMPLEADO_SALDOS, payload: []})
     }
 };

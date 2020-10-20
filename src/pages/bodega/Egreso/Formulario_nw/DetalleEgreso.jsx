@@ -71,8 +71,7 @@ export default function DetalleEgreso() {
                     <div className="col-12 d-flex justify-content-end">
                         <div className="btn-group btn-group-lg">
                             <button className="btn btn-outline-danger"
-                                    disabled={!cabecera.empleado}
-                                    onClick={() => cabecera.empleado ? showModalTransfer() : console.error('No ha seleccionado un empleado.')}>
+                                    onClick={() => (cabecera.empleado && cabecera.grupo) ? showModalTransfer() : alert('Se necesita el empleado y el grupo de materiales.')}>
                                 <i className="fas fa-exchange-alt"/> Transferir saldos de otro empleado.
                             </button>
                             <button className="btn btn-danger">
