@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {Redirect, useHistory, useParams} from "react-router-dom";
 import {checkToken} from "../reducers/seguridad/loginDucks";
-import {checkModule} from "../reducers/seguridad/accessModuleDucks";
+import {checkModule, defaultAccess} from "../reducers/seguridad/accessModuleDucks";
 
 export default function VerifyAuthentication({children}) {
     const authentication = useSelector((state) => state.login.token);
@@ -22,7 +22,11 @@ export default function VerifyAuthentication({children}) {
             dispatch(checkToken());
 
             const ruta = (history.location.pathname).split(`/${idmodulo}`)[0];
-            dispatch(checkModule(idmodulo, ruta));
+            if (ruta !== "/") {
+                dispatch(checkModule(idmodulo, ruta));
+            } else {
+                dispatch(defaultAccess(true));
+            }
 
             setStateCheckToken(false);
         }

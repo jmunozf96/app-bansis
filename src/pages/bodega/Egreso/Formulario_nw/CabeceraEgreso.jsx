@@ -15,6 +15,7 @@ import {Checkbox, FormControlLabel} from "@material-ui/core";
 export default function CabeceraEgreso() {
     const dispatch = useDispatch();
     const cabecera = useSelector(state => state.egresoBodega.cabecera);
+    const credential = useSelector(state => state.login.credential);
 
     const api_haciendas = `${API_LINK}/bansis-app/index.php/haciendas-select`;
     const api_bodegas = `${API_LINK}/bansis-app/index.php/bodegas-select`;
@@ -71,6 +72,7 @@ export default function CabeceraEgreso() {
             <div className="row mb-1">
                 <div className="col-md-4">
                     <div className="row">
+                        {!credential.idhacienda &&
                         <div className="col-md-12 mb-3">
                             <ComponentOptions
                                 api={api_haciendas}
@@ -81,6 +83,7 @@ export default function CabeceraEgreso() {
                                 disabled={false}
                             />
                         </div>
+                        }
                         <div className="col-md-12 mb-3">
                             <ComponentOptions
                                 api={cabecera.hacienda !== null ? api_bodegas + `?hacienda=${cabecera.hacienda.id}` : api_bodegas}

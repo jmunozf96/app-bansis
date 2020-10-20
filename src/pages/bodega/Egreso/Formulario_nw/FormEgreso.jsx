@@ -19,6 +19,7 @@ export default function FormEgreso() {
     const {idmodulo} = useParams();
     const Regresar = `/bodega/egreso-material/${idmodulo}`;
     const dispatch = useDispatch();
+    const credential = useSelector(state => state.login.credential);
     const disabledBtn = useSelector(state => state.egresoBodega.disabledBtn);
     const saveTransaction = useSelector(state => state.egresoBodega.save);
     const state_notificacion = useSelector(state => state.egresoBodega.notificacion);
@@ -32,8 +33,12 @@ export default function FormEgreso() {
             dispatch(setDataCabeceraGrupo(null));
             dispatch(clearFormulario());
             setLoadFormulario(false);
+
+            if (credential.idhacienda) {
+                dispatch(setDataCabeceraHacienda({...credential.idhacienda, ruc: null}));
+            }
         }
-    }, [loadFormulario, setLoadFormulario, dispatch]);
+    }, [loadFormulario, setLoadFormulario, dispatch, credential]);
 
     const nuevo = () => {
         dispatch(clearFormulario());

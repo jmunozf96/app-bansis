@@ -139,15 +139,14 @@ export const loadStorageAuth = () => (dispatch, getState) => {
 };
 
 export const clearAuthentication = () => (dispatch) => {
-    dispatch({type: SET_LOGUEADO, payload: false});
-    dispatch({type: SET_TOKEN, payload: ""});
-    dispatch({type: SET_CREDENTIALS, payload: null});
-    dispatch({type: SET_RECURSOS, payload: []})
-};
-
-export const clearStorageAuth = () => () => {
-    //Limpiar storage
     localStorage.removeItem('_token');
     localStorage.removeItem('_credentialUser');
     Cookies.remove('_recursos');
+
+    dispatch({type: SET_LOGUEADO, payload: false});
+    dispatch({type: SET_TOKEN, payload: ""});
+    dispatch({type: SET_CREDENTIALS, payload: null});
+    dispatch({type: SET_RECURSOS, payload: []});
 };
+
+

@@ -8,7 +8,7 @@ import {useDispatch, useSelector} from "react-redux";
 
 import "./ComponentMenuNavbar.scss"
 import LinearProgress from "@material-ui/core/LinearProgress";
-import {clearAuthentication, clearStorageAuth} from "../../reducers/seguridad/loginDucks";
+import {clearAuthentication} from "../../reducers/seguridad/loginDucks";
 
 export default function ComponentMenuNavbar() {
     const dispatch = useDispatch();
@@ -21,7 +21,6 @@ export default function ComponentMenuNavbar() {
 
     const logoutSite = () => {
         dispatch(clearAuthentication());
-        dispatch(clearStorageAuth());
     };
 
     return (

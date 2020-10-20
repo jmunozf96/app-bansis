@@ -23,16 +23,18 @@ export default function reduce(state = dataInicial, action) {
     }
 }
 
+export const defaultAccess = (state) => (dispatch) => {
+    dispatch({
+        type: SET_ACCESO,
+        payload: state
+    })
+};
+
 export const checkModule = (modulo, ruta) => async (dispatch, getState) => {
     const logueado = getState().login.logueado;
     const credential = getState().login.credential;
 
     if (logueado && credential) {
-
-        if (modulo === undefined) {
-            dispatch({type: SET_ACCESO, payload: true});
-            return;
-        }
 
         const url = `${API_LINK}/bansis/verifyModule`;
         const data = qs.stringify({
