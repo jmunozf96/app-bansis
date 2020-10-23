@@ -178,62 +178,82 @@ export const listenChanel = () => (dispatch, getState) => {
 };
 
 export const searchaDataByCintasSemana = () => async (dispatch, getState) => {
-    const semanas = getState().cosecha.cintas_select.filter(item => item.status);
-    const state = getState().cosecha;
-    const token = getState().login.token;
+        const semanas = getState().cosecha.cintas_select.filter(item => item.status);
+        const state = getState().cosecha;
+        const token = getState().login.token;
 
-    let get_cinta = true;
-    let get_data_cinta = {status: true, except: []};
+        let get_cinta = true;
+        let get_data_cinta = {status: true, except: []};
 
-    if (localStorage.getItem('_cintasSemanaLotes')) {
-        const cintas = JSON.parse(localStorage.getItem('_cintasSemanaLotes'));
-        //Trae las cintas, excepto los datos que se encuentran registrados localmente
-        get_data_cinta.except = cintas.data.map(item => item.cinta.data.idcalendar);
+        if (localStorage.getItem('_cintasSemanaLotes')) {
+            const cintas = JSON.parse(localStorage.getItem('_cintasSemanaLotes'));
+            //Trae las cintas, excepto los datos que se encuentran registrados localmente
+            get_data_cinta.except = cintas.data.map(item => item.cinta.data.idcalendar);
 
-        //Por ahora elimina y vuelve a generar los storage
-        localStorage.removeItem('_cintasSemana');
-        localStorage.removeItem('_cintasSemanaLotes');
+            //Por ahora elimina y vuelve a generar los storage
+            localStorage.removeItem('_cintasSemana');
+            localStorage.removeItem('_cintasSemanaLotes');
+        }
+
+        try {
+            const url = `${API_LINK}/bansis-app/index.php/cosecha/loading/data`;
+            const data = qs.stringify({
+                json: JSON.stringify({semanas: semanas, fecha: state.fecha, cinta: get_cinta, data_cinta: get_data_cinta})
+            });
+
+            const respuesta = await axios.post(url, data, {
+                onDownloadProgress: function () {
+                    dispatch(listenChannelBalanza(true));
+                    dispatch(loadingData(false));
+                    dispatch(searchData(false));
+                },
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Authorization': token //token,
+                }
+            });
+
+            console.log(await respuesta.data);
+            await dispatch({type: SET_CINTAS, payload: respuesta.data.cintas.map(item => ({cinta: item.cinta.data}))});
+            await localStorage.setItem('_cintasSemana', JSON.stringify(respuesta.data.cintas.map(item => ({cinta: item.cinta.data}))));
+
+            await dispatch({type: SET_DATA_CINTAS, payload: respuesta.data.cintas});
+            await localStorage.setItem('_cintasSemanaLotes', JSON.stringify({
+                fecha: moment().format("DD/MM/YYYY"),
+                data: respuesta.data.cintas
+            }));
+
+            await dispatch({
+                type: SET_ADD_COSECHA, payload: respuesta.data.cosecha.map(data => {
+                    //Para sacar el enfunde y matas caidas
+                    const status_cinta = (item) => (item.cinta.data.idcalendar === data.cs_color);
+                    const cintas = getState().cosecha.cintas_data.filter(item => status_cinta(item));
+                    const data_enfunde_caidas = searchEnfunde_MatasCaidas(data, cintas);
+
+                    return {
+                        ...data,
+                        cs_enfunde: data_enfunde_caidas.enfunde,
+                        cs_caidas: data_enfunde_caidas.caidas,
+                        pesando: false
+                    }
+                })
+            });
+
+            //Construir aplicación
+            await dispatch(buildApp(true));
+            //await dispatch(prepareData(false));
+        } catch
+            (e) {
+            console.error(e);
+        }
     }
-
-    try {
-        const url = `${API_LINK}/bansis-app/index.php/cosecha/loading/data`;
-        const data = qs.stringify({
-            json: JSON.stringify({semanas: semanas, fecha: state.fecha, cinta: get_cinta, data_cinta: get_data_cinta})
-        });
-
-        const respuesta = await axios.post(url, data, {
-            onDownloadProgress: function () {
-                dispatch(listenChannelBalanza(true));
-                dispatch(loadingData(false));
-                dispatch(searchData(false));
-            },
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': token //token,
-            }
-        });
-
-        console.log(await respuesta.data);
-        await dispatch({type: SET_CINTAS, payload: respuesta.data.cintas.map(item => ({cinta: item.cinta.data}))});
-        await localStorage.setItem('_cintasSemana', JSON.stringify(respuesta.data.cintas.map(item => ({cinta: item.cinta.data}))));
-
-        await dispatch({type: SET_DATA_CINTAS, payload: respuesta.data.cintas});
-        await localStorage.setItem('_cintasSemanaLotes', JSON.stringify({
-            fecha: moment().format("DD/MM/YYYY"),
-            data: respuesta.data.cintas
-        }));
-
-        //Construir aplicación
-        await dispatch(buildApp(true));
-        //await dispatch(prepareData(false));
-    } catch (e) {
-        console.error(e);
-    }
-};
+;
 
 export const addCosechaLoteCinta = (data) => (dispatch, getState) => {
+    //Para sacar el enfunde y matas caidas
     const status_cinta = (item) => (item.cinta.data.idcalendar === data.cs_color);
-    const data_cintas = getState().cosecha.cintas_data.filter(item => status_cinta(item));
+    const cintas = getState().cosecha.cintas_data.filter(item => status_cinta(item));
+    const data_enfunde_caidas = searchEnfunde_MatasCaidas(data, cintas);
 
     //Consolidar informacion
     const listen = getState().cosecha.listen;
@@ -260,7 +280,10 @@ export const addCosechaLoteCinta = (data) => (dispatch, getState) => {
                     };
                     dispatch({
                         type: SET_ADD_COSECHA,
-                        payload: item.cosecha.map(item => status_lote_cinta(item) ? nw_data : {...item, pesando: false})
+                        payload: item.cosecha.map(item => status_lote_cinta(item) ? nw_data : {
+                            ...item,
+                            pesando: false
+                        })
                     });
 
                 } else {
@@ -268,8 +291,8 @@ export const addCosechaLoteCinta = (data) => (dispatch, getState) => {
                     let cosecha = [...item.cosecha.map(item => ({...item, pesando: false}))];
                     cosecha.push({
                         ...data,
-                        cs_enfunde: searchEnfunde_MatasCaidas(data, data_cintas).enfunde,
-                        cs_caidas: searchEnfunde_MatasCaidas(data, data_cintas).caidas
+                        cs_enfunde: data_enfunde_caidas.enfunde,
+                        cs_caidas: data_enfunde_caidas.caidas
                     });
                     dispatch({type: SET_ADD_COSECHA, payload: cosecha});
                 }
@@ -283,8 +306,8 @@ export const addCosechaLoteCinta = (data) => (dispatch, getState) => {
         //
         const data_cinta = {
             ...data,
-            cs_enfunde: searchEnfunde_MatasCaidas(data, data_cintas).enfunde,
-            cs_caidas: searchEnfunde_MatasCaidas(data, data_cintas).caidas
+            cs_enfunde: data_enfunde_caidas.enfunde,
+            cs_caidas: data_enfunde_caidas.caidas
         };
 
         dispatch({type: SET_ADD_COSECHA, payload: [data_cinta]});
@@ -309,6 +332,7 @@ const searchEnfunde_MatasCaidas = (data, cinta) => {
     const status_lote = (item) => (item.lote === data.cs_seccion);
 
     if (cinta.length > 0) {
+        console.log(cinta);
         const filter_lote = cinta[0].cinta.lotes.data.filter(item => status_lote(item));
         enfunde = filter_lote.reduce((total, item) => total + item.enfunde, 0);
         caidas = filter_lote.reduce((total, item) => total + item.caidas, 0);

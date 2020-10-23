@@ -28,9 +28,11 @@ export default function CosechaRecobro() {
                                 <CosechaCintasSelect data={data}/>
                             </div>
                         )}
-                        <button className="btn btn-danger pb-2" onClick={() => addCintas()}>
-                            <i className="fa fa-plus"/>
-                        </button>
+                        <div className="col-2">
+                            <button className="btn btn-danger pb-2" onClick={() => addCintas()}>
+                                <i className="fa fa-plus"/>
+                            </button>
+                        </div>
                     </ComponentCard>
                 </div>
                 <div className="col-12 mt-3">
@@ -76,4 +78,4 @@ const ComponentCard = ({children}) => {
             </div>
         </div>
     )
-}
+};
