@@ -14,7 +14,6 @@ export default function CosechaDetalle() {
         return cintas.filter(item => item.cinta.idcalendar === cinta)[0].cinta;
     };
 
-    console.log('asssasa',colorCinta());
     const ordenarUltimoDatoRegistrado = () => {
         return cosecha.sort(function(a, b) {
             let keyA = moment(a.ultima_actualizacion).format("YYYY-MM-DDTHH:mm:ss.SSS"),

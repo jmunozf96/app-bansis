@@ -18,7 +18,15 @@ const dataInicial = {
     cosecha: [], //Todos los items de la cosecha
     cintas: [],
     cintas_data: [],
-    cinta_select: ''
+    cinta_select: '',
+    cintas_select: [
+        {label: '13 SEMANAS', status: false, value: 13},
+        {label: '12 SEMANAS', status: false, value: 12},
+        {label: '11 SEMANAS', status: false, value: 11},
+        {label: '10 SEMANAS', status: false, value: 10},
+        {label: '09 SEMANAS', status: false, value: 9},
+        {label: '08 SEMANAS', status: false, value: 8},
+    ] //Array de cintas seleccionadas
 };
 
 const LISTEN_CHANNEL = 'LISTEN_CHANNEL';
@@ -29,6 +37,7 @@ const BUILD_APP = 'BUILD_APP';
 const SET_CINTAS = 'SET_CINTAS';
 const SET_DATA_CINTAS = 'SET_DATA_CINTAS';
 const SET_CINTA_SELECT = 'SET_CINTA_SELECT';
+const SET_CINTAS_SELECT = 'SET_CINTAS_SELECT';
 
 const SET_ADD_COSECHA = 'SET_ADD_COSECHA';
 
@@ -50,6 +59,8 @@ export default function reducer(state = dataInicial, action) {
             return {...state, cintas_data: action.payload};
         case SET_CINTA_SELECT:
             return {...state, cinta_select: action.payload};
+        case SET_CINTAS_SELECT:
+            return {...state, cintas_select: action.payload};
         case SET_ADD_COSECHA:
             return {...state, cosecha: action.payload};
         default:
@@ -106,8 +117,24 @@ export const cintaSelect = (value) => (dispatch) => {
     })
 };
 
+export const cintasSelectBackup = (value) => (dispatch, getState) => {
+    const cintas_seleccionadas = getState().cosecha.cintas_select;
+    let cintas_update = [];
+    cintas_seleccionadas.forEach(data => {
+        const seleccion = value.filter(item => (item.value === data.value && item.status));
+        if (seleccion.length > 0) {
+            cintas_update.push({...seleccion[0], status: true})
+        } else {
+            cintas_update.push({...data, status: false});
+        }
+    });
+    dispatch({
+        type: SET_CINTAS_SELECT,
+        payload: cintas_update
+    })
+};
+
 export const listenChanel = () => (dispatch, getState) => {
-    const cinta_select = getState().cosecha.cinta_select;
     window.Pusher = require('pusher-js');
     window.Echo = new Echo({
         broadcaster: 'pusher',
@@ -121,10 +148,17 @@ export const listenChanel = () => (dispatch, getState) => {
 
     window.Echo.channel('BalanzaPrimo')
         .listen('CosechaPrimo', (e) => {
-            console.log(e.cosecha);
             if (e.cosecha) {
+                const cintas = getState().cosecha.cintas;
+                const cinta_select = getState().cosecha.cinta_select;
                 if (cinta_select !== e.cosecha['cs_color']) {
-                    dispatch(cintaSelect(e.cosecha['cs_color']));
+                    const existe = cintas.filter(item => item.cinta.idcalendar === e.cosecha['cs_color']);
+                    if (existe.length > 0) {
+                        dispatch(cintaSelect(e.cosecha['cs_color']));
+                    } else {
+                        alert(`Error al capturar registro, la cinta con codigo:  ${e.cosecha['cs_color']}, no se encuentra seleccionada`);
+                        return;
+                    }
                 }
                 const data_cosecha = {
                     cs_id: parseInt(e.cosecha['cs_id']),
@@ -143,15 +177,13 @@ export const listenChanel = () => (dispatch, getState) => {
 
 };
 
-export const searchaDataByCintasSemana = (semanas) => async (dispatch, getState) => {
+export const searchaDataByCintasSemana = () => async (dispatch, getState) => {
+    const semanas = getState().cosecha.cintas_select.filter(item => item.status);
     const state = getState().cosecha;
     const token = getState().login.token;
 
     let get_cinta = true;
-    let get_data_cinta = {
-        status: true,
-        except: []
-    };
+    let get_data_cinta = {status: true, except: []};
 
     if (localStorage.getItem('_cintasSemanaLotes')) {
         const cintas = JSON.parse(localStorage.getItem('_cintasSemanaLotes'));

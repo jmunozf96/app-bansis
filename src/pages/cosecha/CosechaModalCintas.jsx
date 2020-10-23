@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Checkbox, FormControlLabel} from "@material-ui/core";
 import {
+    cintasSelectBackup,
     loadingData,
     prepareData,
     searchaDataByCintasSemana
@@ -22,7 +23,7 @@ export default function CosechaModalCintas() {
         title: 'Semanas de corte de cinta',
         animation: true,
         backdrop: "static",
-        size: 'lg',
+        size: 'xl',
         centered: false,
         scrollable: true,
         view: <ViewSemanasSelect setCintasSelect={setCintasSelect}/>
@@ -48,7 +49,8 @@ export default function CosechaModalCintas() {
             ...modalConfig,
             view: <WaitProcessLoadingData/>
         });
-        dispatch(searchaDataByCintasSemana(cintasSelect));
+        dispatch(cintasSelectBackup(cintasSelect));
+        dispatch(searchaDataByCintasSemana());
     };
 
     return (
@@ -73,7 +75,7 @@ export default function CosechaModalCintas() {
                 </Button>
                 {search &&
                 <Button variant="primary" disabled={wait} onClick={() => onSave()}>
-                    Guardar
+                    Cargar datos
                 </Button>}
             </Modal.Footer>
         </Modal>
@@ -81,28 +83,18 @@ export default function CosechaModalCintas() {
 }
 
 const ViewSemanasSelect = ({setCintasSelect}) => {
-    const [cintas, setCintas] = useState([
-        {label: '13 SEMANAS', status: false, value: 13}, {label: '12 SEMANAS', status: false, value: 12},
-        {label: '11 SEMANAS', status: false, value: 11}, {label: '10 SEMANAS', status: false, value: 10},
-        {label: '09 SEMANAS', status: false, value: 9}, {label: '08 SEMANAS', status: false, value: 8},
-    ]);
-    const [select, setSelect] = useState([]);
+    const cintas_seleccionadas = useSelector(state => state.cosecha.cintas_select);
+    const [cintas, setCintas] = useState(cintas_seleccionadas);
     const [status, setStatus] = useState(false);
 
     useEffect(() => {
         if (status) {
-            setCintasSelect([...select]);
+            setCintasSelect(cintas);
             setStatus(false);
         }
-    }, [status, select, setCintasSelect]);
+    }, [status, setCintasSelect, cintas]);
 
     const changeCintas = (data) => {
-        if (!data.status) {
-            //Cambiara a true
-            setSelect([...select, data]);
-        } else {
-            setSelect(select.filter(item => item.value !== data.value))
-        }
         setStatus(true);
         setCintas([...cintas.map(item => item.label === data.label ? {...item, status: !data.status} : item)]);
     };
@@ -112,7 +104,11 @@ const ViewSemanasSelect = ({setCintasSelect}) => {
             <div className="row">
                 <div className="col-12">
                     <div className="alert alert-primary">
-                        <i className="fas fa-cube"/> <b>Seleccionar</b> semanas de cinta.
+                        <p className="mb-0">
+                            <i className="fas fa-info-circle"/>{" "}
+                            <em><b>Recomendación:</b> No pasar racimos por balanza, hasta que se hayan cargado los datos iniciales
+                            de cosecha.</em>
+                        </p>
                     </div>
                 </div>
                 <div className="col-12">
@@ -153,6 +149,8 @@ const WaitProcessLoadingData = () => {
                     <div className="col-12 text-center">
                         <i className="fas fa-cog fa-spin fa-10x"/>
                         <p className="mt-5">Preparando aplicación, espere unos segundos...</p>
+                        <em><b>Recomendación:</b> No pasar racimos por balanza, hasta que se hayan cargado los datos iniciales
+                            de cosecha.</em>
                     </div>
                 </div>
                 :

@@ -6,6 +6,7 @@ import CosechaRecobro from "./CosechaRecobro";
 
 export default function CosechaBalanza() {
     const dispatch = useDispatch();
+    const listen = useSelector(state => state.cosecha.listen);
 
     const prepare = useSelector(state => state.cosecha.prepareData);
     const build = useSelector(state => state.cosecha.build);
@@ -32,12 +33,14 @@ export default function CosechaBalanza() {
                                 </div> : <CosechaRecobro/>
                             }
                             {prepare && <CosechaModalCintas show={prepare}/>}
+                            {!listen &&
                             <div className="card-footer">
                                 <button className="btn btn-success btn-block btn-lg"
                                         onClick={() => conectarse()}>
-                                    <i className="fas fa-plug"/> CONECTARSE
+                                    <i className="fas fa-plug"/> CONECTARSE A BALANZA
                                 </button>
                             </div>
+                            }
                         </div>
                     </div>
                 </div>
