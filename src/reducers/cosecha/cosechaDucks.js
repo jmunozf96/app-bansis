@@ -9,13 +9,9 @@ import {updateDataChart} from "./cosechaChartDucks";
 
 const dataInicial = {
     listen: false,
+    searchData: false,
     prepareData: false,
     loadingData: false,
-    loadingDataStorage: {
-        status: false,
-        only: [],
-        load: false
-    },
     build: false,
     fecha: moment().format("DD/MM/YYYY"),
     itemBalanza: null, //Dato que viene de balanza
@@ -26,9 +22,8 @@ const dataInicial = {
 };
 
 const LISTEN_CHANNEL = 'LISTEN_CHANNEL';
+const SEARCH_DATA = 'SEARCH_DATA';
 const LOADING_DATA = 'LOADING_DATA';
-const LOADING_DATA_STORAGE = 'LOADING_DATA_STORAGE';
-const CONFIRM_LOADING_DATA_STORAGE = 'CONFIRM_LOADING_DATA_STORAGE';
 const PREPARE_DATA = 'PREPARE_DATA';
 const BUILD_APP = 'BUILD_APP';
 const SET_CINTAS = 'SET_CINTAS';
@@ -41,14 +36,12 @@ export default function reducer(state = dataInicial, action) {
     switch (action.type) {
         case LISTEN_CHANNEL:
             return {...state, listen: action.payload};
+        case SEARCH_DATA:
+            return {...state, searchData: action.payload};
         case PREPARE_DATA:
             return {...state, prepareData: action.payload};
         case LOADING_DATA:
             return {...state, loadingData: action.payload};
-        case LOADING_DATA_STORAGE:
-            return {...state, loadingDataStorage: action.payload};
-        case CONFIRM_LOADING_DATA_STORAGE:
-            return {...state, loadingDataStorage: {...state.loadingDataStorage, load: action.payload}};
         case BUILD_APP:
             return {...state, build: action.payload};
         case SET_CINTAS:
@@ -71,6 +64,13 @@ export const listenChannelBalanza = (value) => (dispatch) => {
     })
 };
 
+export const searchData = (value) => (dispatch) => {
+    dispatch({
+        type: SEARCH_DATA,
+        payload: value
+    })
+};
+
 export const prepareData = (value) => (dispatch) => {
     dispatch({
         type: PREPARE_DATA,
@@ -81,20 +81,6 @@ export const prepareData = (value) => (dispatch) => {
 export const loadingData = (value) => (dispatch) => {
     dispatch({
         type: LOADING_DATA,
-        payload: value
-    })
-};
-
-export const loadingDataStorage = (value) => (dispatch) => {
-    dispatch({
-        type: LOADING_DATA_STORAGE,
-        payload: value
-    })
-};
-
-export const confirmLoadingDataStorage = (value) => (dispatch) => {
-    dispatch({
-        type: CONFIRM_LOADING_DATA_STORAGE,
         payload: value
     })
 };
@@ -169,7 +155,12 @@ export const searchaDataByCintasSemana = (semanas) => async (dispatch, getState)
 
     if (localStorage.getItem('_cintasSemanaLotes')) {
         const cintas = JSON.parse(localStorage.getItem('_cintasSemanaLotes'));
-        get_data_cinta.except = cintas.data.map(item => item.cinta.data.idcalendar); //Trae las cintas, excepto los datos que se encuentran registrados localmente
+        //Trae las cintas, excepto los datos que se encuentran registrados localmente
+        get_data_cinta.except = cintas.data.map(item => item.cinta.data.idcalendar);
+
+        //Por ahora elimina y vuelve a generar los storage
+        localStorage.removeItem('_cintasSemana');
+        localStorage.removeItem('_cintasSemanaLotes');
     }
 
     try {
@@ -182,6 +173,7 @@ export const searchaDataByCintasSemana = (semanas) => async (dispatch, getState)
             onDownloadProgress: function () {
                 dispatch(listenChannelBalanza(true));
                 dispatch(loadingData(false));
+                dispatch(searchData(false));
             },
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -193,13 +185,6 @@ export const searchaDataByCintasSemana = (semanas) => async (dispatch, getState)
         await dispatch({type: SET_CINTAS, payload: respuesta.data.cintas.map(item => ({cinta: item.cinta.data}))});
         await localStorage.setItem('_cintasSemana', JSON.stringify(respuesta.data.cintas.map(item => ({cinta: item.cinta.data}))));
 
-        if (get_data_cinta.except.length > 0) {
-            dispatch(loadingDataStorage({
-                status: true,
-                only: get_data_cinta.except
-            }));
-        }
-
         await dispatch({type: SET_DATA_CINTAS, payload: respuesta.data.cintas});
         await localStorage.setItem('_cintasSemanaLotes', JSON.stringify({
             fecha: moment().format("DD/MM/YYYY"),
@@ -208,6 +193,7 @@ export const searchaDataByCintasSemana = (semanas) => async (dispatch, getState)
 
         //Construir aplicación
         await dispatch(buildApp(true));
+        //await dispatch(prepareData(false));
     } catch (e) {
         console.error(e);
     }
@@ -237,7 +223,8 @@ export const addCosechaLoteCinta = (data) => (dispatch, getState) => {
                         cs_id: data.cs_id,
                         cs_cortados: parseInt(existe[0].cs_cortados) + parseInt(data.cs_cortados),
                         cs_peso: (parseFloat(existe[0].cs_peso) + parseFloat(data.cs_peso)).toFixed(2),
-                        ultima_actualizacion: data.ultima_actualizacion
+                        ultima_actualizacion: data.ultima_actualizacion,
+                        pesando: true
                     };
                     dispatch({
                         type: SET_ADD_COSECHA,
@@ -276,14 +263,13 @@ export const addCosechaLoteCinta = (data) => (dispatch, getState) => {
 
 export const updateStorage = () => (dispatch, getState) => {
     const data = getState().cosecha.cintas_data;
-    console.log('update', data);
+
     localStorage.removeItem('_cintasSemanaLotes');
     localStorage.setItem('_cintasSemanaLotes', JSON.stringify({
         fecha: moment().format("DD/MM/YYYY"),
         data: data
     }));
 };
-
 
 const searchEnfunde_MatasCaidas = (data, cinta) => {
     let enfunde = 0;
@@ -298,14 +284,3 @@ const searchEnfunde_MatasCaidas = (data, cinta) => {
     return data = {enfunde, caidas};
 };
 
-export const restoreDataStorage = () => (dispatch, getState) => {
-    const load = getState().cosecha.loadingDataStorage.load;
-    if (load) {
-        console.log('entro');
-        if (localStorage.getItem('_cintasSemanaLotes')) {
-            const data_cintas = getState().cosecha.cintas_data;
-            const data_storage = JSON.parse(localStorage.getItem('_cintasSemanaLotes'));
-            dispatch({type: SET_DATA_CINTAS, payload: data_cintas.concat(data_storage.data)});
-        }
-    }
-};

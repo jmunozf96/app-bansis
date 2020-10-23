@@ -1,7 +1,7 @@
 import React from "react";
 import {useDispatch, useSelector} from "react-redux";
 import CosechaModalCintas from "./CosechaModalCintas";
-import {prepareData} from "../../reducers/cosecha/cosechaDucks";
+import {prepareData, searchData} from "../../reducers/cosecha/cosechaDucks";
 import CosechaRecobro from "./CosechaRecobro";
 
 export default function CosechaBalanza() {
@@ -9,6 +9,11 @@ export default function CosechaBalanza() {
 
     const prepare = useSelector(state => state.cosecha.prepareData);
     const build = useSelector(state => state.cosecha.build);
+
+    const conectarse = () => {
+        dispatch(prepareData(true));
+        dispatch(searchData(true));
+    };
 
     return (
         <React.Fragment>
@@ -29,7 +34,7 @@ export default function CosechaBalanza() {
                             {prepare && <CosechaModalCintas show={prepare}/>}
                             <div className="card-footer">
                                 <button className="btn btn-success btn-block btn-lg"
-                                        onClick={() => dispatch(prepareData(true))}>
+                                        onClick={() => conectarse()}>
                                     <i className="fas fa-plug"/> CONECTARSE
                                 </button>
                             </div>

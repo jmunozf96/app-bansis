@@ -1,4 +1,4 @@
-import {confirmLoadingDataStorage, setDataCintas} from "./cosechaDucks";
+import {setDataCintas} from "./cosechaDucks";
 
 const dataInicial = {
     data: {

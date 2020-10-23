@@ -1,17 +1,20 @@
 import React, {useEffect, useState} from "react";
-import ModalForm from "../../components/ModalForm";
 import {Checkbox, FormControlLabel} from "@material-ui/core";
 import {
-    confirmLoadingDataStorage,
     loadingData,
-    prepareData, restoreDataStorage,
+    prepareData,
     searchaDataByCintasSemana
 } from "../../reducers/cosecha/cosechaDucks";
 import {useDispatch, useSelector} from "react-redux";
+import {Button, Modal} from "react-bootstrap";
 
 export default function CosechaModalCintas() {
     const dispatch = useDispatch();
+    const loadingDataSelect = useSelector(state => state.cosecha.loadingData);
     const prepare = useSelector(state => state.cosecha.prepareData);
+    const search = useSelector(state => state.cosecha.searchData);
+
+    const [wait, setWait] = useState(false); //Esperar que se realice la petición
     const [cintasSelect, setCintasSelect] = useState([]);
     const [modalConfig, setModalConfig] = useState({
         show: prepare,
@@ -19,11 +22,19 @@ export default function CosechaModalCintas() {
         title: 'Semanas de corte de cinta',
         animation: true,
         backdrop: "static",
-        size: '',
+        size: 'lg',
         centered: false,
         scrollable: true,
         view: <ViewSemanasSelect setCintasSelect={setCintasSelect}/>
     });
+
+    useEffect(() => {
+        if (!loadingDataSelect) {
+            setWait(false);
+        } else {
+            setWait(true);
+        }
+    }, [loadingDataSelect]);
 
     const onHideModal = () => {
         setModalConfig({...modalConfig, show: false});
@@ -31,21 +42,41 @@ export default function CosechaModalCintas() {
     };
 
     const onSave = () => {
+        //Ejecutar consulta
         dispatch(loadingData(true));
         setModalConfig({
             ...modalConfig,
             view: <WaitProcessLoadingData/>
         });
-
         dispatch(searchaDataByCintasSemana(cintasSelect));
     };
 
     return (
-        <ModalData
-            configuracion={modalConfig}
-            onHide={onHideModal}
-            onSave={onSave}
-        />
+        <Modal
+            show={modalConfig.show}
+            animation={modalConfig.animation}
+            backdrop={modalConfig.backdrop}
+            size={modalConfig.size}
+            centered={modalConfig.centered}
+            scrollable={modalConfig.scrollable}
+            onHide={() => onHideModal()}
+        >
+            <Modal.Header>
+                <Modal.Title><i className={modalConfig.icon}/> <small>{modalConfig.title}</small></Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                {modalConfig.view}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => onHideModal()}>
+                    Salir
+                </Button>
+                {search &&
+                <Button variant="primary" disabled={wait} onClick={() => onSave()}>
+                    Guardar
+                </Button>}
+            </Modal.Footer>
+        </Modal>
     )
 }
 
@@ -113,11 +144,11 @@ const ViewSemanasSelect = ({setCintasSelect}) => {
 };
 
 const WaitProcessLoadingData = () => {
-    const loadingDataStorage = useSelector(state => state.cosecha.loadingDataStorage.status);
+    const loadingData = useSelector(state => state.cosecha.loadingData);
 
     return (
         <React.Fragment>
-            {!loadingDataStorage ?
+            {loadingData ?
                 <div className="row m-1">
                     <div className="col-12 text-center">
                         <i className="fas fa-cog fa-spin fa-10x"/>
@@ -125,74 +156,13 @@ const WaitProcessLoadingData = () => {
                     </div>
                 </div>
                 :
-                <LoadDataStorage/>
+                <div className="col-12 text-center">
+                    <i className="fas fa-check-circle fa-10x mt-5 mb-3" style={{color: "#1cab09"}}/>
+                    <p className="">Información cargada.</p>
+                </div>
             }
         </React.Fragment>
     )
 };
 
-const LoadDataStorage = () => {
-    const dispatch = useDispatch();
-    const load = useSelector(state => state.cosecha.loadingDataStorage.load);
 
-    const confirmar = () => {
-        dispatch(confirmLoadingDataStorage(true));
-        dispatch(restoreDataStorage());
-    };
-
-    return (
-        <div className="container-fluid">
-            <div className="row">
-                {!load ?
-                    <React.Fragment>
-                        <div className="col-12 text-center">
-                            <i className="fas fa-database fa-10x mt-1 mb-3" style={{color: "#ababab"}}/>
-                            <i className="fas fa-cog fa-spin fa-4x ml-2 mt-4" style={{color: "#ababab"}}/>
-                            <p className="">Tiene información guardada localmente, ¿Desea recuperar los registros?</p>
-                        </div>
-                        <div className="col-12">
-                            <div className="row justify-content-center">
-                                <button className="btn btn-danger col-2 btn-lg"
-                                        onClick={() => dispatch(confirmLoadingDataStorage(false))}>
-                                    NO
-                                </button>
-                                <div className="col-1"/>
-                                <button className="btn btn-primary col-2 btn-lg"
-                                        onClick={() => confirmar()}>
-                                    SI
-                                </button>
-                            </div>
-                        </div>
-                    </React.Fragment>
-                    :
-                    <React.Fragment>
-                        <div className="col-12 text-center">
-                            <i className="fas fa-check-circle fa-10x mt-5 mb-3" style={{color: "#1cab09"}}/>
-                            <p className="">Información salvada.</p>
-                        </div>
-                    </React.Fragment>
-                }
-            </div>
-        </div>
-    )
-}
-
-function ModalData({configuracion, onHide, onSave}) {
-    return (
-        <ModalForm
-            show={configuracion.show}
-            icon={configuracion.icon}
-            title={configuracion.title}
-            animation={configuracion.animation}
-            backdrop={configuracion.backdrop}
-            size={configuracion.size}
-            centered={configuracion.centered}
-            scrollable={configuracion.scrollable}
-            dialogSize={'65'}
-            cancel={onHide}
-            save={onSave}
-        >
-            {configuracion.view}
-        </ModalForm>
-    )
-}
