@@ -13,6 +13,8 @@ import cosechaReducers from "./cosecha/cosechaReducers";
 import egresoBodegaDucks from "./bodega/egresoBodegaDucks";
 import loginDucks from "./seguridad/loginDucks";
 import accessModuleDucks from "./seguridad/accessModuleDucks";
+import cosechaDucks from "./cosecha/cosechaDucks";
+import cosechaChartDucks from "./cosecha/cosechaChartDucks";
 
 export default combineReducers({
     login: loginDucks,
@@ -27,6 +29,8 @@ export default combineReducers({
     dataBodega: bodegaReducers,
     dataGrupo: grupoReducers,
     statusForm: statusFormReducers,
-    cosecha: cosechaReducers,
-    egresoBodega: egresoBodegaDucks
+    //cosecha: cosechaReducers,
+    egresoBodega: egresoBodegaDucks,
+    cosecha: cosechaDucks,
+    cosechaChart: cosechaChartDucks
 });

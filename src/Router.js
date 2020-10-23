@@ -31,8 +31,8 @@ import Page404 from "./components/Error/404 Page";
 import FormUsuario from "./pages/seguridad/Usuario/FormUsuario";
 import FormRecursosUsuario from "./pages/seguridad/Recursos/FormRecursosUsuario";
 import ReporteEnfunde from "./pages/hacienda/Informes/RepEnfunde";
-import Recepcion from "./pages/cosecha/Recepcion";
 import DashboardEnfunde from "./pages/hacienda/Informes/DashboardEnfunde";
+import Cosecha from "./pages/cosecha/Cosecha";
 
 export const routes = [
     {
@@ -145,7 +145,7 @@ export const routes = [
     },
     {
         path: "/cosecha/recepcion/racimos-lote/:idmodulo",
-        component: Recepcion
+        component: Cosecha
     },
     {
         path: "/seguridad/usuario/:idmodulo",
