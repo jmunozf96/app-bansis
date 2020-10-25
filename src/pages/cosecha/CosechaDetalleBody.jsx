@@ -4,9 +4,12 @@ import 'moment/locale/es';
 
 const style = {table: {textCenter: {textAlign: "center", verticalAlign: "middle", fontSize: 18}}};
 
-export default function CosechaDetalleBody({data, index, cinta}) {
+export default function CosechaDetalleBody({data, cinta}) {
+    const saldo = () => {
+        return +data.cs_enfunde - ((+data.cs_caidas + +data.cs_cosecha_inicial) + +data.cs_cortados);
+    };
     return (
-        <tr style={{backgroundColor: data.pesando ? "rgba(154,208,130,0.58)" : ""}}>
+        <tr style={{backgroundColor: saldo() < 0 ? "rgba(255,68,85,0.42)" : data.pesando ? "rgba(154,208,130,0.58)" : ""}}>
             <td style={style.table.textCenter} width="3%">
                 {data.pesando &&
                 <span className="badge badge-success">PESANDO</span>
@@ -18,10 +21,12 @@ export default function CosechaDetalleBody({data, index, cinta}) {
                        disabled={true}/>
             </td>
             <td style={style.table.textCenter} width="10%">{data.cs_enfunde}</td>
-            <td style={style.table.textCenter} width="10%">{data.cs_caidas}</td>
+            <td style={style.table.textCenter} width="10%">
+                {+data.cs_caidas + +data.cs_cosecha_inicial}
+            </td>
             <td style={style.table.textCenter} width="10%">{data.cs_cortados}</td>
             <td style={style.table.textCenter} width="10%">
-                {+data.cs_enfunde - (+data.cs_caidas + +data.cs_cortados)}
+                {saldo()}
             </td>
             <td style={style.table.textCenter} width="13%">{data.cs_peso} lbs.</td>
             <td style={style.table.textCenter} width="13%">{(+data.cs_peso / +data.cs_cortados).toFixed(2)} lbs.</td>

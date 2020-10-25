@@ -11,11 +11,11 @@ export default function CosechaDetalle() {
     const [page, setPage] = useState(1);
 
     const colorCinta = () => {
-        return cintas.filter(item => item.cinta.idcalendar === cinta)[0].cinta;
+        return cintas.filter(item => item.codigo === cinta)[0];
     };
 
     const ordenarUltimoDatoRegistrado = () => {
-        return cosecha.sort(function(a, b) {
+        return cosecha.sort(function (a, b) {
             let keyA = moment(a.ultima_actualizacion).format("YYYY-MM-DDTHH:mm:ss.SSS"),
                 keyB = moment(b.ultima_actualizacion).format("YYYY-MM-DDTHH:mm:ss.SSS");
             // Compare the 2 dates
@@ -42,7 +42,7 @@ export default function CosechaDetalle() {
                     <th width="8%">Lote</th>
                     <th width="4%">...</th>
                     <th width="10%">Enfunde</th>
-                    <th width="10%">Caidas</th>
+                    <th width="10%">Cort. Ini.</th>
                     <th width="10%">Cort.</th>
                     <th width="10%">Saldo</th>
                     <th width="13%">Peso</th>
@@ -59,7 +59,8 @@ export default function CosechaDetalle() {
             {(cosecha.length / 5) > 1 &&
             <div className="row">
                 <div className="col-12 d-flex justify-content-center">
-                    <Pagination count={Math.ceil(cosecha.length / 5)} page={page} onChange={changePage} variant="outlined"
+                    <Pagination count={Math.ceil(cosecha.length / 5)} page={page} onChange={changePage}
+                                variant="outlined"
                                 shape="rounded"/>
                 </div>
             </div>

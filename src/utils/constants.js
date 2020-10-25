@@ -2,9 +2,9 @@ import axios from "axios";
 
 export const APP_TITLE = 'Bansis Web';
 //export const API_LINK = 'http://192.168.191.105:8082/api';
-//export const API_LINK = 'http://192.168.1.128:8082/api';//
+export const API_LINK = 'http://192.168.1.128:8082/api';//
 
-export const API_LINK = 'http://192.168.191.1:8085/api';
+//export const API_LINK = 'http://192.168.191.1:8085/api';
 //export const API_LINK = 'http://192.168.191.1:8082/api';
 
 //Produccion

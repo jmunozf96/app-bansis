@@ -40,17 +40,20 @@ const CajasDia = () => {
     useEffect(() => {
         if (load) {
             (async () => {
-                const url = `${API_LINK}/bansis-app/index.php/cosecha/${1}/cajas-dia?fecha=${fecha}`;
-                const respuesta = await axios.get(url);
-                const {code} = respuesta.data;
-                if (code === 200) {
-                    const {data} = respuesta.data;
-                    if (data.length > 0)
-                        setCajas(data);
-
+                try {
+                    const url = `${API_LINK}/bansis-app/index.php/cosecha/${1}/cajas-dia?fecha=${fecha}`;
+                    const respuesta = await axios.get(url);
+                    const {code} = respuesta.data;
+                    if (code === 200) {
+                        const {data} = respuesta.data;
+                        if (data.length > 0)
+                            setCajas(data);
+                    }
+                } catch (e) {
+                    console.error(e);
                 }
-                await setLoad(false);
             })();
+            setLoad(false);
         }
     }, [load, fecha]);
 

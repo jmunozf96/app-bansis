@@ -44,13 +44,17 @@ export default function CosechaModalCintas() {
 
     const onSave = () => {
         //Ejecutar consulta
-        dispatch(loadingData(true));
-        setModalConfig({
-            ...modalConfig,
-            view: <WaitProcessLoadingData/>
-        });
-        dispatch(cintasSelectBackup(cintasSelect));
-        dispatch(searchaDataByCintasSemana());
+        if (cintasSelect.filter(item => item.status).length > 0) {
+            dispatch(loadingData(true));
+            setModalConfig({
+                ...modalConfig,
+                view: <WaitProcessLoadingData/>
+            });
+            dispatch(cintasSelectBackup(cintasSelect));
+            dispatch(searchaDataByCintasSemana());
+        } else {
+            alert("Seleccione por lo menos una semana de corte.")
+        }
     };
 
     return (
@@ -106,8 +110,9 @@ const ViewSemanasSelect = ({setCintasSelect}) => {
                     <div className="alert alert-primary">
                         <p className="mb-0">
                             <i className="fas fa-info-circle"/>{" "}
-                            <em><b>Recomendación:</b> No pasar racimos por balanza, hasta que se hayan cargado los datos iniciales
-                            de cosecha.</em>
+                            <em><b>Recomendación:</b> No pasar racimos por balanza, hasta que se hayan cargado los datos
+                                iniciales
+                                de cosecha.</em>
                         </p>
                     </div>
                 </div>
@@ -149,7 +154,8 @@ const WaitProcessLoadingData = () => {
                     <div className="col-12 text-center">
                         <i className="fas fa-cog fa-spin fa-10x"/>
                         <p className="mt-5">Preparando aplicación, espere unos segundos...</p>
-                        <em><b>Recomendación:</b> No pasar racimos por balanza, hasta que se hayan cargado los datos iniciales
+                        <em><b>Recomendación:</b> No pasar racimos por balanza, hasta que se hayan cargado los datos
+                            iniciales
                             de cosecha.</em>
                     </div>
                 </div>

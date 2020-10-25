@@ -5,6 +5,7 @@ import CosechaChart from "./CosechaChart";
 import CosechaDetalle from "./CosechaDetalle";
 import CosechaCajasDia from "./CosechaCajasDia";
 import {prepareData, searchData} from "../../reducers/cosecha/cosechaDucks";
+import CosechaCintaRecobro from "./CosechaCintaRecobro";
 
 export default function CosechaRecobro() {
     const dispatch = useDispatch();
@@ -33,6 +34,11 @@ export default function CosechaRecobro() {
                                 <i className="fa fa-plus"/>
                             </button>
                         </div>
+                    </ComponentCard>
+                </div>
+                <div className="col-12 mt-3">
+                    <ComponentCard>
+                       <CosechaCintaRecobro/>
                     </ComponentCard>
                 </div>
                 <div className="col-12 mt-3">

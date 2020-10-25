@@ -818,7 +818,7 @@ export const clearNotificacion = () => (dispatch) => {
 //Setear formulario
 export const clearFormulario = () => (dispatch) => {
     dispatch(setDataCabeceraEmpleado(null));
-    dispatch(clearDespacho());
+    //dispatch(clearDespacho());
     dispatch(clearDetalle());
     dispatch(clearRespaldo());
     dispatch(changeStatusBtnsave(true));

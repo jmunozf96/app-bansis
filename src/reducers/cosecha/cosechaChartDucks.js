@@ -99,10 +99,10 @@ export const updateData = (data) => (dispatch, getState) => {
 export const loadDataChart = (cinta) => (dispatch, getState) => {
     const cintas = getState().cosecha.cintas_data;
     if (cintas.length > 0) {
-        let data = cintas.filter(item => item.cinta.data.idcalendar === cinta);
+        let data = cintas.filter(item => item.recobro.codigo === cinta);
 
         if (data.length > 0) {
-            data = data[0].cinta.lotes;
+            data = data[0].data.chart;
             dispatch(updateData(data));
         }
     }
@@ -110,11 +110,11 @@ export const loadDataChart = (cinta) => (dispatch, getState) => {
 
 export const updateDataChart = (data) => (dispatch, getState) => {
     const cintas = getState().cosecha.cintas_data;
-    const status = (item) => (item.cinta.data.idcalendar === data.cs_color);
+    const status = (item) => (item.recobro.codigo === data.cs_color);
     const cinta_filter = cintas.filter(item => status(item));
 
     if (cinta_filter.length > 0) {
-        const cinta_data_chart = cinta_filter[0].cinta.lotes; //Se tiene un item
+        const cinta_data_chart = cinta_filter[0].data.chart; //Se tiene un item
         let index = null;
         let encontro = cinta_data_chart.categories.some((elemento, i) => {
             index = i;
@@ -129,10 +129,11 @@ export const updateDataChart = (data) => (dispatch, getState) => {
                 cinta_data_chart.saldos.data[index] -= parseInt(data.cs_cortados);
 
             const nw_data = {
-                cinta: {
-                    ...cinta_filter[0].cinta,
-                    lotes: {
-                        ...cinta_filter[0].cinta.lotes,
+                ...cinta_filter[0],
+                data: {
+                    ...cinta_filter[0].data,
+                    chart: {
+                        ...cinta_filter[0].data.chart,
                         cortados: cinta_data_chart.cortados,
                         saldos: cinta_data_chart.saldos
                     }
@@ -141,7 +142,7 @@ export const updateDataChart = (data) => (dispatch, getState) => {
 
             const nw_array_data = cintas.map(item => status(item) ? nw_data : item);
             dispatch(setDataCintas(nw_array_data));
-            dispatch(updateData(nw_data.cinta.lotes));
+            dispatch(updateData(nw_data.data.chart));
         }
     }
 };

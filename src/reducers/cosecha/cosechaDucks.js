@@ -8,6 +8,8 @@ import Echo from "laravel-echo";
 import {updateDataChart} from "./cosechaChartDucks";
 
 const dataInicial = {
+    hacienda: null,
+    canal: null,
     listen: false,
     searchData: false,
     prepareData: false,
@@ -29,6 +31,8 @@ const dataInicial = {
     ] //Array de cintas seleccionadas
 };
 
+const SET_HACIENDA = 'SET_HACIENDA';
+const SET_CANAL = 'SET_CANAL';
 const LISTEN_CHANNEL = 'LISTEN_CHANNEL';
 const SEARCH_DATA = 'SEARCH_DATA';
 const LOADING_DATA = 'LOADING_DATA';
@@ -43,6 +47,10 @@ const SET_ADD_COSECHA = 'SET_ADD_COSECHA';
 
 export default function reducer(state = dataInicial, action) {
     switch (action.type) {
+        case SET_HACIENDA:
+            return {...state, hacienda: action.payload};
+        case SET_CANAL:
+            return {...state, canal: action.payload};
         case LISTEN_CHANNEL:
             return {...state, listen: action.payload};
         case SEARCH_DATA:
@@ -67,6 +75,31 @@ export default function reducer(state = dataInicial, action) {
             return state;
     }
 }
+
+export const setDataHacienda = (value) => (dispatch) => {
+    dispatch({
+        type: SET_HACIENDA,
+        payload: value
+    });
+
+    if (value) {
+        dispatch(setCanal());
+        dispatch(listenChanel());
+    }
+};
+
+export const setCanal = () => (dispatch, getState) => {
+    const hacienda = getState().cosecha.hacienda;
+    let canal = {nombre: '', evento: ''};
+    if (hacienda.id === 1) {
+        canal.nombre = 'BalanzaPrimo';
+        canal.evento = 'CosechaPrimo';
+    } else if (hacienda.id === 2) {
+        canal.nombre = 'BalanzaSofca';
+        canal.evento = 'CosechaSofca';
+    }
+    dispatch({type: SET_CANAL, payload: canal})
+};
 
 export const listenChannelBalanza = (value) => (dispatch) => {
     dispatch({
@@ -135,123 +168,136 @@ export const cintasSelectBackup = (value) => (dispatch, getState) => {
 };
 
 export const listenChanel = () => (dispatch, getState) => {
-    window.Pusher = require('pusher-js');
-    window.Echo = new Echo({
-        broadcaster: 'pusher',
-        key: 'ASDASD123',
-        wsHost: window.location.hostname,
-        wsPort: 6001,
-        wssPort: 6001,
-        disableStats: true,
-        enabledTransports: ['ws', 'wss'],
-    });
-
-    window.Echo.channel('BalanzaPrimo')
-        .listen('CosechaPrimo', (e) => {
-            if (e.cosecha) {
-                const cintas = getState().cosecha.cintas;
-                const cinta_select = getState().cosecha.cinta_select;
-                if (cinta_select !== e.cosecha['cs_color']) {
-                    const existe = cintas.filter(item => item.cinta.idcalendar === e.cosecha['cs_color']);
-                    if (existe.length > 0) {
-                        dispatch(cintaSelect(e.cosecha['cs_color']));
-                    } else {
-                        alert(`Error al capturar registro, la cinta con codigo:  ${e.cosecha['cs_color']}, no se encuentra seleccionada`);
-                        return;
-                    }
-                }
-                const data_cosecha = {
-                    cs_id: parseInt(e.cosecha['cs_id']),
-                    cs_fecha: e.cosecha['cs_fecha'],
-                    cs_haciend: e.cosecha['cs_haciend'],
-                    cs_seccion: e.cosecha['cs_seccion'],
-                    cs_cortados: 1,
-                    cs_peso: parseFloat(e.cosecha['cs_peso']).toFixed(2),
-                    cs_color: e.cosecha['cs_color'],
-                    ultima_actualizacion: e.cosecha['fechacre'],
-                    pesando: true
-                };
-                dispatch(addCosechaLoteCinta(data_cosecha));
-            }
+    const canal = getState().cosecha.canal;
+    if (canal) {
+        window.Pusher = require('pusher-js');
+        window.Echo = new Echo({
+            broadcaster: 'pusher',
+            key: 'ASDASD123',
+            wsHost: '192.168.1.128',
+            wsPort: 6001,
+            wssPort: 6001,
+            disableStats: true,
+            enabledTransports: ['ws', 'wss'],
         });
 
+        window.Echo.channel(canal.nombre)
+            .listen(canal.evento, (e) => {
+                console.log(e.cosecha);
+                if (e.cosecha) {
+                    const cintas = getState().cosecha.cintas;
+                    const cinta_select = getState().cosecha.cinta_select;
+                    if (cinta_select !== e.cosecha['cs_color']) {
+                        const existe = cintas.filter(item => item.codigo === e.cosecha['cs_color']);
+                        if (existe.length > 0) {
+                            dispatch(cintaSelect(e.cosecha['cs_color']));
+                        } else {
+                            alert(`Error al capturar registro, la cinta con codigo:  ${e.cosecha['cs_color']}, no se encuentra seleccionada`);
+                            return;
+                        }
+                    }
+                    const data_cosecha = {
+                        cs_id: parseInt(e.cosecha['cs_id']),
+                        cs_fecha: e.cosecha['cs_fecha'],
+                        cs_haciend: e.cosecha['cs_haciend'],
+                        cs_seccion: e.cosecha['cs_seccion'],
+                        cs_cortados: 1,
+                        cs_peso: parseFloat(e.cosecha['cs_peso']).toFixed(2),
+                        cs_color: e.cosecha['cs_color'],
+                        ultima_actualizacion: e.cosecha['fechacre'],
+                        pesando: true
+                    };
+                    dispatch(addCosechaLoteCinta(data_cosecha));
+                }
+            });
+    }
 };
 
 export const searchaDataByCintasSemana = () => async (dispatch, getState) => {
         const semanas = getState().cosecha.cintas_select.filter(item => item.status);
-        const state = getState().cosecha;
-        const token = getState().login.token;
+        if (semanas.length > 0) {
+            const state = getState().cosecha;
+            const token = getState().login.token;
 
-        let get_cinta = true;
-        let get_data_cinta = {status: true, except: []};
+            let get_cinta = true;
+            let get_data_cinta = {status: true, except: []};
 
-        if (localStorage.getItem('_cintasSemanaLotes')) {
-            const cintas = JSON.parse(localStorage.getItem('_cintasSemanaLotes'));
-            //Trae las cintas, excepto los datos que se encuentran registrados localmente
-            get_data_cinta.except = cintas.data.map(item => item.cinta.data.idcalendar);
+            if (localStorage.getItem('_cintasSemanaLotes')) {
+                const data = JSON.parse(localStorage.getItem('_cintasSemanaLotes'));
+                //Trae las cintas, excepto los datos que se encuentran registrados localmente
+                get_data_cinta.except = data.cintas.map(item => item.recobro.codigo);
 
-            //Por ahora elimina y vuelve a generar los storage
-            localStorage.removeItem('_cintasSemana');
-            localStorage.removeItem('_cintasSemanaLotes');
-        }
+                //Por ahora elimina y vuelve a generar los storage
+                localStorage.removeItem('_cintasSemana');
+                localStorage.removeItem('_cintasSemanaLotes');
+            }
 
-        try {
-            const url = `${API_LINK}/bansis-app/index.php/cosecha/loading/data`;
-            const data = qs.stringify({
-                json: JSON.stringify({semanas: semanas, fecha: state.fecha, cinta: get_cinta, data_cinta: get_data_cinta})
-            });
+            try {
+                const url = `${API_LINK}/bansis-app/index.php/cosecha/loading/data`;
+                const data = qs.stringify({
+                    json: JSON.stringify({
+                        semanas: semanas,
+                        fecha: state.fecha,
+                        cinta: get_cinta,
+                        data_cinta: get_data_cinta
+                    })
+                });
 
-            const respuesta = await axios.post(url, data, {
-                onDownloadProgress: function () {
-                    dispatch(listenChannelBalanza(true));
-                    dispatch(loadingData(false));
-                    dispatch(searchData(false));
-                },
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': token //token,
-                }
-            });
-
-            console.log(await respuesta.data);
-            await dispatch({type: SET_CINTAS, payload: respuesta.data.cintas.map(item => ({cinta: item.cinta.data}))});
-            await localStorage.setItem('_cintasSemana', JSON.stringify(respuesta.data.cintas.map(item => ({cinta: item.cinta.data}))));
-
-            await dispatch({type: SET_DATA_CINTAS, payload: respuesta.data.cintas});
-            await localStorage.setItem('_cintasSemanaLotes', JSON.stringify({
-                fecha: moment().format("DD/MM/YYYY"),
-                data: respuesta.data.cintas
-            }));
-
-            await dispatch({
-                type: SET_ADD_COSECHA, payload: respuesta.data.cosecha.map(data => {
-                    //Para sacar el enfunde y matas caidas
-                    const status_cinta = (item) => (item.cinta.data.idcalendar === data.cs_color);
-                    const cintas = getState().cosecha.cintas_data.filter(item => status_cinta(item));
-                    const data_enfunde_caidas = searchEnfunde_MatasCaidas(data, cintas);
-
-                    return {
-                        ...data,
-                        cs_enfunde: data_enfunde_caidas.enfunde,
-                        cs_caidas: data_enfunde_caidas.caidas,
-                        pesando: false
+                const respuesta = await axios.post(url, data, {
+                    onDownloadProgress: function () {
+                        dispatch(listenChannelBalanza(true));
+                        dispatch(loadingData(false));
+                        dispatch(searchData(false));
+                    },
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': token //token,
                     }
-                })
-            });
+                });
 
-            //Construir aplicación
-            await dispatch(buildApp(true));
-            //await dispatch(prepareData(false));
-        } catch
-            (e) {
-            console.error(e);
+                console.log(await respuesta.data);
+                await dispatch({type: SET_CINTAS, payload: respuesta.data.cintas.map(item => (item.recobro))});
+                await localStorage.setItem('_cintasSemana', JSON.stringify(respuesta.data.cintas.map(item => (item.recobro))));
+
+                await dispatch({type: SET_DATA_CINTAS, payload: respuesta.data.cintas});
+                await localStorage.setItem('_cintasSemanaLotes', JSON.stringify({
+                    fecha: moment().format("DD/MM/YYYY"),
+                    cintas: respuesta.data.cintas
+                }));
+
+                await dispatch({
+                    type: SET_ADD_COSECHA, payload: respuesta.data.cosecha.map(data => {
+                        //Para sacar el enfunde y matas caidas
+                        const status_cinta = (item) => (item.recobro.codigo === data.cs_color);
+                        const cintas = getState().cosecha.cintas_data.filter(item => status_cinta(item));
+                        const data_enfunde_caidas = searchEnfunde_MatasCaidas(data, cintas);
+
+                        return {
+                            ...data,
+                            cs_enfunde: data_enfunde_caidas.enfunde,
+                            cs_caidas: data_enfunde_caidas.caidas,
+                            cs_cosecha_inicial: data_enfunde_caidas.cosecha_inicial,
+                            pesando: false
+                        }
+                    })
+                });
+
+                //Construir aplicación
+                await dispatch(buildApp(true));
+                //await dispatch(prepareData(false));
+            } catch
+                (e) {
+                console.error(e);
+            }
+        } else {
+            alert("Seleccione por lo menos una semana de corte.")
         }
     }
 ;
 
 export const addCosechaLoteCinta = (data) => (dispatch, getState) => {
     //Para sacar el enfunde y matas caidas
-    const status_cinta = (item) => (item.cinta.data.idcalendar === data.cs_color);
+    const status_cinta = (item) => (item.recobro.codigo === data.cs_color);
     const cintas = getState().cosecha.cintas_data.filter(item => status_cinta(item));
     const data_enfunde_caidas = searchEnfunde_MatasCaidas(data, cintas);
 
@@ -292,7 +338,8 @@ export const addCosechaLoteCinta = (data) => (dispatch, getState) => {
                     cosecha.push({
                         ...data,
                         cs_enfunde: data_enfunde_caidas.enfunde,
-                        cs_caidas: data_enfunde_caidas.caidas
+                        cs_caidas: data_enfunde_caidas.caidas,
+                        cs_cosecha_inicial: data_enfunde_caidas.cosecha_inicial
                     });
                     dispatch({type: SET_ADD_COSECHA, payload: cosecha});
                 }
@@ -307,7 +354,8 @@ export const addCosechaLoteCinta = (data) => (dispatch, getState) => {
         const data_cinta = {
             ...data,
             cs_enfunde: data_enfunde_caidas.enfunde,
-            cs_caidas: data_enfunde_caidas.caidas
+            cs_caidas: data_enfunde_caidas.caidas,
+            cs_cosecha_inicial: data_enfunde_caidas.cosecha_inicial
         };
 
         dispatch({type: SET_ADD_COSECHA, payload: [data_cinta]});
@@ -322,21 +370,23 @@ export const updateStorage = () => (dispatch, getState) => {
     localStorage.removeItem('_cintasSemanaLotes');
     localStorage.setItem('_cintasSemanaLotes', JSON.stringify({
         fecha: moment().format("DD/MM/YYYY"),
-        data: data
+        cintas: data
     }));
 };
 
-const searchEnfunde_MatasCaidas = (data, cinta) => {
+const searchEnfunde_MatasCaidas = (data, cintas) => {
     let enfunde = 0;
     let caidas = 0;
+    let cosecha_inicial = 0;
+
     const status_lote = (item) => (item.lote === data.cs_seccion);
 
-    if (cinta.length > 0) {
-        console.log(cinta);
-        const filter_lote = cinta[0].cinta.lotes.data.filter(item => status_lote(item));
+    if (cintas.length > 0) {
+        const filter_lote = cintas[0].data.lotes.filter(item => status_lote(item));
         enfunde = filter_lote.reduce((total, item) => total + item.enfunde, 0);
         caidas = filter_lote.reduce((total, item) => total + item.caidas, 0);
+        cosecha_inicial = filter_lote.reduce((total, item) => total + item.cortado, 0);
     }
-    return data = {enfunde, caidas};
+    return data = {enfunde, caidas, cosecha_inicial};
 };
 

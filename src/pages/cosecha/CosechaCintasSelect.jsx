@@ -19,17 +19,17 @@ export default function CosechaCintasSelect({data}) {
                     <input
                         type="radio"
                         name="colorSemana"
-                        value={data && data.cinta.idcalendar}
+                        value={data && data.codigo}
                         style={{width: 20, height: 20}}
-                        checked={data.cinta.idcalendar === cinta}
-                        onChange={(e) => changeCintaSemana(data.cinta.idcalendar)}
+                        checked={data.codigo === cinta}
+                        onChange={(e) => changeCintaSemana(data.codigo)}
                     />
                 </div>
             </div>
             <input
                 type="text"
                 className="form-control"
-                name={`${data.cinta.color}-CALENDARIO`}
+                name={`${data.color}-CALENDARIO`}
                 disabled
             />
         </div>
