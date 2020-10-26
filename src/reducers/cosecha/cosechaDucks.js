@@ -195,7 +195,6 @@ export const listenChanel = () => (dispatch, getState) => {
 
         window.Echo.channel(canal.nombre)
             .listen(canal.evento, (e) => {
-                console.log(e.cosecha);
                 if (e.cosecha) {
                     const cintas = getState().cosecha.cintas;
                     const cinta_select = getState().cosecha.cinta_select;
