@@ -1,7 +1,7 @@
 import React from "react";
 import {Navbar, Nav, NavDropdown} from "react-bootstrap";
 import EqualizerIcon from '@material-ui/icons/Equalizer';
-import {APP_TITLE} from "../../utils/constants";
+import {APP_TITLE} from "../../constants/helpers";
 import {Link} from "react-router-dom"
 
 import {useDispatch, useSelector} from "react-redux";

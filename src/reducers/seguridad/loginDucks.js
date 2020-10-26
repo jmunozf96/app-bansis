@@ -1,4 +1,4 @@
-import {API_LINK} from "../../utils/constants";
+import {API_LINK} from "../../constants/helpers";
 import axios from "axios";
 import qs from "qs";
 import Cookies from "js-cookie"

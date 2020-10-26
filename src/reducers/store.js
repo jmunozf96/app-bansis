@@ -9,13 +9,8 @@ const store = createStore(
     reducer, composeEnhancers(applyMiddleware(thunk)));
 
 store.dispatch(loadStorageAuth());
-
 store.subscribe(() => {
     store.dispatch(loadCredentials());
-
-    /*setStateLocalStorage(store.getState().auth._token);
-    setCookie(store.getState().credential);
-    setCookieRecursos(store.getState().recursos);*/
 });
 
 

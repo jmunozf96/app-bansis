@@ -2,7 +2,7 @@ import React from 'react';
 import ComponentMenuNavbar from "./components/ComponentMenuNavbar";
 
 import {BrowserRouter as Router} from "react-router-dom";
-import RouterConfig from "./RouterConfig";
+import RouterConfig from "./router/RouterConfig";
 //import Footer from "./components/Footer";
 
 //Redux

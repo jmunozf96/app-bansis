@@ -3,7 +3,7 @@ import 'moment/locale/es';
 import qs from "qs";
 import axios from "axios";
 
-import {API_LINK} from "../../utils/constants";
+import {API_LINK} from "../../constants/helpers";
 import Echo from "laravel-echo";
 import {clearDataChart, updateDataChart} from "./cosechaChartDucks";
 
@@ -317,11 +317,11 @@ export const searchaDataByCintasSemana = () => async (dispatch, getState) => {
                     //await dispatch(prepareData(false));
                 } else {
                     console.error(respuesta.data.code, respuesta.data.error);
-                    dispatch(statusError(true, "Error al procesar los datos.."));
+                    dispatch(statusError(true, "Errors al procesar los datos.."));
                 }
             } catch (e) {
                 console.error(e);
-                dispatch(statusError(true, "Error al procesar los datos.."));
+                dispatch(statusError(true, "Errors al procesar los datos.."));
                 //dispatch(setDefaultCintas());//Seteamos las cintas seleccionadas
             }
         } else {

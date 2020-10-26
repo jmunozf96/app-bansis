@@ -1,6 +1,6 @@
 import React from "react";
-import Page404 from "../../components/Error/404 Page";
-import {API_LINK} from "../../utils/constants";
+import Page404 from "../../components/Errors/404 Page";
+import {API_LINK} from "../../constants/helpers";
 import axios from "axios";
 import qs from "qs";
 

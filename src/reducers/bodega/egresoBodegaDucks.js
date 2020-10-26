@@ -3,7 +3,7 @@ import 'moment/locale/es';
 import {v4 as uuidv4} from "uuid";
 import qs from "qs";
 import axios from "axios";
-import {API_LINK} from "../../utils/constants";
+import {API_LINK} from "../../constants/helpers";
 import React from "react";
 
 const dataInicial = {
