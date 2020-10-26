@@ -46,10 +46,13 @@ const dataInicial = {
 };
 
 const SET_DATA_CHART = 'SET_DATA_CHART';
+const CLEAR_DATA_CHART = 'CLEAR_DATA_CHART';
 
 export default function reducer(state = dataInicial, action) {
     switch (action.type) {
         case SET_DATA_CHART:
+            return {...state, data: action.payload};
+        case CLEAR_DATA_CHART:
             return {...state, data: action.payload};
         default:
             return state
@@ -91,6 +94,36 @@ export const updateData = (data) => (dispatch, getState) => {
                         }
                     ]
                 },
+            }
+        }
+    });
+};
+
+export const clearDataChart = () => (dispatch, getState) => {
+    const dataChart = getState().cosechaChart.data;
+    dispatch({
+        type: CLEAR_DATA_CHART,
+        payload: {
+            ...dataChart,
+            series: [],
+            options: {
+                ...dataChart.options,
+                xaxis: {
+                    categories: [],
+                },
+                yaxis: [
+                    {
+                        seriesName: [],
+                        axisBorder: {
+                            show: true,
+                        },
+                        crosshairs: {show: false},
+                        tooltip: {
+                            enabled: true,
+                            offsetX: 0,
+                        },
+                    },
+                ],
             }
         }
     });

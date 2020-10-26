@@ -33,6 +33,7 @@ export default function CosechaCajasDia({show, setShow}) {
 }
 
 const CajasDia = () => {
+    const hacienda = useSelector(state => state.cosecha.hacienda);
     const fecha = useSelector(state => state.cosecha.fecha);
     const [load, setLoad] = useState(true);
     const [cajas, setCajas] = useState([]);
@@ -41,7 +42,7 @@ const CajasDia = () => {
         if (load) {
             (async () => {
                 try {
-                    const url = `${API_LINK}/bansis-app/index.php/cosecha/${1}/cajas-dia?fecha=${fecha}`;
+                    const url = `${API_LINK}/bansis-app/index.php/cosecha/${hacienda.id}/cajas-dia?fecha=${fecha}`;
                     const respuesta = await axios.get(url);
                     const {code} = respuesta.data;
                     if (code === 200) {
@@ -55,7 +56,7 @@ const CajasDia = () => {
             })();
             setLoad(false);
         }
-    }, [load, fecha]);
+    }, [hacienda, load, fecha]);
 
 
     if (load) {

@@ -1,7 +1,14 @@
 import React from "react";
 import {useDispatch, useSelector} from "react-redux";
 import CosechaModalCintas from "./CosechaModalCintas";
-import {prepareData, searchData, setDataHacienda} from "../../reducers/cosecha/cosechaDucks";
+import {
+    buildApp,
+    closeChanel,
+    listenChannelBalanza,
+    prepareData,
+    searchData, setCanal,
+    setDataHacienda, setDefaultCintas
+} from "../../reducers/cosecha/cosechaDucks";
 import CosechaRecobro from "./CosechaRecobro";
 import ComponentOptions from "../../components/ComponentOptions";
 import {API_LINK} from "../../utils/constants";
@@ -21,6 +28,16 @@ export default function CosechaBalanza() {
         dispatch(searchData(true));
     };
 
+    const desconectarse = () => {
+        dispatch(closeChanel());//Cerramos canal
+        dispatch(listenChannelBalanza(false));//Apagamos el listening en redux
+        dispatch(setCanal());//Seteamos el canal
+        dispatch(buildApp(false));//Destruimos la app
+        dispatch(setDataHacienda(null));
+        dispatch(setDefaultCintas());//Seteamos las cintas seleccionadas
+
+    };
+
     const changeOption = (e, data) => {
         const data_option = data['data-json'] !== undefined ? data['data-json'] : null;
         dispatch(setDataHacienda(data_option));
@@ -35,7 +52,8 @@ export default function CosechaBalanza() {
                         <div className="card">
                             <div className="card-header">
                                 <h5 className="m-0">
-                                    <i className="fas fa-chart-bar"/> Saldo de Recobro
+                                    <i className="fas fa-chart-bar"/>
+                                    Saldo de Recobro {hacienda && ` | ${hacienda.descripcion}`}
                                 </h5>
                             </div>
                             {!listen &&
@@ -71,7 +89,7 @@ export default function CosechaBalanza() {
                                     </button>
                                     :
                                     <button className="btn btn-danger btn-block btn-lg"
-                                            onClick={() => hacienda ? conectarse() : console.error("Seleccione una hacienda para conectarse.")}>
+                                            onClick={() => desconectarse()}>
                                         <i className="fas fa-sign-out-alt"/> DESCONECTARSE
                                     </button>
 

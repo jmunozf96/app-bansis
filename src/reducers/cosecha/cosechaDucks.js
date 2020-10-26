@@ -5,7 +5,7 @@ import axios from "axios";
 
 import {API_LINK} from "../../utils/constants";
 import Echo from "laravel-echo";
-import {updateDataChart} from "./cosechaChartDucks";
+import {clearDataChart, updateDataChart} from "./cosechaChartDucks";
 
 const dataInicial = {
     hacienda: null,
@@ -16,7 +16,6 @@ const dataInicial = {
     loadingData: false,
     build: false,
     fecha: moment().format("DD/MM/YYYY"),
-    itemBalanza: null, //Dato que viene de balanza
     cosecha: [], //Todos los items de la cosecha
     cintas: [],
     cintas_data: [],
@@ -94,7 +93,7 @@ export const setCanal = () => (dispatch, getState) => {
     if (hacienda.id === 1) {
         canal.nombre = 'BalanzaPrimo';
         canal.evento = 'CosechaPrimo';
-    } else if (hacienda.id === 2) {
+    } else if (hacienda.id === 3) {//Id de Sofca es 3
         canal.nombre = 'BalanzaSofca';
         canal.evento = 'CosechaSofca';
     }
@@ -150,6 +149,11 @@ export const cintaSelect = (value) => (dispatch) => {
     })
 };
 
+export const setDefaultCintas = () => (dispatch, getState) => {
+    const cintas_seleccionadas = getState().cosecha.cintas_select;
+    dispatch({type: SET_CINTAS_SELECT, payload: cintas_seleccionadas.map(item => ({...item, status: false}))});
+};
+
 export const cintasSelectBackup = (value) => (dispatch, getState) => {
     const cintas_seleccionadas = getState().cosecha.cintas_select;
     let cintas_update = [];
@@ -174,7 +178,7 @@ export const listenChanel = () => (dispatch, getState) => {
         window.Echo = new Echo({
             broadcaster: 'pusher',
             key: 'ASDASD123',
-            wsHost: '192.168.1.128',
+            wsHost: '192.168.191.1',
             wsPort: 6001,
             wssPort: 6001,
             disableStats: true,
@@ -213,6 +217,19 @@ export const listenChanel = () => (dispatch, getState) => {
     }
 };
 
+export const closeChanel = () => (dispatch, getState) => {
+    const canal = getState().cosecha.canal;
+    if (canal !== '') {
+        window.Echo.leave(canal.nombre);
+        //Limpiamos los estados
+        dispatch({type: SET_ADD_COSECHA, payload: []});
+        dispatch({type: SET_CINTAS, payload: []});
+        dispatch({type: SET_DATA_CINTAS, payload: []});
+        dispatch({type: SET_CINTA_SELECT, payload: ''});
+        dispatch(clearDataChart());//Limpiamos el grafico
+    }
+};
+
 export const searchaDataByCintasSemana = () => async (dispatch, getState) => {
         const semanas = getState().cosecha.cintas_select.filter(item => item.status);
         if (semanas.length > 0) {
@@ -238,6 +255,7 @@ export const searchaDataByCintasSemana = () => async (dispatch, getState) => {
                     json: JSON.stringify({
                         semanas: semanas,
                         fecha: state.fecha,
+                        hacienda: state.hacienda.id,
                         cinta: get_cinta,
                         data_cinta: get_data_cinta
                     })

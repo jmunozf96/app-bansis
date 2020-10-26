@@ -11,7 +11,6 @@ export default function CosechaCintaRecobro() {
         return filter_cinta.reduce((total, item) => +total + +item.cs_cortados, 0);
     };
 
-    console.log(cinta);
     return (
         <div className="col-12">
             {cinta ?
