@@ -5,7 +5,7 @@ import CabeceraEgreso from "./CabeceraEgreso";
 import DetalleEgreso from "./DetalleEgreso";
 import {useDispatch, useSelector} from "react-redux";
 import {
-    clearDespacho,
+    //clearDespacho,
     clearFormulario,
     clearNotificacion, existEgreso,
     saveEgresoBodega,
@@ -55,7 +55,6 @@ export default function FormEgreso() {
             console.warn("Se actualizo la transacción...");
             dispatch(updateEgresoBodega());
         }
-
         //Limpiar formulario
         //dispatch(clearDespacho());
     };
