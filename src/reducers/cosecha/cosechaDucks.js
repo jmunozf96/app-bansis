@@ -27,7 +27,11 @@ const dataInicial = {
         {label: '10 SEMANAS', status: false, value: 10},
         {label: '09 SEMANAS', status: false, value: 9},
         {label: '08 SEMANAS', status: false, value: 8},
-    ] //Array de cintas seleccionadas
+    ], //Array de cintas seleccionadas
+    errors: {
+        status: false,
+        message: ''
+    }
 };
 
 const SET_HACIENDA = 'SET_HACIENDA';
@@ -43,6 +47,8 @@ const SET_CINTA_SELECT = 'SET_CINTA_SELECT';
 const SET_CINTAS_SELECT = 'SET_CINTAS_SELECT';
 
 const SET_ADD_COSECHA = 'SET_ADD_COSECHA';
+
+const SET_ERRORS = 'SET_ERRORS';
 
 export default function reducer(state = dataInicial, action) {
     switch (action.type) {
@@ -70,6 +76,8 @@ export default function reducer(state = dataInicial, action) {
             return {...state, cintas_select: action.payload};
         case SET_ADD_COSECHA:
             return {...state, cosecha: action.payload};
+        case SET_ERRORS:
+            return {...state, errors: action.payload};
         default:
             return state;
     }
@@ -230,6 +238,10 @@ export const closeChanel = () => (dispatch, getState) => {
     }
 };
 
+export const statusError = (status, message) => (dispatch) => {
+    dispatch({type: SET_ERRORS, payload: {status, message}})
+};
+
 export const searchaDataByCintasSemana = () => async (dispatch, getState) => {
         const semanas = getState().cosecha.cintas_select.filter(item => item.status);
         if (semanas.length > 0) {
@@ -263,7 +275,6 @@ export const searchaDataByCintasSemana = () => async (dispatch, getState) => {
 
                 const respuesta = await axios.post(url, data, {
                     onDownloadProgress: function () {
-                        dispatch(listenChannelBalanza(true));
                         dispatch(loadingData(false));
                         dispatch(searchData(false));
                     },
@@ -273,39 +284,46 @@ export const searchaDataByCintasSemana = () => async (dispatch, getState) => {
                     }
                 });
 
-                console.log(await respuesta.data);
-                await dispatch({type: SET_CINTAS, payload: respuesta.data.cintas.map(item => (item.recobro))});
-                await localStorage.setItem('_cintasSemana', JSON.stringify(respuesta.data.cintas.map(item => (item.recobro))));
+                //console.log(await respuesta.data);
+                if (respuesta.data.code === 200) {
+                    await dispatch({type: SET_CINTAS, payload: respuesta.data.cintas.map(item => (item.recobro))});
+                    await localStorage.setItem('_cintasSemana', JSON.stringify(respuesta.data.cintas.map(item => (item.recobro))));
 
-                await dispatch({type: SET_DATA_CINTAS, payload: respuesta.data.cintas});
-                await localStorage.setItem('_cintasSemanaLotes', JSON.stringify({
-                    fecha: moment().format("DD/MM/YYYY"),
-                    cintas: respuesta.data.cintas
-                }));
+                    await dispatch({type: SET_DATA_CINTAS, payload: respuesta.data.cintas});
+                    await localStorage.setItem('_cintasSemanaLotes', JSON.stringify({
+                        fecha: moment().format("DD/MM/YYYY"),
+                        cintas: respuesta.data.cintas
+                    }));
 
-                await dispatch({
-                    type: SET_ADD_COSECHA, payload: respuesta.data.cosecha.map(data => {
-                        //Para sacar el enfunde y matas caidas
-                        const status_cinta = (item) => (item.recobro.codigo === data.cs_color);
-                        const cintas = getState().cosecha.cintas_data.filter(item => status_cinta(item));
-                        const data_enfunde_caidas = searchEnfunde_MatasCaidas(data, cintas);
+                    await dispatch({
+                        type: SET_ADD_COSECHA, payload: respuesta.data.cosecha.map(data => {
+                            //Para sacar el enfunde y matas caidas
+                            const status_cinta = (item) => (item.recobro.codigo === data.cs_color);
+                            const cintas = getState().cosecha.cintas_data.filter(item => status_cinta(item));
+                            const data_enfunde_caidas = searchEnfunde_MatasCaidas(data, cintas);
 
-                        return {
-                            ...data,
-                            cs_enfunde: data_enfunde_caidas.enfunde,
-                            cs_caidas: data_enfunde_caidas.caidas,
-                            cs_cosecha_inicial: data_enfunde_caidas.cosecha_inicial,
-                            pesando: false
-                        }
-                    })
-                });
+                            return {
+                                ...data,
+                                cs_enfunde: data_enfunde_caidas.enfunde,
+                                cs_caidas: data_enfunde_caidas.caidas,
+                                cs_cosecha_inicial: data_enfunde_caidas.cosecha_inicial,
+                                pesando: false
+                            }
+                        })
+                    });
 
-                //Construir aplicación
-                await dispatch(buildApp(true));
-                //await dispatch(prepareData(false));
-            } catch
-                (e) {
+                    //Construir aplicación
+                    await dispatch(buildApp(true));
+                    await dispatch(listenChannelBalanza(true));
+                    //await dispatch(prepareData(false));
+                } else {
+                    console.error(respuesta.data.code, respuesta.data.error);
+                    dispatch(statusError(true, "Error al procesar los datos.."));
+                }
+            } catch (e) {
                 console.error(e);
+                dispatch(statusError(true, "Error al procesar los datos.."));
+                //dispatch(setDefaultCintas());//Seteamos las cintas seleccionadas
             }
         } else {
             alert("Seleccione por lo menos una semana de corte.")

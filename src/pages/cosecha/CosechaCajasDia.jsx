@@ -49,12 +49,13 @@ const CajasDia = () => {
                         const {data} = respuesta.data;
                         if (data.length > 0)
                             setCajas(data);
+                        await setLoad(false);
                     }
                 } catch (e) {
                     console.error(e);
+                    await setLoad(false);
                 }
             })();
-            setLoad(false);
         }
     }, [hacienda, load, fecha]);
 

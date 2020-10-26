@@ -35,7 +35,6 @@ export default function CosechaBalanza() {
         dispatch(buildApp(false));//Destruimos la app
         dispatch(setDataHacienda(null));
         dispatch(setDefaultCintas());//Seteamos las cintas seleccionadas
-
     };
 
     const changeOption = (e, data) => {
@@ -52,7 +51,7 @@ export default function CosechaBalanza() {
                         <div className="card">
                             <div className="card-header">
                                 <h5 className="m-0">
-                                    <i className="fas fa-chart-bar"/>
+                                    <i className="fas fa-chart-bar"/>{" "}
                                     Saldo de Recobro {hacienda && ` | ${hacienda.descripcion}`}
                                 </h5>
                             </div>

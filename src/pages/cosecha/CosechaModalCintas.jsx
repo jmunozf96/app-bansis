@@ -19,11 +19,11 @@ export default function CosechaModalCintas() {
     const [cintasSelect, setCintasSelect] = useState([]);
     const [modalConfig, setModalConfig] = useState({
         show: prepare,
-        icon: '',
+        icon: 'fas fa-calendar-week',
         title: 'Semanas de corte de cinta',
         animation: true,
         backdrop: "static",
-        size: 'xl',
+        size: '',
         centered: false,
         scrollable: true,
         view: <ViewSemanasSelect setCintasSelect={setCintasSelect}/>
@@ -62,13 +62,14 @@ export default function CosechaModalCintas() {
             show={modalConfig.show}
             animation={modalConfig.animation}
             backdrop={modalConfig.backdrop}
-            size={modalConfig.size}
             centered={modalConfig.centered}
             scrollable={modalConfig.scrollable}
             onHide={() => onHideModal()}
         >
             <Modal.Header>
-                <Modal.Title><i className={modalConfig.icon}/> <small>{modalConfig.title}</small></Modal.Title>
+                <Modal.Title>
+                    <i className={modalConfig.icon}/> <b><small>{modalConfig.title}</small></b>
+                </Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {modalConfig.view}
@@ -89,7 +90,7 @@ export default function CosechaModalCintas() {
 const ViewSemanasSelect = ({setCintasSelect}) => {
     const cintas_seleccionadas = useSelector(state => state.cosecha.cintas_select);
     const [cintas, setCintas] = useState(cintas_seleccionadas);
-    const [status, setStatus] = useState(false);
+    const [status, setStatus] = useState(true);
 
     useEffect(() => {
         if (status) {
@@ -121,7 +122,7 @@ const ViewSemanasSelect = ({setCintasSelect}) => {
                         <div className="card-body">
                             <div className="row">
                                 {cintas.map((data, index) =>
-                                    <div className="col-md-3 text-center" key={index}>
+                                    <div className="col-12 col-md-6 text-center" key={index}>
                                         <FormControlLabel
                                             control={
                                                 <Checkbox
@@ -146,6 +147,7 @@ const ViewSemanasSelect = ({setCintasSelect}) => {
 
 const WaitProcessLoadingData = () => {
     const loadingData = useSelector(state => state.cosecha.loadingData);
+    const error = useSelector(state => state.cosecha.errors);
 
     return (
         <React.Fragment>
@@ -160,10 +162,19 @@ const WaitProcessLoadingData = () => {
                     </div>
                 </div>
                 :
-                <div className="col-12 text-center">
-                    <i className="fas fa-check-circle fa-10x mt-5 mb-3" style={{color: "#1cab09"}}/>
-                    <p className="">Información cargada.</p>
-                </div>
+                <React.Fragment>
+                    {!error.status ?
+                        <div className="col-12 text-center">
+                            <i className="fas fa-check-circle fa-10x mt-5 mb-3" style={{color: "#1cab09"}}/>
+                            <p className="">Información cargada.</p>
+                        </div>
+                        :
+                        <div className="col-12 text-center">
+                            <i className="fas fa-times fa-10x mt-5 mb-3" style={{color: "#b21a00"}}/>
+                            <p className="">{error.message}</p>
+                        </div>
+                    }
+                </React.Fragment>
             }
         </React.Fragment>
     )
