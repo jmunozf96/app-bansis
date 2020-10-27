@@ -197,7 +197,7 @@ export const listenChanel = () => (dispatch, getState) => {
 
         window.Echo.channel(canal.nombre)
             .listen(canal.evento, (e) => {
-                console.log(e.cosecha);
+
                 if (e.cosecha) {
                     const cintas = getState().cosecha.cintas;
                     const cinta_select = getState().cosecha.cinta_select;
@@ -285,7 +285,6 @@ export const searchaDataByCintasSemana = () => async (dispatch, getState) => {
                         'Authorization': token //token,
                     }
                 });
-
                 //console.log(await respuesta.data);
                 if (respuesta.data.code === 200) {
                     await dispatch({type: SET_CINTAS, payload: respuesta.data.cintas.map(item => (item.recobro))});
