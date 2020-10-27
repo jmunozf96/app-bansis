@@ -10,8 +10,7 @@ import {
     setDataHacienda, setDefaultCintas
 } from "../../reducers/cosecha/cosechaDucks";
 import CosechaRecobro from "./CosechaRecobro";
-import ComponentOptions from "../../components/ComponentOptions";
-import {API_LINK} from "../../constants/helpers";
+import OptionsHaciendas from "../../components/Global/OptionsHaciendas";
 
 export default function CosechaBalanza() {
     const dispatch = useDispatch();
@@ -20,8 +19,6 @@ export default function CosechaBalanza() {
     const build = useSelector(state => state.cosecha.build);
     const hacienda = useSelector(state => state.cosecha.hacienda);
     //const credential = useSelector(state => state.login.credential);
-
-    const api_haciendas = `${API_LINK}/bansis-app/index.php/haciendas-select`;
 
     const conectarse = () => {
         dispatch(prepareData(true));
@@ -59,12 +56,9 @@ export default function CosechaBalanza() {
                             <div className="card-body">
                                 <div className="row">
                                     <div className="col-md-12 mb-3">
-                                        <ComponentOptions
-                                            api={api_haciendas}
-                                            label="Hacienda"
-                                            name="hacienda"
-                                            value={hacienda !== null ? hacienda.descripcion : ""}
-                                            changeValue={changeOption}
+                                        <OptionsHaciendas
+                                            hacienda={hacienda}
+                                            changeOption={changeOption}
                                             disabled={false}
                                         />
                                     </div>

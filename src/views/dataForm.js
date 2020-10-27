@@ -1,6 +1,6 @@
 import React from "react";
-import Formulario from "../components/Formulario/Formulario";
-import FormComponent from "../components/Form";
+import Formulario from "../components/Tools/Formulario/Formulario";
+import FormComponent from "../components/Tools/Form";
 
 import {Col, Row} from "react-bootstrap";
 import {Alert} from "@material-ui/lab";

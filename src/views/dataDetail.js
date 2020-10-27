@@ -8,8 +8,8 @@ import {progressActions} from "../actions/progressActions";
 import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import axios from "axios";
-import AlertDialog from "../components/AlertDialog/AlertDialog";
-import SnackbarComponent from "../components/Snackbar/Snackbar";
+import AlertDialog from "../components/Tools/AlertDialog/AlertDialog";
+import SnackbarComponent from "../components/Tools/Snackbar/Snackbar";
 
 export default function DataDetail(props) {
     const {

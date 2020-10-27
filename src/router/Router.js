@@ -1,9 +1,9 @@
 import Home from "../views/home";
 
-import Empleado from "../views/hacienda/empleado";
-import FormEmpleado from "../views/hacienda/formEmpleado";
-import Labor from "../views/hacienda/labor";
-import FormLabor from "../views/hacienda/formLabor";
+import Empleado from "../views/hacienda_empleados/empleado";
+import FormEmpleado from "../views/hacienda_empleados/formEmpleado";
+import Labor from "../views/hacienda_labor/labor";
+import FormLabor from "../views/hacienda_labor/formLabor";
 import Hacienda from "../views/hacienda/hacienda";
 import FormHacienda from "../views/hacienda/formHacienda";
 
@@ -16,22 +16,22 @@ import FormGrupo from "../views/bodega/formGrupo";
 import FormMaterial from "../views/bodega/formMaterial";
 import Material from "../views/bodega/material";
 import Maps from "../views/hacienda/Mapa/maps";
-import FormEgreso from "../views/bodega/Egreso/Formulario/FormEgreso";
-import Egreso from "../views/bodega/Egreso";
-import FormularioLote from "../views/hacienda/Lote/Formulario/formLote";
-import Lote from "../views/hacienda/Lote";
-import FormSeccionLote from "../views/hacienda/LoteSeccion/Formulario/FormSeccionLote";
-import FormSeccionLabor from "../views/hacienda/LoteSeccionLabor/Formulario/FormSeccionLabor";
-import SeccionLoteLabor from "../views/hacienda/LoteSeccionLabor";
-import FormEnfunde from "../views/hacienda/AvanceLabor/Enfunde/Formulario/FormEnfunde";
-import EnfundeSemanal from "../views/hacienda/AvanceLabor/Enfunde/EnfundeSemanal";
-import {EnfundeLoteDetalle} from "../views/hacienda/AvanceLabor/Enfunde/EnfundeLoteDetalle";
-import EnfundeLoteroList from "../views/hacienda/AvanceLabor/Enfunde/EnfundeLoteroList";
+import FormEgreso from "../views/bodega_egreso/Formulario/FormEgreso";
+import Egreso from "../views/bodega_egreso";
+import FormularioLote from "../views/hacienda_lote/Formulario/formLote";
+import Lote from "../views/hacienda_lote";
+import FormSeccionLote from "../views/hacienda_lote_seccion/Formulario/FormSeccionLote";
+import FormSeccionLabor from "../views/hacienda_seccion_labor/Formulario/FormSeccionLabor";
+import SeccionLoteLabor from "../views/hacienda_seccion_labor";
+import FormEnfunde from "../views/hacienda_labor_avances/enfunde/Formulario/FormEnfunde";
+import EnfundeSemanal from "../views/hacienda_labor_avances/enfunde/EnfundeSemanal";
+import {EnfundeLoteDetalle} from "../views/hacienda_labor_avances/enfunde/EnfundeLoteDetalle";
+import EnfundeLoteroList from "../views/hacienda_labor_avances/enfunde/EnfundeLoteroList";
 import Page404 from "../components/Errors/404 Page";
-import FormUsuario from "../views/seguridad/Usuario/FormUsuario";
-import FormRecursosUsuario from "../views/seguridad/Recursos/FormRecursosUsuario";
-import ReporteEnfunde from "../views/hacienda/Informes/RepEnfunde";
-import DashboardEnfunde from "../views/hacienda/Informes/DashboardEnfunde";
+import FormUsuario from "../views/system_seguridad/Usuario/FormUsuario";
+import FormRecursosUsuario from "../views/system_seguridad/Recursos/FormRecursosUsuario";
+import ReporteEnfunde from "../views/hacienda_labor_avances/enfunde/Informe/RepEnfunde";
+import DashboardEnfunde from "../views/hacienda_labor_avances/enfunde/Informe/DashboardEnfunde";
 import Cosecha from "../views/cosecha/Cosecha";
 
 export const routes = [
@@ -148,11 +148,11 @@ export const routes = [
         component: Cosecha
     },
     {
-        path: "/seguridad/usuario/:idmodulo",
+        path: "/system_seguridad/usuario/:idmodulo",
         component: FormUsuario
     },
     {
-        path: "/seguridad/usuario/modulo-acceso/:idmodulo",
+        path: "/system_seguridad/usuario/modulo-acceso/:idmodulo",
         component: FormRecursosUsuario
     },
     {

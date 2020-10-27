@@ -1,5 +1,5 @@
 import React from "react";
-import Menu from "../components/Menu"
+import Menu from "../components/Tools/Menu"
 //import LinearProgress from "@material-ui/core/LinearProgress";
 import {Container} from "react-bootstrap";
 

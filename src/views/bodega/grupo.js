@@ -4,8 +4,8 @@ import {useDispatch} from "react-redux";
 import {progressActions} from "../../actions/progressActions";
 
 import {useHistory} from "react-router-dom";
-import TableForm from "../../components/Table";
-import TableDetail from "../../components/TableDetalle";
+import TableForm from "../../components/Tools/Table";
+import TableDetail from "../../components/Tools/TableDetalle";
 import DataDetail from "../dataDetail";
 import {editFormAction} from "../../actions/statusFormAction";
 import {clearGrupoFormAction} from "../../actions/bodega/grupoActions";

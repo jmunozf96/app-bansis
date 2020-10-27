@@ -5,10 +5,10 @@ import {API_LINK, API_XASS_PRIMO, _saveApi, _configStoreApi, API_XASS_SOFCA} fro
 import {useDispatch, useSelector} from "react-redux";
 import {progressActions} from "../../actions/progressActions";
 
-import InputSearch from "../../components/InputSearch";
-import SimpleTableUI from "../../components/TableUI";
-import ConfirmationDialog from "../../components/ConfirmationDialog";
-import SnackbarComponent from "../../components/Snackbar";
+import InputSearch from "../../components/Tools/InputSearch";
+import SimpleTableUI from "../../components/Tools/TableUI";
+import ConfirmationDialog from "../../components/Tools/ConfirmationDialog";
+import SnackbarComponent from "../../components/Tools/Snackbar";
 
 import {TableCell, TableRow} from "@material-ui/core";
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import TableForm from "../../components/Table";
+import TableForm from "../../components/Tools/Table";
 import {API_LINK} from "../../constants/helpers";
 import {Link} from "react-router-dom";
 import {Badge, Button, ButtonGroup, Col, Container, Row} from "react-bootstrap";
@@ -15,8 +15,8 @@ import {progressActions} from "../../actions/progressActions";
 
 import moment from "moment";
 import 'moment/locale/es';
-import SnackbarComponent from "../../components/Snackbar/Snackbar";
-import AlertDialog from "../../components/AlertDialog/AlertDialog";
+import SnackbarComponent from "../../components/Tools/Snackbar/Snackbar";
+import AlertDialog from "../../components/Tools/AlertDialog/AlertDialog";
 import qs from "qs";
 
 export default function Material() {

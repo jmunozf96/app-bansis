@@ -1,11 +1,11 @@
 import React, {useState} from "react";
-import CosechaCintasSelect from "./CosechaCintasSelect";
+import CosechaCintasSelect from "../../components/app/cosecha/CosechaCintasSelect";
 import {useDispatch, useSelector} from "react-redux";
-import CosechaChart from "./CosechaChart";
-import CosechaDetalle from "./CosechaDetalle";
-import CosechaCajasDia from "./CosechaCajasDia";
+import CosechaChart from "../../components/app/cosecha/CosechaChart";
+import CosechaDetalle from "../../components/app/cosecha/CosechaDetalle";
+import CosechaCajasDia from "../../components/app/cosecha/CosechaCajasDia";
 import {prepareData, searchData} from "../../reducers/cosecha/cosechaDucks";
-import CosechaCintaRecobro from "./CosechaCintaRecobro";
+import CosechaCintaRecobro from "../../components/app/cosecha/CosechaCintaRecobro";
 
 export default function CosechaRecobro() {
     const dispatch = useDispatch();
