@@ -309,6 +309,7 @@ export const searchaDataByCintasSemana = () => async (dispatch, getState) => {
                                 cs_enfunde: data_enfunde_caidas.enfunde,
                                 cs_caidas: data_enfunde_caidas.caidas,
                                 cs_cosecha_inicial: data_enfunde_caidas.cosecha_inicial,
+                                cs_coordenadas: data_enfunde_caidas.coordenadas,
                                 pesando: false
                             }
                         })
@@ -377,7 +378,8 @@ export const addCosechaLoteCinta = (data) => (dispatch, getState) => {
                         ...data,
                         cs_enfunde: data_enfunde_caidas.enfunde,
                         cs_caidas: data_enfunde_caidas.caidas,
-                        cs_cosecha_inicial: data_enfunde_caidas.cosecha_inicial
+                        cs_cosecha_inicial: data_enfunde_caidas.cosecha_inicial,
+                        cs_coordenadas: data_enfunde_caidas.coordenadas
                     });
                     dispatch({type: SET_ADD_COSECHA, payload: cosecha});
                 }
@@ -393,7 +395,8 @@ export const addCosechaLoteCinta = (data) => (dispatch, getState) => {
             ...data,
             cs_enfunde: data_enfunde_caidas.enfunde,
             cs_caidas: data_enfunde_caidas.caidas,
-            cs_cosecha_inicial: data_enfunde_caidas.cosecha_inicial
+            cs_cosecha_inicial: data_enfunde_caidas.cosecha_inicial,
+            cs_coordenadas: data_enfunde_caidas.coordenadas
         };
 
         dispatch({type: SET_ADD_COSECHA, payload: [data_cinta]});
@@ -416,15 +419,19 @@ const searchEnfunde_MatasCaidas = (data, cintas) => {
     let enfunde = 0;
     let caidas = 0;
     let cosecha_inicial = 0;
+    let coordenadas = null;
 
     const status_lote = (item) => (item.lote === data.cs_seccion);
 
     if (cintas.length > 0) {
         const filter_lote = cintas[0].data.lotes.filter(item => status_lote(item));
-        enfunde = filter_lote.reduce((total, item) => total + item.enfunde, 0);
-        caidas = filter_lote.reduce((total, item) => total + item.caidas, 0);
-        cosecha_inicial = filter_lote.reduce((total, item) => total + item.cortado, 0);
+        if (filter_lote.length > 0) {
+            enfunde = filter_lote.reduce((total, item) => total + item.enfunde, 0);
+            caidas = filter_lote.reduce((total, item) => total + item.caidas, 0);
+            cosecha_inicial = filter_lote.reduce((total, item) => total + item.cortado, 0);
+            coordenadas = filter_lote[0].coordenadas;
+        }
     }
-    return data = {enfunde, caidas, cosecha_inicial};
+    return data = {enfunde, caidas, cosecha_inicial, coordenadas};
 };
 

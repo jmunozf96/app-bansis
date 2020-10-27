@@ -6,6 +6,7 @@ import CosechaDetalle from "../../components/app/cosecha/CosechaDetalle";
 import CosechaCajasDia from "../../components/app/cosecha/CosechaCajasDia";
 import {prepareData, searchData} from "../../reducers/cosecha/cosechaDucks";
 import CosechaCintaRecobro from "../../components/app/cosecha/CosechaCintaRecobro";
+import CosechaMapa from "../../components/app/cosecha/CosechaMapa";
 
 export default function CosechaRecobro() {
     const dispatch = useDispatch();
@@ -13,6 +14,7 @@ export default function CosechaRecobro() {
     const cintas = useSelector(state => state.cosecha.cintas);
 
     const [showModalCajas, setShowModalCajas] = useState(false);
+    const [showModalMapa, setShowModalMapa] = useState(false);
 
     const addCintas = () => {
         dispatch(prepareData(true));
@@ -50,13 +52,20 @@ export default function CosechaRecobro() {
                 </div>
                 <div className="col-12 mt-3">
                     <ComponentCard>
-                        <div className="col-12 d-flex justify-content-center">
+                        <div className="col-6">
                             <button className="btn btn-primary btn-lg btn-block"
                                     onClick={() => setShowModalCajas(true)}>
                                 <i className="fa fa-eye"/> Visualizar Cajas del día
                             </button>
                         </div>
                         {showModalCajas && <CosechaCajasDia show={showModalCajas} setShow={setShowModalCajas}/>}
+                        <div className="col-6">
+                            <button className="btn btn-dark btn-lg btn-block"
+                                    onClick={() => setShowModalMapa(true)}>
+                                <i className="fas fa-map-marker-alt"/> Visualizar Mapa Hacienda
+                            </button>
+                        </div>
+                        {showModalMapa && <CosechaMapa show={showModalMapa} setShow={setShowModalMapa}/>}
                     </ComponentCard>
                 </div>
                 {cinta !== '' &&

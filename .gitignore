@@ -13,6 +13,9 @@
 # production
 /build
 
+# maps
+/public/MapaHacienda
+
 # misc
 .DS_Store
 .env.local
