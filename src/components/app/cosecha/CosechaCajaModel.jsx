@@ -4,7 +4,7 @@ import 'moment/locale/es';
 
 export default function CosechaCajaModel(props) {
     const {data = null} = props;
-    console.log(data);
+
     return (
         <>
             {data &&
