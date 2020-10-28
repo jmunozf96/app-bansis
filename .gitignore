@@ -13,11 +13,7 @@
 # production
 /build
 
-<<<<<<< HEAD
 # mapas
-=======
-# maps
->>>>>>> 04843f21800a64c00537ef015b0cef174b191da7
 /public/MapaHacienda
 
 # misc
