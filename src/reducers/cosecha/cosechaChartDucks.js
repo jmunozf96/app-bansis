@@ -157,9 +157,12 @@ export const updateDataChart = (data) => (dispatch, getState) => {
         if (encontro) {
             cinta_data_chart.cortados.data[index] += parseInt(data.cs_cortados);
 
-            const no_cero = (data1, data2) => (parseInt(data1) - parseInt(data2) === 0);
-            if (!no_cero(cinta_data_chart.saldos.data[index], data.cs_cortados))
+            const no_cero = (data1, data2) => ((parseInt(data1) - parseInt(data2)) >= 0);
+            if (no_cero(cinta_data_chart.saldos.data[index], data.cs_cortados)){
                 cinta_data_chart.saldos.data[index] -= parseInt(data.cs_cortados);
+            }else{
+                cinta_data_chart.saldos.data[index] = 0;
+            }
 
             const nw_data = {
                 ...cinta_filter[0],

@@ -188,7 +188,7 @@ export const listenChanel = () => (dispatch, getState) => {
         window.Echo = new Echo({
             broadcaster: 'pusher',
             key: 'ASDASD123',
-            wsHost: '192.168.191.1',
+            wsHost: '192.168.191.94',
             wsPort: 6001,
             wssPort: 6001,
             disableStats: true,
@@ -303,6 +303,7 @@ export const searchaDataByCintasSemana = () => async (dispatch, getState) => {
                             const cintas = getState().cosecha.cintas_data.filter(item => status_cinta(item));
                             const data_enfunde_caidas = searchEnfunde_MatasCaidas(data, cintas);
 
+                            dispatch(updateDataChart(data));
                             return {
                                 ...data,
                                 cs_enfunde: data_enfunde_caidas.enfunde,
@@ -370,6 +371,7 @@ export const addCosechaLoteCinta = (data) => (dispatch, getState) => {
                         })
                     });
 
+                    dispatch(updateDataChart(nw_data));
                 } else {
                     //Nuevo item
                     let cosecha = [...item.cosecha.map(item => ({...item, pesando: false}))];
@@ -381,8 +383,9 @@ export const addCosechaLoteCinta = (data) => (dispatch, getState) => {
                         cs_coordenadas: data_enfunde_caidas.coordenadas
                     });
                     dispatch({type: SET_ADD_COSECHA, payload: cosecha});
+
+                    dispatch(updateDataChart(data));
                 }
-                dispatch(updateDataChart(data));
                 dispatch(updateStorage());
                 return;
             } else {
