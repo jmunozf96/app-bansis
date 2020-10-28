@@ -1,8 +1,8 @@
 import React from 'react';
-import ComponentMenuNavbar from "./components/ComponentMenuNavbar";
+import MenuNavbar from "./components/MenuNavbar";
 
 import {BrowserRouter as Router} from "react-router-dom";
-import RouterConfig from "./RouterConfig";
+import RouterConfig from "./router/RouterConfig";
 //import Footer from "./components/Footer";
 
 //Redux
@@ -12,9 +12,9 @@ import {Provider} from "react-redux";
 function App() {
     return (
         <Provider store={store}>
-            <Router basename="bansis">
+            <Router basename="bansis-web/">
                 <header>
-                    <ComponentMenuNavbar/>
+                    <MenuNavbar/>
                 </header>
                 <div style={{marginTop: "2.5rem"}}>
                     <RouterConfig/>

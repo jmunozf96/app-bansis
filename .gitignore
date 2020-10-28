@@ -1,6 +1,6 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-/src/utils/constants.js
+/src/constants/helpers.js
 
 # dependencies
 /node_modules
@@ -13,7 +13,11 @@
 # production
 /build
 
+<<<<<<< HEAD
 # mapas
+=======
+# maps
+>>>>>>> 04843f21800a64c00537ef015b0cef174b191da7
 /public/MapaHacienda
 
 # misc

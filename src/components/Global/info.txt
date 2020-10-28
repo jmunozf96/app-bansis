@@ -1,0 +1,9 @@
+En esta carpeta se encuentran los componentes globales que seran reutilizados en toda la aplicación.
+
+-Hacienda
+-SeccionLotes
+-Bodegas
+-Materiales
+-GrupoMateriales
+-Empleados
+-GruposEmpleado
