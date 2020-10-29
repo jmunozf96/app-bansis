@@ -6,11 +6,21 @@ import CosechaCajaModel from "./CosechaCajaModel";
 import axios from "axios";
 
 export default function CosechaCajasDia({show, setShow}) {
+    const [load, setLoad] = useState(true);
+    const [cajas, setCajas] = useState([]);
+
+    const closeModal = () => {
+        setShow(false);
+        setLoad(false);
+        setCajas([]);
+    };
+
     return (
         <Modal
             show={show}
             animation={true}
             centered={true}
+            backdrop="static"
             scrollable={true}
             size="lg"
             onHide={() => setShow(false)}
@@ -21,10 +31,16 @@ export default function CosechaCajasDia({show, setShow}) {
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <CajasDia/>
+                <CajasDia
+                    load={load}
+                    setLoad={setLoad}
+                    cajas={cajas}
+                    setCajas={setCajas}
+                />
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={() => setShow(false)}>
+                <Button variant="secondary" disabled={load}
+                        onClick={() => !load ? closeModal() : console.error("Espere un momento...")}>
                     Salir
                 </Button>
             </Modal.Footer>
@@ -32,11 +48,9 @@ export default function CosechaCajasDia({show, setShow}) {
     )
 }
 
-const CajasDia = () => {
+const CajasDia = ({load, setLoad, cajas, setCajas}) => {
     const hacienda = useSelector(state => state.cosecha.hacienda);
     const fecha = useSelector(state => state.cosecha.fecha);
-    const [load, setLoad] = useState(true);
-    const [cajas, setCajas] = useState([]);
 
     useEffect(() => {
         if (load) {
@@ -57,8 +71,7 @@ const CajasDia = () => {
                 }
             })();
         }
-    }, [hacienda, load, fecha]);
-
+    }, [hacienda, load, fecha, setCajas, setLoad]);
 
     if (load) {
         return (
@@ -70,7 +83,6 @@ const CajasDia = () => {
             </div>
         )
     }
-
 
     return (
         <React.Fragment>
@@ -94,8 +106,7 @@ const CajasDia = () => {
                     <div className="col-12 m-0">
                         <div className="alert alert-danger">
                             <i className="fas fa-exclamation-circle"/> No se han encontrado datos de cajas pesadas el
-                            día de
-                            hoy.
+                            día de hoy.
                         </div>
                     </div>
                 }

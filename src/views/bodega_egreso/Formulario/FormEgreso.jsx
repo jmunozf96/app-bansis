@@ -66,7 +66,7 @@ export default function FormEgreso() {
     return (
         <ComponentFormularioBase
             icon='fas fa-street-view'
-            title={'Formulario bodega_egreso de Bodega'}
+            title={'Formulario de Bodega'}
             nuevo={nuevo}
             guardar={guardar}
             volver={Regresar}

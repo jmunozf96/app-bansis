@@ -6,6 +6,8 @@
     background-image: url("../../../assets/img/background.jpg");
     background-repeat: no-repeat;
     background-size: cover;
+    display: flex;
+    justify-content: center;
 
     &-opacidad {
       position: relative;
@@ -15,6 +17,50 @@
       opacity: 0.8;
     }
 
-  }
+    &__tracking-in-expand {
+      position: absolute;
+      margin: 0;
+      top: 25%;
+      z-index: 1000;
+      padding: 5px;
+      font-weight: bold;
+      color: white;
+      font-size: 80px;
+      -ms-transform: translateY(-25%);
+      transform: translateY(-25%);
+      text-shadow: 5px 5px 0px rgba(171, 171, 171, 0.27);
+      -webkit-animation: tracking-in-expand .7s cubic-bezier(.215, .61, .355, 1.000);
+      animation: tracking-in-expand .7s cubic-bezier(.215, .61, .355, 1.000);
+    }
 
+
+    @-webkit-keyframes tracking-in-expand {
+      0% {
+        letter-spacing: -.5em;
+        opacity: 0
+      }
+
+      40% {
+        opacity: .6
+      }
+
+      100% {
+        opacity: 1
+      }
+    }
+
+    @keyframes tracking-in-expand {
+      0% {
+        letter-spacing: -.5em;
+        opacity: 0
+      }
+      40% {
+        opacity: .6
+      }
+      100% {
+        opacity: 1
+      }
+    }
+
+  }
 }

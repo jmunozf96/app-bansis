@@ -11,6 +11,9 @@ export default function Menu() {
                 {/*<h1 className="icon"><DesktopMacOutlinedIcon/></h1>
                 <h1 className="title">BANSIS</h1>
                 <small>SISTEMA DE BANANO</small>*/}
+                {/*<div className="menu__imagen__tracking-in-expand">
+                    SISTEMA WEB BANANERO
+                </div>*/}
             </div>
         </Row>
     );

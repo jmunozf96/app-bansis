@@ -11,11 +11,13 @@ import loginDucks from "./seguridad/loginDucks";
 import accessModuleDucks from "./seguridad/accessModuleDucks";
 import cosechaDucks from "./cosecha/cosechaDucks";
 import cosechaChartDucks from "./cosecha/cosechaChartDucks";
+import progressDucks from "./progressDucks";
 
 export default combineReducers({
     login: loginDucks,
     accesoModulo: accessModuleDucks,
-    progressbar: progressNavReducers,
+    progressLoading: progressDucks,
+    progressbar: progressNavReducers, //Eliminar
     empleado: empleadoReducers,
     dataLabor: laborReducers,
     dataHacienda: haciendaReducers,

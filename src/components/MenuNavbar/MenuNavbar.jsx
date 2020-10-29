@@ -1,6 +1,5 @@
 import React from "react";
 import {Navbar, Nav, NavDropdown} from "react-bootstrap";
-import EqualizerIcon from '@material-ui/icons/Equalizer';
 import {APP_TITLE} from "../../constants/helpers";
 import {Link} from "react-router-dom"
 
@@ -9,6 +8,7 @@ import {useDispatch, useSelector} from "react-redux";
 import "./MenuNavbar.scss"
 import LinearProgress from "@material-ui/core/LinearProgress";
 import {clearAuthentication} from "../../reducers/seguridad/loginDucks";
+import profileDefault from "../../assets/img/profile.png"
 
 export default function MenuNavbar() {
     const dispatch = useDispatch();
@@ -16,6 +16,7 @@ export default function MenuNavbar() {
     const credentialCard = useSelector((state) => state.login.credential);
     const recursos = useSelector((state) => state.login.recursos);
 
+    const loadingProgress = useSelector(state => state.progressLoading);
     const progressbarStatus = useSelector((state) => state.progressbar.loading);
 
 
@@ -27,19 +28,19 @@ export default function MenuNavbar() {
         <>
             <Navbar className="menu-top py-1" collapseOnSelect expand="lg" bg="dark" variant="dark" fixed={"top"}>
                 <Navbar.Brand as={Link} to="/">
-                    <EqualizerIcon className="mt-n2"/> {APP_TITLE}
+                    <i className="fas fa-seedling"/> {APP_TITLE}
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="responsive-navbar-nav"/>
                 <Navbar.Collapse id="responsive-navbar-nav">
-                    {authentication !== '' && credentialCard ? (
+                    {authentication !== '' && credentialCard && recursos.length > 0 ? (
                         <>
                             <Nav className="mr-auto">
                                 <Nav.Link as={Link} to="/">Inicio</Nav.Link>
-                                {recursos && recursos.length > 0 && recursos.map((item, index) => (
+                                {recursos.map((item, index) => (
                                     <React.Fragment key={index}>
                                         {item.recurso.recurso_hijo.length > 0 &&
                                         <NavDropdown
-                                            title={`${item.recurso.nombre}`}
+                                            title={item.recurso.nombre}
                                             id="collasible-nav-dropdown"
                                         >
                                             {item.recurso.recurso_hijo.length > 0 && item.recurso.recurso_hijo.map((hijo1, index) => (
@@ -53,7 +54,9 @@ export default function MenuNavbar() {
                                                                 pathname: `${hijo2.ruta}/${(hijo2.id)}`,
                                                                 state: hijo2.id
                                                             }}
-                                                        >{hijo2.nombre}</NavDropdown.Item>
+                                                        >
+                                                            <i className="fas fa-caret-right"/> {hijo2.nombre}
+                                                        </NavDropdown.Item>
                                                     ))}
                                                     <NavDropdown.Divider/>
                                                 </React.Fragment>
@@ -68,14 +71,22 @@ export default function MenuNavbar() {
                                     <NavDropdown.Item
                                         eventKey="4.1"
                                         disabled>
-                                        {credentialCard.nombres} {credentialCard.apellidos}</NavDropdown.Item>
+                                        <img
+                                            src={profileDefault}
+                                            width="40" height="40"
+                                            style={{textAlign: "center", marginLeft: -5, marginRight: 5}}
+                                            className="rounded-circle" alt="profile"/>{" "}
+                                        {credentialCard.nombres} {credentialCard.apellidos}
+                                    </NavDropdown.Item>
                                     <NavDropdown.Divider/>
-                                    <NavDropdown.Item>Actualizar</NavDropdown.Item>
+                                    <NavDropdown.Item>
+                                        <i className="fas fa-user-edit"/> Actualizar
+                                    </NavDropdown.Item>
                                     <NavDropdown.Item
                                         as={Link}
                                         to="/login"
                                         onClick={logoutSite}>
-                                        Salir
+                                        <i className="fas fa-sign-out-alt"/> Salir
                                     </NavDropdown.Item>
                                 </NavDropdown>
                             </Nav>
@@ -88,8 +99,15 @@ export default function MenuNavbar() {
                     </Nav>}
                 </Navbar.Collapse>
             </Navbar>
-            {progressbarStatus &&
+            {(progressbarStatus) &&
             <LinearProgress color="secondary" style={{marginTop: "3rem", marginBottom: "-3rem"}}/>}
+            {loadingProgress.loading &&
+            <LinearProgress
+                variant="determinate"
+                color="secondary"
+                style={{marginTop: "3rem", marginBottom: "-3rem", height: 4}}
+                value={loadingProgress.progress}/>
+            }
         </>
     );
 }

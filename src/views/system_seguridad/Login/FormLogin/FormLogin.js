@@ -2,15 +2,16 @@ import React, {useEffect, useState} from "react";
 import {Alert, Col, Form, Row} from "react-bootstrap";
 import {
     FormControl,
-    Button, TextField, FormControlLabel, Checkbox
+    /*Button,*/ TextField, FormControlLabel, Checkbox
 } from "@material-ui/core";
-import VpnKeyIcon from '@material-ui/icons/VpnKey';
+//import VpnKeyIcon from '@material-ui/icons/VpnKey';
 
 import {useHistory} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 
 import "./FormLogin.scss"
-import {loginSystem} from "../../../../reducers/seguridad/loginDucks";
+import {loginSystem, setError, stateLoading} from "../../../../reducers/seguridad/loginDucks";
+import {loadingProgressBar} from "../../../../reducers/progressDucks";
 
 export default function FormLogin() {
     const history = useHistory();
@@ -24,12 +25,10 @@ export default function FormLogin() {
         password: '',
         getToken: true
     });
-    const [statusForm, setStatusForm] = useState({
-        status: false,
-        message: 'Credenciales Incorrectas'
-    });
 
+    const loading = useSelector(state => state.login.loading);
     const authentication = useSelector((state) => state.login.token);
+    const error_login = useSelector(state => state.login.error);
 
     //En caso de loguearse se debe dejar el token
     const dispatch = useDispatch();
@@ -64,13 +63,12 @@ export default function FormLogin() {
             const {user, password} = userAcount;
 
             if (!user || !password) {
-                setStatusForm({
-                    status: true,
-                    message: "Debe completar los campos..."
-                });
+                dispatch(setError(true, "Debe completar los campos..."));
                 return;
             }
 
+            dispatch(stateLoading(true));
+            dispatch(loadingProgressBar(true));
             dispatch(loginSystem(userAcount));
         }
     ;
@@ -82,16 +80,24 @@ export default function FormLogin() {
         >
             <Row>
                 <Col md={12}>
-                    {!statusForm.status ? (
-                            <Alert variant="primary">
-                                Ingrese sus credenciales.
-                            </Alert>
-                        ) :
-                        (
-                            <Alert variant="danger">
-                                {statusForm.message}.
-                            </Alert>
-                        )}
+                    {!error_login.status ?
+                        <React.Fragment>
+                            {!loading ?
+                                <Alert variant="primary">
+                                    <i className="fas fa-key"/> Ingrese sus credenciales.
+                                </Alert>
+                                :
+                                <Alert variant="warning">
+                                    Iniciando sesión, <b>espere un momento...</b>
+                                </Alert>
+                            }
+                        </React.Fragment>
+                        :
+
+                        <Alert variant="danger">
+                            <i className="fas fa-times"/> <b>Error, </b> {error_login.message}.
+                        </Alert>
+                    }
                     <FormControl>
                         <TextField
                             variant="outlined"
@@ -122,18 +128,14 @@ export default function FormLogin() {
                         control={<Checkbox value="remember" color="primary"/>}
                         label="Recordar"
                     />
+                    <p>En caso de problemas, contactar al <a href="mailto:astestadistica@pmb.vanet">administrador.</a>
+                    </p>
                 </Col>
-                <Col md={12} className="">
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        startIcon={<VpnKeyIcon/>}
-                        required
-                        fullWidth
-                    >
-                        Ingresar
-                    </Button>
+                <Col md={12} className="d-flex">
+                    <button type="submit" className="btn btn-success" disabled={loading}>
+                        {loading ? <i className="fas fa-spinner fa-spin"/> :
+                            <i className="fas fa-sign-in-alt"/>} Entrar
+                    </button>
                     {/*<Grid container>
                         <Grid item xs>
                             <Link href="#" variant="body2">

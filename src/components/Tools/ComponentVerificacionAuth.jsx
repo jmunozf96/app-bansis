@@ -7,7 +7,6 @@ import {checkModule, defaultAccess} from "../../reducers/seguridad/accessModuleD
 export default function ComponentVerificacionAuth({children}) {
     const authentication = useSelector((state) => state.login.token);
     //const credentialCard = useSelector((state) => state.login.credential);
-
     const dispatch = useDispatch();
     const {idmodulo} = useParams();
     const history = useHistory();
