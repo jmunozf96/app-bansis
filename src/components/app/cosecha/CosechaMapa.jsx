@@ -9,6 +9,11 @@ export default function CosechaMapa({show, setShow}) {
     const [dataMap, setDataMap] = useState([]);
     const [loadCoordenadas, setLoadCoordenadas] = useState(true);
     const [viewMapa, setViewMapa] = useState('');
+    const [reloadMap, setReloadMap] = useState(false);
+
+    const mapa = useCallback(() => {
+        return <Mapa coordenadas={dataMap}/>
+    }, [dataMap]);
 
     useEffect(() => {
         if (loadCoordenadas) {
@@ -30,19 +35,24 @@ export default function CosechaMapa({show, setShow}) {
                         })
                     }
                 });
-                setDataMap(nw_data)
+                setDataMap(nw_data);
+                setViewMapa(mapa);
+                setReloadMap(true);
             }
             setLoadCoordenadas(false);
         }
-    }, [cosecha, loadCoordenadas, setLoadCoordenadas]);
-
-    const mapa = useCallback(() => {
-        return <Mapa coordenadas={dataMap}/>
-    }, [dataMap]);
+    }, [cintas, cosecha, loadCoordenadas, setLoadCoordenadas, show, mapa]);
 
     useEffect(() => {
         setViewMapa(mapa);
     }, [show, mapa]);
+
+    useEffect(() => {
+        if (reloadMap) {
+            setViewMapa(mapa);
+            setReloadMap(false);
+        }
+    }, [reloadMap, mapa]);
 
     return (
         <Modal

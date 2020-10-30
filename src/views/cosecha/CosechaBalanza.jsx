@@ -32,6 +32,13 @@ export default function CosechaBalanza() {
         dispatch(buildApp(false));//Destruimos la app
         dispatch(setDataHacienda(null));
         dispatch(setDefaultCintas());//Seteamos las cintas seleccionadas
+
+        //Eliminamos el storage
+        const existe = JSON.parse(localStorage.getItem('_cintasSemanaLotes'));
+        if (existe) {
+            localStorage.removeItem('_cintasSemana');
+            localStorage.removeItem('_cintasSemanaLotes');
+        }
     };
 
     const changeOption = (e, data) => {
