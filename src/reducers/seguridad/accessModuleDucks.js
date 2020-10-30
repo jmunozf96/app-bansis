@@ -46,6 +46,13 @@ export const checkModule = (modulo, ruta) => async (dispatch, getState) => {
         if (status) {
             dispatch({type: SET_ACCESO, payload: true});
             return;
+        } else {
+            //Si se ha cambiado el codigo de algun modulo en el storage, retornar el codigo original al mismo.
+            const recursos = JSON.parse(localStorage.getItem('_recursos'));
+            if (recursos) {
+                localStorage.removeItem('_recursos');
+                localStorage.setItem('_recursos', JSON.stringify(respuesta.data.recursos));
+            }
         }
 
         dispatch({type: SET_ACCESO, payload: false});

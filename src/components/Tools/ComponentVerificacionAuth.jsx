@@ -19,14 +19,12 @@ export default function ComponentVerificacionAuth({children}) {
     useEffect(() => {
         if (stateCheckToken) {
             dispatch(checkToken());
-
             const ruta = (history.location.pathname).split(`/${idmodulo}`)[0];
             if (ruta !== "/") {
                 dispatch(checkModule(idmodulo, ruta));
             } else {
                 dispatch(defaultAccess(true));
             }
-
             setStateCheckToken(false);
         }
     }, [stateCheckToken, setStateCheckToken, dispatch, history, idmodulo]);

@@ -5,6 +5,7 @@ import {useSelector} from "react-redux";
 
 export default function CosechaMapa({show, setShow}) {
     const cosecha = useSelector(state => state.cosecha.cosecha);
+    const cintas = useSelector(state => state.cosecha.cintas);
     const [dataMap, setDataMap] = useState([]);
     const [loadCoordenadas, setLoadCoordenadas] = useState(true);
     const [viewMapa, setViewMapa] = useState('');
@@ -16,7 +17,11 @@ export default function CosechaMapa({show, setShow}) {
                 let hash = {};
                 const unique = data.filter(o => hash[o.title] ? false : hash[o.title] = true);
                 const nw_data = unique.map(item => {
-                    const cosecha_cintas = cosecha.filter(data => data.cs_seccion === item.title);
+                    const cosecha_cintas = cosecha.filter(data => data.cs_seccion === item.title)
+                        .map(item => ({
+                            ...item,
+                            color: cintas.filter(data => data.codigo === item.cs_color)[0]
+                        }));
                     return {
                         ...item, cintas: cosecha_cintas.sort(function (a, b) {
                             if (a.cs_color > b.cs_color) return 1;

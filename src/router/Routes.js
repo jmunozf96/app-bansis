@@ -33,6 +33,7 @@ import FormRecursosUsuario from "../views/system_seguridad/Recursos/FormRecursos
 import ReporteEnfunde from "../views/hacienda_labor_avances/enfunde/Informe/RepEnfunde";
 import DashboardEnfunde from "../views/hacienda_labor_avances/enfunde/Informe/DashboardEnfunde";
 import Cosecha from "../views/cosecha/Cosecha";
+import ReporteManosRecusadas from "../views/cosecha/Informe/ReporteManosRecusadas";
 
 export const routes = [
     {
@@ -148,11 +149,15 @@ export const routes = [
         component: Cosecha
     },
     {
-        path: "/system_seguridad/usuario/:idmodulo",
+        path: "/cosecha/reporte/manos-cosecha/:idmodulo",
+        component: ReporteManosRecusadas
+    },
+    {
+        path: "/seguridad/usuario/:idmodulo",
         component: FormUsuario
     },
     {
-        path: "/system_seguridad/usuario/modulo-acceso/:idmodulo",
+        path: "/seguridad/usuario/modulo-acceso/:idmodulo",
         component: FormRecursosUsuario
     },
     {

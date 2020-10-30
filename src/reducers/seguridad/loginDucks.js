@@ -1,7 +1,7 @@
 import {API_LINK} from "../../constants/helpers";
 import axios from "axios";
 import qs from "qs";
-import Cookies from "js-cookie"
+
 import {loadingProgressBar, uploadProgressBar} from "../progressDucks";
 
 const dataInicial = {
@@ -109,7 +109,7 @@ export const setCredentials = (credential) => async (dispatch) => {
 
             //Guardar en el localStorage
             await localStorage.setItem('_credentialUser', JSON.stringify({sub, nick, nombres, apellidos, idhacienda}));
-            await Cookies.set('_recursos', JSON.stringify(respuesta.data.recursos), {expires: 7});
+            await localStorage.setItem('_recursos', JSON.stringify(respuesta.data.recursos));
         }
     } catch (e) {
         console.error(e);
@@ -118,7 +118,6 @@ export const setCredentials = (credential) => async (dispatch) => {
 
 export const checkToken = () => async (dispatch, getState) => {
     const loguin = getState().login;
-
     if (loguin.token !== "" && loguin.logueado) {
         const url = `${API_LINK}/bansis/verifyToken`;
         const respuesta = await axios.post(url, null, {
@@ -154,7 +153,7 @@ export const loadCredentials = () => (dispatch, getState) => {
 export const loadStorageAuth = () => (dispatch, getState) => {
     const token_storage = JSON.parse(localStorage.getItem('_token'));
     const credential_storage = JSON.parse(localStorage.getItem('_credentialUser'));
-    const recursos = Cookies.get('_recursos');
+    const recursos = JSON.parse(localStorage.getItem('_recursos'));
 
     if (token_storage && credential_storage && recursos) {
         let token = getState().login.token;
@@ -162,21 +161,21 @@ export const loadStorageAuth = () => (dispatch, getState) => {
             dispatch({type: SET_LOGUEADO, payload: true});
             dispatch({type: SET_TOKEN, payload: token_storage});
             dispatch({type: SET_CREDENTIALS, payload: credential_storage});
-            dispatch({type: SET_RECURSOS, payload: JSON.parse(recursos)})
+            dispatch({type: SET_RECURSOS, payload: recursos})
         }
         return;
     }
 
     localStorage.removeItem('_token');
     localStorage.removeItem('_credentialUser');
-    Cookies.remove('_recursos');
+    localStorage.removeItem('_recursos');
     dispatch({type: SET_LOGUEADO, payload: false});
 };
 
 export const clearAuthentication = () => (dispatch) => {
     localStorage.removeItem('_token');
     localStorage.removeItem('_credentialUser');
-    Cookies.remove('_recursos');
+    localStorage.removeItem('_recursos');
 
     dispatch({type: SET_LOGUEADO, payload: false});
     dispatch({type: SET_TOKEN, payload: ""});

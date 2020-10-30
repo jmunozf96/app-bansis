@@ -1,6 +1,6 @@
 import React from "react";
 import {Route, Switch} from "react-router-dom";
-import {routes} from "./Router";
+import {routes} from "./Routes";
 
 import Login from "../views/system_seguridad/Login/login";
 import ComponentVerificacionAuth from "../components/Tools/ComponentVerificacionAuth";

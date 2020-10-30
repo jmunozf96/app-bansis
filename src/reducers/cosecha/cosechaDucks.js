@@ -90,7 +90,6 @@ export const setDataHacienda = (value) => (dispatch) => {
     });
 
     dispatch(setCanal());
-    dispatch(listenChanel());
 };
 
 export const setCanal = () => (dispatch, getState) => {
@@ -277,6 +276,9 @@ export const searchaDataByCintasSemana = () => async (dispatch, getState) => {
                     onDownloadProgress: function () {
                         dispatch(loadingData(false));
                         dispatch(searchData(false));
+
+                        //Empieza a escuchar el canal
+                        dispatch(listenChanel());
                     },
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',

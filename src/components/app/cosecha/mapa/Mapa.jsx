@@ -51,14 +51,14 @@ export default function Mapa({coordenadas}) {
                         <table className="table table-bordered text-center table-sm">
                             <thead>
                             <tr>
-                                <th width="40%">Cinta</th>
+                                <th width="50%">Cinta</th>
                                 <th>Cortados</th>
                             </tr>
                             </thead>
                             <tbody>
                             {item.cintas.length > 0 && item.cintas.map((cinta, i) =>
                                 <tr key={i}>
-                                    <td width="40%">{cinta.cs_color}</td>
+                                    <td width="50%">{cinta.color.color}</td>
                                     <td>{cinta.cs_cortados}</td>
                                 </tr>
                             )}
