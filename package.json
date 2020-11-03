@@ -17,6 +17,8 @@
     "apexcharts": "^3.19.0",
     "axios": "^0.19.2",
     "bootstrap": "^4.4.1",
+    "daterangepicker": "^3.1.0",
+    "jquery": "^3.5.1",
     "js-cookie": "^2.2.1",
     "laravel-echo": "^1.9.0",
     "leaflet": "^1.6.0",
