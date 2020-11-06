@@ -1,7 +1,9 @@
 import React from "react";
 import ApexChart from "../../../Tools/ApexChart/ApexChart";
+import {transformarDataDanosLote} from "./ChartPrepareData";
 
-export default function ChartLotesManos({data}) {
+export default function CharLoteDanos({id, alias, danos}) {
+    const data = transformarDataDanosLote(id, danos);
 
     return (
         <ApexChart

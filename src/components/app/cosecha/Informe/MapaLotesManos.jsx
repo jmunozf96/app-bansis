@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import {Map, TileLayer, Tooltip} from "react-leaflet";
 import {CircleMarker} from "react-leaflet/es";
+import {calcularIntensidadMapa} from "./HelpersInforme";
 
 export default function MapaLotesManos({lotes}) {
     const [zoom, setZoom] = useState(16);
@@ -16,12 +17,16 @@ export default function MapaLotesManos({lotes}) {
         setLongitud(e.latlng.lng);
     };
 
+    const intensidad = (cantidad) => {
+        return calcularIntensidadMapa(cantidad);
+    };
+
     return (
         <Map
             center={[latitud, longitud]}
             zoom={zoom}
             className="id-mapa-hacienda"
-            style={{height: 800}}
+            style={{height: 650}}
             onClick={(e) => onClickCoordenadas(e)}
             onZoom={(e) => onChangeZoom(e)}
         >
@@ -32,14 +37,14 @@ export default function MapaLotesManos({lotes}) {
                 //url="http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
             />
             <React.Fragment>
-                {lotes.length > 0 && lotes.map((item, i) =>
+                {lotes.length > 0 && lotes.filter(item => item.cantidad > 0).map((item, i) =>
                     <CircleMarker
                         key={i}
                         center={{lat: `${item.lat}`, lng: `${item.lng}`}}
                         fillColor="red"
                         color="red"
                         fillOpacity={0.5}
-                        radius={+item.cantidad * 0.20}>
+                        radius={intensidad(+item.cantidad)}>
                         <Tooltip direction='right' offset={[8, -15]} opacity={1} permanent>
                             <span><b>{item.alias}</b></span>
                         </Tooltip>

@@ -2,20 +2,31 @@ import React, {useCallback, useEffect, useState} from "react";
 import {API_LINK} from "../../../../constants/helpers";
 import axios from "axios";
 import {Checkbox, FormControlLabel} from "@material-ui/core";
+import {convertDataHttp_ConsolidarDanos} from "./HelpersInforme";
 
-export default function DanosHacienda({desde, hasta, dataFilter, load}) {
-    const [danos, setDanos] = useState([]);
+
+export default function DanosHacienda({danos, setDanos, desde, hasta, dataFilter, load}) {
     const [loadData, setLoadData] = useState(true);
+    const [selectAll, setSelectAll] = useState(true);
 
     useEffect(() => {
         setLoadData(load);
     }, [load]);
 
     useEffect(() => {
+        setSelectAll(true);
+        setDanos([]);
+        return () => {
+            setDanos([]);
+        }
+    }, [setDanos]);
+
+    useEffect(() => {
         if (loadData) {
+            setSelectAll(true);
             (async () => {
                 try {
-                    const url = `${API_LINK}/bansis-app/index.php/cosecha/informe/manos-recusadas/danos?fecha=${desde}`;
+                    const url = `${API_LINK}/bansis-app/index.php/cosecha/informe/manos-recusadas/danos?desde=${desde}&hasta=${hasta}`;
                     const respuesta = await axios.get(url);
                     const {code} = respuesta.data;
                     if (code === 200)
@@ -26,13 +37,13 @@ export default function DanosHacienda({desde, hasta, dataFilter, load}) {
             })();
             setLoadData(false);
         }
-    }, [loadData, desde, hasta]);
+    }, [loadData, desde, hasta, setDanos]);
 
     const changeValue = useCallback((e, id) => {
         const status = (data) => (data.id === id);
-        const data = [...danos.map(data => status(data) ? ({...data, selected: !data.selected}) : data)];
+        const data = danos.map((data) => status(data) ? ({...data, selected: !data.selected}) : data);
         setDanos(data);
-    }, [danos]);
+    }, [danos, setDanos]);
 
     useEffect(() => {
         if (localStorage.getItem('_dataManos')) {
@@ -49,24 +60,40 @@ export default function DanosHacienda({desde, hasta, dataFilter, load}) {
                 item['manos_recusadas'] = nw_manos_recusadas;
             });
 
-            dataFilter([...data.map(item => ({
-                id: item.id,
-                alias: item.alias,
-                lat: item.latitud,
-                lng: item.longitud,
-                cantidad: data.filter(data => data.id === item.id)[0]['manos_recusadas']
-                    .reduce((total, data) => total + +data.cantidad, 0)
-            }))])
+            dataFilter(convertDataHttp_ConsolidarDanos(data))
         }
     }, [danos, dataFilter]);
 
+    const unSelectAll = () => {
+        setSelectAll(!selectAll);
+        const data = danos.map((data) => !data.disabled ? {...data, selected: !selectAll} : data);
+        setDanos(data);
+    };
+
     if (loadData) {
-        return <h1>Cargando danos...</h1>
+        return (
+            <div className="col-12 text-center">
+                <i className="fas fa-spinner fa-spin fa-10x"/>
+            </div>
+        )
     }
 
     return (
-        <React.Fragment>
+        <div className="col-12">
             <div className="row">
+                <div className="col-6">
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={selectAll}
+                                onChange={() => unSelectAll()}
+                                name={'SELECCIONAR TODOS'}
+                                color="secondary"
+                            />
+                        }
+                        label={'SELECCIONAR TODOS'}
+                    />
+                </div>
                 {danos.length > 0 && danos.map((data, i) =>
                     <div className="col-6" key={i}>
                         <FormControlLabel
@@ -75,7 +102,8 @@ export default function DanosHacienda({desde, hasta, dataFilter, load}) {
                                     checked={data.selected}
                                     onChange={e => changeValue(e, data.id)}
                                     name={data.nombre}
-                                    color="secondary"
+                                    color="primary"
+                                    disabled={data.disabled}
                                 />
                             }
                             label={data.nombre}
@@ -83,6 +111,6 @@ export default function DanosHacienda({desde, hasta, dataFilter, load}) {
                     </div>
                 )}
             </div>
-        </React.Fragment>
+        </div>
     )
 }
