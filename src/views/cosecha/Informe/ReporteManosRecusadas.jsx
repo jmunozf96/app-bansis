@@ -17,14 +17,21 @@ import ListadoLotes from "../../../components/app/cosecha/Informe/ListadoLotes";
 import emptyData from "../../../assets/img/svg/notfound.svg"
 import ModalBase from "../../../components/app/cosecha/Informe/ModalBase";
 import ChartLoteDanos from "../../../components/app/cosecha/Informe/ChartLoteDanos";
+import ChartDanos from "../../../components/app/cosecha/Informe/ChartDanos";
+import {useDispatch, useSelector} from "react-redux";
+import {setDesde, setHacienda, setHasta} from "../../../reducers/cosecha/manosRecusadasDucks";
+import OptionsHaciendas from "../../../components/Global/OptionsHaciendas";
 
 export default function () {
     const [danos, setDanos] = useState([]);
     const [data, setData] = useState([]);
     const [viewMap, setViewMap] = useState(true);
-    const [viewChart, setViewChart] = useState(false);
+    const [viewChartLotes, setViewChartLotes] = useState(false);
+    const [viewChartDanos, setViewChartDanos] = useState(false);
     const [view, setView] = useState('');
 
+    const dispatch = useDispatch();
+    const hacienda = useSelector(state => state.manosRecusadas.hacienda);
     const [startDate, setStartDate] = useState(moment().format("DD/MM/YYYY"));
     const [endDate, setEndDate] = useState(moment().format("DD/MM/YYYY"));
 
@@ -45,6 +52,12 @@ export default function () {
         status: false,
         messagge: `Buscando registros entre: <b>${startDate} - ${endDate}</b>...`
     });
+
+    //Efecto para cambio de Fechas en Redux
+    useEffect(() => {
+        dispatch(setDesde(startDate));
+        dispatch(setHasta(endDate));
+    }, [dispatch, startDate, endDate]);
 
     useEffect(() => {
         setDataModal({show: false, view: ''});
@@ -68,19 +81,26 @@ export default function () {
     }, [startDate, endDate]);
 
     useEffect(() => {
-        setLoadData(true);
-    }, [startDate, endDate]);
+        setError({status: false, messagge: `Buscando registros entre: <b>${startDate} - ${endDate}</b>...`});
+        if (!hacienda) {
+            setData([]); //Limpiamos
+            removeLocalStorage('_dataManos');
+            setLoadDanos(false);
+        } else {
+            setLoadData(true);
+        }
+    }, [hacienda, startDate, endDate]);
 
     useEffect(() => {
-        if (loadData) {
+        if (loadData && hacienda) {
             setLoadDanos(false); //Seteamos para actualizar cada que se realiza una busqueda
             (async () => {
                 try {
-                    const respuesta = await axios.get(`${API_LINK}/bansis-app/index.php/cosecha/informe/manos-recusadas/1?desde=${startDate}&hasta=${endDate}`);
+                    const respuesta = await axios.get(`${API_LINK}/bansis-app/index.php/cosecha/informe/manos-recusadas/${hacienda.id}?desde=${startDate}&hasta=${endDate}`);
                     const {code} = respuesta.data;
 
                     if (code === 200) {
-                        console.log('Respuesta Http Data: ', respuesta.data.datos);
+                        //console.log('Respuesta Http Data: ', respuesta.data.datos);
                         if (respuesta.data.datos.length > 0) {
                             localStorage.setItem('_dataManos', JSON.stringify(respuesta.data.datos));
                             let data = convertDataHttp_ConsolidarDanos(respuesta.data.datos);
@@ -97,7 +117,7 @@ export default function () {
             })();
             setLoadData(false);
         }
-    }, [loadData, startDate, endDate, error, error_emptyData]);
+    }, [hacienda, loadData, startDate, endDate, error, error_emptyData]);
 
     const changeStatusModal = useCallback((id, alias) => {
         setShowDanosLote({status: true, id, alias});
@@ -118,32 +138,53 @@ export default function () {
 
     useEffect(() => {
         //Poner el mapa por defecto
-        if (!viewChart) {
+        if (!viewChartLotes && !viewChartDanos) {
+            //Mapa update
             setView(<MapaLotesManos lotes={data}/>);
-        } else {
+        } else if (!viewChartDanos) {
+            //Lote Update
             setView(<ChartLotesManos data={transformarDataLotes(data, changeStatusModal)}/>);
+        } else {
+            //Danos Update
+            setView(<ChartDanos danos={danos.filter(item => item.selected)} danosLotes={data}/>);
         }
-    }, [data, viewChart, changeStatusModal]);
+    }, [danos, data, viewChartLotes, viewChartDanos, changeStatusModal]);
 
     const selectMapa = useCallback(() => {
-        if (viewMap) {
-            setView('');
-        } else {
-            setView(<MapaLotesManos lotes={data}/>);
-        }
-        if (viewChart) setViewChart(false);
-        setViewMap(!viewMap);
-    }, [viewMap, viewChart, data]);
+        setView(<MapaLotesManos lotes={data}/>);
+        if (viewChartLotes) setViewChartLotes(false);
+        if (viewChartDanos) setViewChartDanos(false);
+        setViewMap(true);
+    }, [viewChartLotes, viewChartDanos, data]);
 
-    const selectChart = useCallback(() => {
-        if (viewChart) {
+    const selectChartLotes = useCallback(() => {
+        if (viewChartLotes) {
             setView('');
+            setViewMap(true);
         } else {
             setView(<ChartLotesManos data={transformarDataLotes(data, changeStatusModal)}/>);
+            setViewMap(false);
         }
-        if (viewMap) setViewMap(false);
-        setViewChart(!viewChart);
-    }, [viewChart, viewMap, data, changeStatusModal]);
+        if (viewChartDanos) setViewChartDanos(false);
+        setViewChartLotes(!viewChartLotes);
+    }, [viewChartLotes, viewChartDanos, data, changeStatusModal]);
+
+    const selectChartDanos = useCallback(() => {
+        if (viewChartDanos) {
+            setView('');
+            setViewMap(true);
+        } else {
+            setView(<ChartDanos danos={danos.filter(item => item.selected)} danosLotes={data}/>);
+            setViewMap(false);
+        }
+        if (viewChartLotes) setViewChartLotes(false);
+        setViewChartDanos(!viewChartDanos);
+    }, [danos, viewChartDanos, viewChartLotes, data]);
+
+    const changeOption = (e, data) => {
+        const data_option = data['data-json'] !== undefined ? data['data-json'] : null;
+        dispatch(setHacienda(data_option));
+    };
 
     return (
         <React.Fragment>
@@ -153,21 +194,28 @@ export default function () {
                         <div className="card">
                             <div className="card-body">
                                 <div className="row">
-                                    <div className="col-12">
+                                    <div className="col-md-12">
+                                        <OptionsHaciendas
+                                            hacienda={hacienda}
+                                            changeOption={changeOption}
+                                            disabled={false}
+                                        />
+                                    </div>
+                                    {hacienda &&
+                                    <div className="col-12 mt-3">
                                         <DateRangePicker
                                             start={setStartDate}
                                             end={setEndDate}
                                         />
-                                    </div>
+                                    </div>}
                                 </div>
                                 <hr/>
+                                {hacienda &&
                                 <div className="row">
                                     {(!error.status && loadDanos) || data.length > 0 ?
                                         <DanosHacienda
                                             danos={danos}
                                             setDanos={setDanos}
-                                            desde={startDate}
-                                            hasta={endDate}
                                             load={loadDanos}
                                             dataFilter={setData}
                                         />
@@ -179,7 +227,7 @@ export default function () {
                                             />
                                         </div>
                                     }
-                                </div>
+                                </div>}
                             </div>
                         </div>
                     </div>
@@ -196,10 +244,17 @@ export default function () {
                                                     >
                                                         <i className="fas fa-map-marked-alt"/> Mapa Geografico
                                                     </button>
-                                                    <button className={`btn btn-primary ${viewChart ? 'active' : ''}`}
-                                                            onClick={() => selectChart()}
+                                                    <button
+                                                        className={`btn btn-primary ${viewChartLotes ? 'active' : ''}`}
+                                                        onClick={() => selectChartLotes()}
                                                     >
-                                                        <i className="fas fa-chart-bar"/> Estadisticas
+                                                        <i className="fas fa-chart-bar"/> Lotes
+                                                    </button>
+                                                    <button
+                                                        className={`btn btn-danger ${viewChartDanos ? 'active' : ''}`}
+                                                        onClick={() => selectChartDanos()}
+                                                    >
+                                                        <i className="fas fa-exclamation-circle"/> Danos
                                                     </button>
                                                 </div>
                                             </div>

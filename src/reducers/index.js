@@ -12,6 +12,7 @@ import accessModuleDucks from "./seguridad/accessModuleDucks";
 import cosechaDucks from "./cosecha/cosechaDucks";
 import cosechaChartDucks from "./cosecha/cosechaChartDucks";
 import progressDucks from "./progressDucks";
+import manosRecusadasDucks from "./cosecha/manosRecusadasDucks";
 
 export default combineReducers({
     login: loginDucks,
@@ -26,5 +27,6 @@ export default combineReducers({
     statusForm: statusFormReducers,
     egresoBodega: egresoBodegaDucks,
     cosecha: cosechaDucks,
-    cosechaChart: cosechaChartDucks
+    cosechaChart: cosechaChartDucks,
+    manosRecusadas: manosRecusadasDucks
 });

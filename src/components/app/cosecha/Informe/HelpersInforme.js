@@ -30,7 +30,8 @@ export const convertDataHttp_ConsolidarDanos = (data) => {
         tipo_variedad: item.tipo_variedad,
         tipo_suelo: item.tipo_suelo,
         cantidad: data.filter(data => data.id === item.id)[0]['manos_recusadas']
-            .reduce((total, data) => total + +data.cantidad, 0)
+            .reduce((total, data) => total + +data.cantidad, 0),
+        danos: item['manos_recusadas']
     }))];
 };
 

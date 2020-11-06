@@ -811,7 +811,7 @@ function TableSeccionLaborDetalle(props) {
     const [distribucion, setDistribucion] = useState(null);
     const [updateData, setUpdateData] = useState(false);
     const [has, setHas] = useState(0);
-    const authentication = useSelector((state) => state.auth._token);
+    const authentication = useSelector((state) => state.login.token);
 
     const [datosConsulta, setDatosConsulta] = useState(null);
     const [searchDatos, setSearchDatos] = useState(false);

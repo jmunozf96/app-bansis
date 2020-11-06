@@ -64,6 +64,39 @@ export const transformarDataDanosLote = (id, danos) => {
     return data_chart;
 };
 
+export const consolidarDanos = (danos, lotes) => {
+    let consolidado = [];
+    danos.forEach(data => {
+        let total = 0;
+        lotes.forEach(lote => {
+            total += lote.danos.filter(item => item.dano.id === data.id).reduce((total, item) => total + +item.cantidad, 0)
+        });
+        consolidado.push({
+            id: data.id, categories: data.nombre, series: total
+        })
+    });
+    consolidado = consolidado.sort((a, b) => {
+        if (a.series < b.series) return 1;
+        if (a.series > b.series) return -1;
+        return 0;
+    });
+    return consolidado;
+};
+
+export const getDanosTotal = (danos, lotes) => {
+    let data_chart = {...model_data};
+    data_chart.options.yaxis.title.text = 'Total Danos';
+    data_chart.options.chart.height = 500;
+    data_chart.options.chart.type = 'bar';
+    const consolidado = consolidarDanos(danos, lotes);
+    data_chart.options.xaxis.categories = consolidado.map(data => data.categories);
+    data_chart.series = [{name: "Danos", data: consolidado.map(data => data.series)}];
+    data_chart.options.colors = ['#c41800'];
+    data_chart.options.chart.events = {};
+
+    return data_chart;
+};
+
 const model_data = {
     series: [],
     options: {
@@ -86,7 +119,6 @@ const model_data = {
         stroke: {
             show: true,
             width: 2,
-            colors: ['transparent']
         },
         xaxis: {
             categories: [],

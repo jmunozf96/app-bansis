@@ -3,9 +3,14 @@ import {API_LINK} from "../../../../constants/helpers";
 import axios from "axios";
 import {Checkbox, FormControlLabel} from "@material-ui/core";
 import {convertDataHttp_ConsolidarDanos} from "./HelpersInforme";
+import {useSelector} from "react-redux";
 
 
-export default function DanosHacienda({danos, setDanos, desde, hasta, dataFilter, load}) {
+export default function DanosHacienda({danos, setDanos, dataFilter, load}) {
+    const desde = useSelector(state => state.manosRecusadas.desde);
+    const hasta = useSelector(state => state.manosRecusadas.hasta);
+    const hacienda = useSelector(state => state.manosRecusadas.hacienda);
+
     const [loadData, setLoadData] = useState(true);
     const [selectAll, setSelectAll] = useState(true);
 
@@ -22,11 +27,11 @@ export default function DanosHacienda({danos, setDanos, desde, hasta, dataFilter
     }, [setDanos]);
 
     useEffect(() => {
-        if (loadData) {
+        if (loadData && hacienda) {
             setSelectAll(true);
             (async () => {
                 try {
-                    const url = `${API_LINK}/bansis-app/index.php/cosecha/informe/manos-recusadas/danos?desde=${desde}&hasta=${hasta}`;
+                    const url = `${API_LINK}/bansis-app/index.php/cosecha/informe/manos-recusadas/${hacienda.id}/danos?desde=${desde}&hasta=${hasta}`;
                     const respuesta = await axios.get(url);
                     const {code} = respuesta.data;
                     if (code === 200)
@@ -37,7 +42,7 @@ export default function DanosHacienda({danos, setDanos, desde, hasta, dataFilter
             })();
             setLoadData(false);
         }
-    }, [loadData, desde, hasta, setDanos]);
+    }, [loadData, hacienda, desde, hasta, setDanos]);
 
     const changeValue = useCallback((e, id) => {
         const status = (data) => (data.id === id);
