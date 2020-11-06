@@ -31,7 +31,9 @@ export default function () {
     const [view, setView] = useState('');
 
     const dispatch = useDispatch();
+    const credential = useSelector(state => state.login.credential);
     const hacienda = useSelector(state => state.manosRecusadas.hacienda);
+    const [disabledHacienda, setDisabledHacienda] = useState(false);
     const [startDate, setStartDate] = useState(moment().format("DD/MM/YYYY"));
     const [endDate, setEndDate] = useState(moment().format("DD/MM/YYYY"));
 
@@ -52,6 +54,13 @@ export default function () {
         status: false,
         messagge: `Buscando registros entre: <b>${startDate} - ${endDate}</b>...`
     });
+
+    useEffect(() => {
+        if (credential.idhacienda) {
+            setDisabledHacienda(true);
+            dispatch(setHacienda(credential.idhacienda))
+        }
+    }, [credential, dispatch]);
 
     //Efecto para cambio de Fechas en Redux
     useEffect(() => {
@@ -198,7 +207,7 @@ export default function () {
                                         <OptionsHaciendas
                                             hacienda={hacienda}
                                             changeOption={changeOption}
-                                            disabled={false}
+                                            disabled={disabledHacienda}
                                         />
                                     </div>
                                     {hacienda &&
