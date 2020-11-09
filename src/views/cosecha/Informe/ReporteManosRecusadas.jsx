@@ -116,6 +116,10 @@ export default function () {
                             setData(data);
                             setLoadDanos(true);
                             setError({...error, status: false});
+
+                            setViewMap(true);
+                            setViewChartLotes(false);
+                            setViewChartDanos(false);
                         } else {
                             error_emptyData();
                         }
@@ -171,24 +175,24 @@ export default function () {
             setView('');
             setViewMap(true);
         } else {
-            setView(<ChartLotesManos data={transformarDataLotes(data, changeStatusModal)}/>);
+            //setView(<ChartLotesManos data={transformarDataLotes(data, changeStatusModal)}/>);
             setViewMap(false);
         }
         if (viewChartDanos) setViewChartDanos(false);
         setViewChartLotes(!viewChartLotes);
-    }, [viewChartLotes, viewChartDanos, data, changeStatusModal]);
+    }, [viewChartLotes, viewChartDanos]);
 
     const selectChartDanos = useCallback(() => {
         if (viewChartDanos) {
             setView('');
             setViewMap(true);
         } else {
-            setView(<ChartDanos danos={danos.filter(item => item.selected)} danosLotes={data}/>);
+            //setView(<ChartDanos danos={danos.filter(item => item.selected)} danosLotes={data}/>);
             setViewMap(false);
         }
         if (viewChartLotes) setViewChartLotes(false);
         setViewChartDanos(!viewChartDanos);
-    }, [danos, viewChartDanos, viewChartLotes, data]);
+    }, [viewChartDanos, viewChartLotes]);
 
     const changeOption = (e, data) => {
         const data_option = data['data-json'] !== undefined ? data['data-json'] : null;
