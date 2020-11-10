@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useCallback, useEffect} from "react";
 import CosechaBalanza from "./CosechaBalanza";
 import {
     buildApp,
@@ -12,7 +12,7 @@ import {useDispatch} from "react-redux";
 export default function () {
     const dispatch = useDispatch();
 
-    useEffect(() => {
+    const clear = useCallback(() => {
         dispatch(closeChanel());//Cerramos canal
         dispatch(listenChannelBalanza(false));//Apagamos el listening en redux
         dispatch(setCanal());//Seteamos el canal
@@ -27,6 +27,14 @@ export default function () {
             localStorage.removeItem('_cintasSemanaLotes');
         }
     }, [dispatch]);
+
+    useEffect(() => {
+        clear();
+
+        return () => {
+            clear();
+        }
+    }, [clear, dispatch]);
 
     return <CosechaBalanza/>;
 }
