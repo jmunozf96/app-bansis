@@ -73,6 +73,7 @@ export const loginSystem = (credential) => async (dispatch) => {
             },
             onDownloadProgress: () => {
                 dispatch(loadingProgressBar(false));
+                dispatch(stateLoading(false));
             }
         });
 
@@ -83,15 +84,16 @@ export const loginSystem = (credential) => async (dispatch) => {
                 payload: respuesta.data.credential
             });
 
-            await localStorage.setItem('_token', JSON.stringify(respuesta.data.credential));
             await dispatch({type: SET_LOGUEADO, payload: true});
             await dispatch(setCredentials(credential));
+
+            localStorage.setItem('_token', JSON.stringify(respuesta.data.credential));
             return true;
         }
-
         dispatch(setError(true, message));
     } catch (e) {
         console.error(e);
+        return false;
     }
 };
 
@@ -101,16 +103,20 @@ export const setCredentials = (credential) => async (dispatch) => {
         const data = qs.stringify({json: JSON.stringify({...credential, getToken: true})});
         const respuesta = await axios.post(url, data);
 
-        const {code} = respuesta.data;
+        const {code, message} = respuesta.data;
         if (code === 200) {
             const {credential: {sub, nick, nombres, apellidos, idhacienda}} = respuesta.data;
             await dispatch({type: SET_CREDENTIALS, payload: {sub, nick, nombres, apellidos, idhacienda}});
             await dispatch({type: SET_RECURSOS, payload: respuesta.data.recursos});
 
             //Guardar en el localStorage
-            await localStorage.setItem('_credentialUser', JSON.stringify({sub, nick, nombres, apellidos, idhacienda}));
-            await localStorage.setItem('_recursos', JSON.stringify(respuesta.data.recursos));
+            localStorage.setItem('_credentialUser', JSON.stringify({sub, nick, nombres, apellidos, idhacienda}));
+            localStorage.setItem('_recursos', JSON.stringify(respuesta.data.recursos));
+            return;
         }
+
+        dispatch(stateLoading(false));
+        dispatch(setError(true, message));
     } catch (e) {
         console.error(e);
     }
@@ -151,17 +157,17 @@ export const loadCredentials = () => (dispatch, getState) => {
 };
 
 export const loadStorageAuth = () => (dispatch, getState) => {
-    const token_storage = JSON.parse(localStorage.getItem('_token'));
-    const credential_storage = JSON.parse(localStorage.getItem('_credentialUser'));
-    const recursos = JSON.parse(localStorage.getItem('_recursos'));
+    const token_storage = localStorage.getItem('_token');
+    const credential_storage = localStorage.getItem('_credentialUser');
+    const recursos = localStorage.getItem('_recursos');
 
     if (token_storage && credential_storage && recursos) {
         let token = getState().login.token;
         if (token === '') {
             dispatch({type: SET_LOGUEADO, payload: true});
-            dispatch({type: SET_TOKEN, payload: token_storage});
-            dispatch({type: SET_CREDENTIALS, payload: credential_storage});
-            dispatch({type: SET_RECURSOS, payload: recursos})
+            dispatch({type: SET_TOKEN, payload: JSON.parse(token_storage)});
+            dispatch({type: SET_CREDENTIALS, payload: JSON.parse(credential_storage)});
+            dispatch({type: SET_RECURSOS, payload: JSON.parse(recursos)})
         }
         return;
     }

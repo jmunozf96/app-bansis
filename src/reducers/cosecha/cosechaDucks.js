@@ -194,7 +194,6 @@ export const listenChanel = () => (dispatch, getState) => {
 
         window.Echo.channel(canal.nombre)
             .listen(canal.evento, (e) => {
-
                 if (e.cosecha) {
                     const cintas = getState().cosecha.cintas;
                     const cinta_select = getState().cosecha.cinta_select;
@@ -226,7 +225,7 @@ export const listenChanel = () => (dispatch, getState) => {
 
 export const closeChanel = () => (dispatch, getState) => {
     const canal = getState().cosecha.canal;
-    if (canal !== '' && window.Echo) {
+    if (canal && canal.nombre !== '' && canal.evento !== '') {
         window.Echo.leave(canal.nombre);
         //Limpiamos los estados
         dispatch({type: SET_ADD_COSECHA, payload: []});

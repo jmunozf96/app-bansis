@@ -69,7 +69,13 @@ export default function FormLogin() {
 
             dispatch(stateLoading(true));
             dispatch(loadingProgressBar(true));
-            dispatch(loginSystem(userAcount));
+            const login = dispatch(loginSystem(userAcount));
+
+            login.then(
+                response => {
+                    if (!response) dispatch(setError(true, "Error al iniciar sesión..."));
+                }
+            )
         }
     ;
 

@@ -4,7 +4,7 @@ import React, {useEffect} from "react";
 import {Col, Container, Row} from "react-bootstrap";
 import FormLogin from "./FormLogin";
 import {useDispatch} from "react-redux";
-import {setError, stateLoading} from "../../../reducers/seguridad/loginDucks";
+import {clearAuthentication, setError, stateLoading} from "../../../reducers/seguridad/loginDucks";
 import {uploadProgressBar} from "../../../reducers/progressDucks";
 
 export default function Login() {
@@ -14,7 +14,8 @@ export default function Login() {
         dispatch(setError(false, ''));
         dispatch(uploadProgressBar(0));
         dispatch(stateLoading(false));
-    },[dispatch]);
+    }, [dispatch]);
+
 
     return (
         <Container fluid style={{marginTop: "6.5rem"}}>

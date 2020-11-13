@@ -10,6 +10,7 @@ import store from "./reducers/store";
 import {Provider} from "react-redux";
 
 function App() {
+
     return (
         <Provider store={store}>
             <Router basename="bansis-web/">
