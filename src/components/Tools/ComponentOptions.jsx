@@ -26,7 +26,9 @@ export default function ComponentOptions({api, label, name, value, changeValue, 
         return <React.Fragment/>;
     }
 
-    options = result.dataArray;
+    if (result.code === 200) {
+        options = result.dataArray;
+    }
 
     return (
         <FormControl variant="outlined" className={classes.formControl}>

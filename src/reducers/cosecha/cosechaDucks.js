@@ -94,14 +94,19 @@ export const setDataHacienda = (value) => (dispatch) => {
 
 export const setCanal = () => (dispatch, getState) => {
     const hacienda = getState().cosecha.hacienda;
-    let canal = {nombre: '', evento: ''};
-    if (hacienda) {
-        if (hacienda.id === 1) {
-            canal.nombre = 'BalanzaPrimo';
-            canal.evento = 'CosechaPrimo';
-        } else if (hacienda.id === 3) {//Id de Sofca es 3
-            canal.nombre = 'BalanzaSofca';
-            canal.evento = 'CosechaSofca';
+    const canal_data = getState().cosecha.canal;
+    let canal = null;
+
+    if (!canal_data) {
+        if (hacienda) {
+            canal = {nombre: '', evento: ''};
+            if (hacienda.id === 1) {
+                canal.nombre = 'BalanzaPrimo';
+                canal.evento = 'CosechaPrimo';
+            } else if (hacienda.id === 3) {//Id de Sofca es 3
+                canal.nombre = 'BalanzaSofca';
+                canal.evento = 'CosechaSofca';
+            }
         }
     }
     dispatch({type: SET_CANAL, payload: canal})
@@ -226,7 +231,7 @@ export const listenChanel = () => (dispatch, getState) => {
 export const closeChanel = () => (dispatch, getState) => {
     const canal = getState().cosecha.canal;
     if (canal && canal.nombre !== '' && canal.evento !== '') {
-        window.Echo.leave(canal.nombre);
+        window.Echo.leaveChannel(canal.nombre);
         //Limpiamos los estados
         dispatch({type: SET_ADD_COSECHA, payload: []});
         dispatch({type: SET_CINTAS, payload: []});

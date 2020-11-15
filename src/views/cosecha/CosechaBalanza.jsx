@@ -6,7 +6,7 @@ import {
     closeChanel,
     listenChannelBalanza,
     prepareData,
-    searchData, setCanal,
+    searchData,
     setDataHacienda, setDefaultCintas
 } from "../../reducers/cosecha/cosechaDucks";
 import CosechaRecobro from "./CosechaRecobro";
@@ -28,9 +28,8 @@ export default function CosechaBalanza() {
     const desconectarse = () => {
         dispatch(closeChanel());//Cerramos canal
         dispatch(listenChannelBalanza(false));//Apagamos el listening en redux
-        dispatch(setCanal());//Seteamos el canal
-        dispatch(buildApp(false));//Destruimos la app
         dispatch(setDataHacienda(null));
+        dispatch(buildApp(false));//Destruimos la app
         dispatch(setDefaultCintas());//Seteamos las cintas seleccionadas
 
         //Eliminamos el storage

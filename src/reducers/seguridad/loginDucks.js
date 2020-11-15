@@ -69,6 +69,7 @@ export const loginSystem = (credential) => async (dispatch) => {
         const data = qs.stringify({json: JSON.stringify({...credential})});
         const respuesta = await axios.post(url, data, {
             onUploadProgress: (progressEvent) => {
+                dispatch(setError(false, ""));
                 dispatch(uploadProgressBar(progressEvent.loaded));
             },
             onDownloadProgress: () => {
@@ -161,7 +162,9 @@ export const loadStorageAuth = () => (dispatch, getState) => {
     const credential_storage = localStorage.getItem('_credentialUser');
     const recursos = localStorage.getItem('_recursos');
 
-    if (token_storage && credential_storage && recursos) {
+    const status = (data) => (data !== "undefined" && data !== null);
+
+    if (status(token_storage) && status(credential_storage) && status(recursos)) {
         let token = getState().login.token;
         if (token === '') {
             dispatch({type: SET_LOGUEADO, payload: true});
