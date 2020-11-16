@@ -399,14 +399,7 @@ function GraficoBarrasPeriodo({hacienda, load, setLoad, periodo}) {
                     const {code} = response;
 
                     if (code === 200) {
-                        const {dataChartBarPrimo, dataChartBarSofca, dataOptions} = response;
-                        let data = [];
-                        if (dataChartBarPrimo) {
-                            data.push(dataChartBarPrimo)
-                        }
-                        if (dataChartBarSofca) {
-                            data.push(dataChartBarSofca)
-                        }
+                        const {data, dataOptions} = response;
                         setData({
                             ...data,
                             series: data,

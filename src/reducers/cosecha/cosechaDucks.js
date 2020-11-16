@@ -186,58 +186,62 @@ export const cintasSelectBackup = (value) => (dispatch, getState) => {
 export const listenChanel = () => (dispatch, getState) => {
     const canal = getState().cosecha.canal;
     if (canal) {
-        window.Pusher = require('pusher-js');
-        window.Echo = new Echo({
-            broadcaster: 'pusher',
-            key: 'ASDASD123',
-            wsHost: '192.168.191.94',
-            wsPort: 6001,
-            wssPort: 6001,
-            disableStats: true,
-            enabledTransports: ['ws', 'wss'],
-        });
-
-        window.Echo.channel(canal.nombre)
-            .listen(canal.evento, (e) => {
-                if (e.cosecha) {
-                    const cintas = getState().cosecha.cintas;
-                    const cinta_select = getState().cosecha.cinta_select;
-                    if (cinta_select !== e.cosecha['cs_color']) {
-                        const existe = cintas.filter(item => item.codigo === e.cosecha['cs_color']);
-                        if (existe.length > 0) {
-                            dispatch(cintaSelect(e.cosecha['cs_color']));
-                        } else {
-                            alert(`Error al capturar registro, la cinta con codigo:  ${e.cosecha['cs_color']}, no se encuentra seleccionada`);
-                            return;
-                        }
-                    }
-                    const data_cosecha = {
-                        cs_id: parseInt(e.cosecha['cs_id']),
-                        cs_fecha: e.cosecha['cs_fecha'],
-                        cs_haciend: e.cosecha['cs_haciend'],
-                        cs_seccion: e.cosecha['cs_seccion'],
-                        cs_cortados: 1,
-                        cs_peso: parseFloat(e.cosecha['cs_peso']).toFixed(2),
-                        cs_color: e.cosecha['cs_color'],
-                        ultima_actualizacion: e.cosecha['fechacre'],
-                        pesando: true
-                    };
-                    dispatch(addCosechaLoteCinta(data_cosecha));
-                }
+        if (canal.nombre !== '' && canal.evento !== '') {
+            window.Pusher = require('pusher-js');
+            window.Echo = new Echo({
+                broadcaster: 'pusher',
+                key: 'ASDASD123',
+                wsHost: '192.168.191.94',
+                wsPort: 6001,
+                wssPort: 6001,
+                disableStats: true,
+                enabledTransports: ['ws', 'wss'],
             });
+
+            window.Echo.channel(canal.nombre)
+                .listen(canal.evento, (e) => {
+                    if (e.cosecha) {
+                        const cintas = getState().cosecha.cintas;
+                        const cinta_select = getState().cosecha.cinta_select;
+                        if (cinta_select !== e.cosecha['cs_color']) {
+                            const existe = cintas.filter(item => item.codigo === e.cosecha['cs_color']);
+                            if (existe.length > 0) {
+                                dispatch(cintaSelect(e.cosecha['cs_color']));
+                            } else {
+                                alert(`Error al capturar registro, la cinta con codigo:  ${e.cosecha['cs_color']}, no se encuentra seleccionada`);
+                                return;
+                            }
+                        }
+                        const data_cosecha = {
+                            cs_id: parseInt(e.cosecha['cs_id']),
+                            cs_fecha: e.cosecha['cs_fecha'],
+                            cs_haciend: e.cosecha['cs_haciend'],
+                            cs_seccion: e.cosecha['cs_seccion'],
+                            cs_cortados: 1,
+                            cs_peso: parseFloat(e.cosecha['cs_peso']).toFixed(2),
+                            cs_color: e.cosecha['cs_color'],
+                            ultima_actualizacion: e.cosecha['fechacre'],
+                            pesando: true
+                        };
+                        dispatch(addCosechaLoteCinta(data_cosecha));
+                    }
+                });
+        }
     }
 };
 
 export const closeChanel = () => (dispatch, getState) => {
     const canal = getState().cosecha.canal;
-    if (canal && canal.nombre !== '' && canal.evento !== '') {
-        window.Echo.leaveChannel(canal.nombre);
-        //Limpiamos los estados
-        dispatch({type: SET_ADD_COSECHA, payload: []});
-        dispatch({type: SET_CINTAS, payload: []});
-        dispatch({type: SET_DATA_CINTAS, payload: []});
-        dispatch({type: SET_CINTA_SELECT, payload: ''});
-        dispatch(clearDataChart());//Limpiamos el grafico
+    if (canal) {
+        if (canal.nombre !== '' && canal.evento !== '') {
+            window.Echo.leaveChannel(canal.nombre);
+            //Limpiamos los estados
+            dispatch({type: SET_ADD_COSECHA, payload: []});
+            dispatch({type: SET_CINTAS, payload: []});
+            dispatch({type: SET_DATA_CINTAS, payload: []});
+            dispatch({type: SET_CINTA_SELECT, payload: ''});
+            dispatch(clearDataChart());//Limpiamos el grafico
+        }
     }
 };
 

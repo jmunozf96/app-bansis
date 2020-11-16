@@ -13,7 +13,7 @@ function App() {
 
     return (
         <Provider store={store}>
-            <Router basename="banasoft-web/">
+            <Router basename="bansis-web/">
                 <header>
                     <MenuNavbar/>
                 </header>
