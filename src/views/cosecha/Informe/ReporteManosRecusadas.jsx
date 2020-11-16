@@ -56,6 +56,13 @@ export default function () {
     });
 
     useEffect(() => {
+        localStorage.removeItem('_dataManos');
+        return () => {
+            localStorage.removeItem('_dataManos');
+        }
+    }, []);
+
+    useEffect(() => {
         if (credential.idhacienda) {
             setDisabledHacienda(true);
             dispatch(setHacienda(credential.idhacienda))
