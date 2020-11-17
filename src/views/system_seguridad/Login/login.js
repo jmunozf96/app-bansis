@@ -4,14 +4,14 @@ import React, {useEffect} from "react";
 import {Col, Container, Row} from "react-bootstrap";
 import FormLogin from "./FormLogin";
 import {useDispatch} from "react-redux";
-import {clearAuthentication, setError, stateLoading} from "../../../reducers/seguridad/loginDucks";
+import {stateLoading} from "../../../reducers/seguridad/loginDucks";
 import {uploadProgressBar} from "../../../reducers/progressDucks";
 
 export default function Login() {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(setError(false, ''));
+        //dispatch(setError(false, ''));
         dispatch(uploadProgressBar(0));
         dispatch(stateLoading(false));
     }, [dispatch]);

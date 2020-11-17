@@ -84,7 +84,7 @@ export default function ReporteEnfunde() {
             </div>
             <hr/>
             <InformeEnfundeSemanal
-                data={enfunde}
+                //data={enfunde}
                 setData={setEnfunde}
                 loadData={loadData}
                 setLoadData={setLoadData}

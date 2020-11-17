@@ -234,7 +234,7 @@ export const closeChanel = () => (dispatch, getState) => {
     const canal = getState().cosecha.canal;
     if (canal) {
         if (canal.nombre !== '' && canal.evento !== '') {
-            window.Echo.leaveChannel(canal.nombre);
+            window.Echo.disconnect();
             //Limpiamos los estados
             dispatch({type: SET_ADD_COSECHA, payload: []});
             dispatch({type: SET_CINTAS, payload: []});
@@ -328,11 +328,11 @@ export const searchaDataByCintasSemana = () => async (dispatch, getState) => {
                     //await dispatch(prepareData(false));
                 } else {
                     console.error(respuesta.data.code, respuesta.data.error);
-                    dispatch(statusError(true, "Errors al procesar los datos.."));
+                    dispatch(statusError(true, "Error al procesar los datos.."));
                 }
             } catch (e) {
                 console.error(e);
-                dispatch(statusError(true, "Errors al procesar los datos.."));
+                dispatch(statusError(true, "Error al procesar los datos.."));
                 //dispatch(setDefaultCintas());//Seteamos las cintas seleccionadas
             }
         } else {

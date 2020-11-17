@@ -1,9 +1,9 @@
 import React, {useEffect} from "react"
-import Backdrop from "@material-ui/core/Backdrop";
-import CircularProgress from "@material-ui/core/CircularProgress";
+/*import Backdrop from "@material-ui/core/Backdrop";
+import CircularProgress from "@material-ui/core/CircularProgress";*/
 
 export default function InformeEnfundeSemanal(props) {
-    const {data, cabeceraTabla, api, setData, children, loadData, setLoadData} = props;
+    const {cabeceraTabla, api, setData, children, loadData, setLoadData} = props;
 
     useEffect(() => {
         if (loadData) {
@@ -20,13 +20,13 @@ export default function InformeEnfundeSemanal(props) {
         }
     }, [loadData, api, setData, setLoadData]);
 
-    if (data === null) {
+    /*if (data === null) {
         return (
             <Backdrop open={true}>
                 <CircularProgress color="inherit"/>
             </Backdrop>
         );
-    }
+    }*/
 
     return (
         <table className="table table-bordered table-hover">

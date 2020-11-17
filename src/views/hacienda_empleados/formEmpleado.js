@@ -10,8 +10,8 @@ import {empleadoAction, empleadoCleanAction} from "../../actions/hacienda/emplea
 import {progressActions} from "../../actions/progressActions";
 import {editFormAction} from "../../actions/statusFormAction";
 
-import Backdrop from "@material-ui/core/Backdrop";
-import CircularProgress from "@material-ui/core/CircularProgress";
+/*import Backdrop from "@material-ui/core/Backdrop";
+import CircularProgress from "@material-ui/core/CircularProgress";*/
 import DataForm from "../dataForm";
 
 export default function FormEmpleado() {
@@ -98,13 +98,13 @@ export default function FormEmpleado() {
     }, [statusForm, history, dispatch, id, loadData, setLoadData, setStatusResponseForm, statusResponseForm, redirect, setRedirect]);
 
     //Primero hay que verificar que se carguen todos los datos de los componentes
-    if (haciendas.loading || labores.loading) {
+    /*if (haciendas.loading || labores.loading) {
         return (
             <Backdrop open={true}>
                 <CircularProgress color="inherit"/>
             </Backdrop>
         );
-    }
+    }*/
 
     //Construimos un array con nuestro formulario
     const arrayFormulario = [

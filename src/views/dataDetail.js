@@ -5,8 +5,8 @@ import {Link} from "react-router-dom";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import {useDispatch, useSelector} from "react-redux";
 import {progressActions} from "../actions/progressActions";
-import Backdrop from "@material-ui/core/Backdrop";
-import CircularProgress from "@material-ui/core/CircularProgress";
+/*import Backdrop from "@material-ui/core/Backdrop";
+import CircularProgress from "@material-ui/core/CircularProgress";*/
 import axios from "axios";
 import AlertDialog from "../components/Tools/AlertDialog/AlertDialog";
 import SnackbarComponent from "../components/Tools/Snackbar/Snackbar";
@@ -91,11 +91,11 @@ export default function DataDetail(props) {
 
     if (getData.length === 0) {
         progessbarStatus(false);
-        return (
+        /*return (
             <Backdrop open={true}>
                 <CircularProgress color="inherit"/>
             </Backdrop>
-        );
+        );*/
     }
 
     return (

@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from "react";
 import {API_LINK} from "../../../constants/helpers";
 
-import Backdrop from "@material-ui/core/Backdrop";
-import CircularProgress from "@material-ui/core/CircularProgress";
+/*import Backdrop from "@material-ui/core/Backdrop";
+import CircularProgress from "@material-ui/core/CircularProgress";*/
 import PaginationForm from "../../../components/Tools/Pagination/Pagination";
 import {useHistory} from "react-router-dom";
 import {useSelector} from "react-redux";
@@ -107,13 +107,13 @@ export default function EnfundeSemanal() {
         setReload(true);
     };
 
-    if (!enfundes || reload) {
+    /*if (!enfundes || reload) {
         return (
             <Backdrop open={true}>
                 <CircularProgress color="inherit"/>
             </Backdrop>
         );
-    }
+    }*/
 
     return (
         <>
@@ -253,7 +253,7 @@ export default function EnfundeSemanal() {
                             </tr>
                             </thead>
                             <tbody>
-                            {enfundes.hasOwnProperty('dataArray') && enfundes.dataArray.data.length > 0 &&
+                            {enfundes && enfundes.hasOwnProperty('dataArray') && enfundes.dataArray.data.length > 0 &&
                             enfundes.dataArray.data.map((item, index) => (
                                 <tr key={index} className="text-center table-sm">
                                     <td style={style.table.textCenter}>
@@ -310,6 +310,7 @@ export default function EnfundeSemanal() {
                             </tbody>
                         </table>
                     </div>
+                    {enfundes &&
                     <div className="col-12 align-content-center">
                         <PaginationForm
                             current_page={enfundes.dataArray.current_page}
@@ -318,6 +319,7 @@ export default function EnfundeSemanal() {
                             onChangePage={onChangePage}
                         />
                     </div>
+                    }
                 </div>
             </div>
             }

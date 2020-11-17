@@ -140,8 +140,10 @@ export const checkToken = () => async (dispatch, getState) => {
             dispatch({type: SET_LOGUEADO, payload: true});
             //Actualizamos credenciales
             dispatch({type: SET_CREDENTIALS, payload: {sub, nick, nombres, apellidos, idhacienda}});
+            return true;
         } else {
             //Seteamos
+            return false;
         }
     }
 };

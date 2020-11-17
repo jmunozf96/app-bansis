@@ -67,6 +67,7 @@ export default function MenuNavbar() {
                                 ))}
                             </Nav>
                             <Nav className="ml-auto">
+                                {credentialCard &&
                                 <NavDropdown title={credentialCard.nick} id="nav-dropdown" drop="left">
                                     <NavDropdown.Item
                                         eventKey="4.1"
@@ -89,6 +90,7 @@ export default function MenuNavbar() {
                                         <i className="fas fa-sign-out-alt"/> Salir
                                     </NavDropdown.Item>
                                 </NavDropdown>
+                                }
                             </Nav>
                         </>
                     ) : <Nav className="ml-auto">

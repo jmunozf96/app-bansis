@@ -11,8 +11,8 @@ import {progressActions} from "../../actions/progressActions";
 import {API_LINK} from "../../constants/helpers";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import Typography from "@material-ui/core/Typography";
-import Backdrop from "@material-ui/core/Backdrop";
-import CircularProgress from "@material-ui/core/CircularProgress";
+/*import Backdrop from "@material-ui/core/Backdrop";
+import CircularProgress from "@material-ui/core/CircularProgress";*/
 import TableForm from "../../components/Tools/Table/Table";
 import UpdateIcon from "@material-ui/icons/Update";
 import SyncIcon from "@material-ui/icons/Sync";
@@ -27,7 +27,7 @@ export default function SeccionLoteLabor() {
         message: ''
     });
 
-    const [loadData, setLoadData] = useState(true);
+    //const [loadData, setLoadData] = useState(true);
     const [seccionLaborEmpleado, setSeccionLaborEmpleado] = useState(null);
     const [page, setPage] = useState(1);
     const [reload, setReload] = useState(true);
@@ -67,7 +67,7 @@ export default function SeccionLoteLabor() {
                     setNotificacion({open: true, message: response.message});
                     //No se encontraron datos
                 }
-                setLoadData(false);
+                //setLoadData(false);
             })();
             setReload(false);
         }
@@ -134,13 +134,13 @@ export default function SeccionLoteLabor() {
         })()
     };
 
-    if (!seccionLaborEmpleado && loadData) {
+    /*if (!seccionLaborEmpleado && loadData) {
         return (
             <Backdrop open={true}>
                 <CircularProgress color="inherit"/>
             </Backdrop>
         );
-    }
+    }*/
 
     return (
         <Container fluid className="mb-5">

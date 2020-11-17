@@ -9,8 +9,6 @@ import {useDispatch, useSelector} from "react-redux";
 import {progressActions} from "../../actions/progressActions";
 import {editFormAction} from "../../actions/statusFormAction";
 
-import Backdrop from "@material-ui/core/Backdrop";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import DataForm from "../dataForm";
 import {addBodegaFormAction, clearBodegaFormAction} from "../../actions/bodega/bodegaActions";
 
@@ -91,14 +89,14 @@ export default function FormBodega() {
         }
     }, [statusForm, history, dispatch, id, loadData, setLoadData, setStatusResponseForm, statusResponseForm, redirect, setRedirect]);
 
-    //Primero hay que verificar que se carguen todos los datos de los componentes
+    /*//Primero hay que verificar que se carguen todos los datos de los componentes
     if (haciendas.loading) {
         return (
             <Backdrop open={true}>
                 <CircularProgress color="inherit"/>
             </Backdrop>
         );
-    }
+    }*/
 
     //Construimos un array con nuestro formulario
     const arrayFormulario = [

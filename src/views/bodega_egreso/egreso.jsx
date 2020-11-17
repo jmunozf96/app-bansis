@@ -7,8 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 //import ApexChart from "../../../components/ApexChart";
 import {API_LINK} from "../../constants/helpers";
-import Backdrop from "@material-ui/core/Backdrop";
-import CircularProgress from "@material-ui/core/CircularProgress";
+
 import {useDispatch, useSelector} from "react-redux";
 import {progressActions} from "../../actions/progressActions";
 import TableForm from "../../components/Tools/Table";
@@ -91,13 +90,13 @@ export default function Egreso() {
         }
     }, [reload, page, dispatch, egresos, filter, credential, hacienda]);
 
-    if (Object.entries(egresos).length === 0) {
+    /*if (Object.entries(egresos).length === 0) {
         return (
             <Backdrop open={true}>
                 <CircularProgress color="inherit"/>
             </Backdrop>
         );
-    }
+    }*/
 
     const unFilter = () => {
         progessbarStatus(true);

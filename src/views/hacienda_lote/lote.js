@@ -3,7 +3,7 @@ import {Badge, Button, ButtonGroup, Col, Container, FormGroup, Row} from "react-
 import SnackbarComponent from "../../components/Tools/Snackbar/Snackbar";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import Link from "@material-ui/core/Link";
-import Backdrop from "@material-ui/core/Backdrop";
+
 import Typography from "@material-ui/core/Typography";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import {useHistory} from "react-router-dom";
@@ -15,7 +15,8 @@ import moment from "moment";
 import UpdateIcon from "@material-ui/icons/Update";
 import SyncIcon from "@material-ui/icons/Sync";
 import DeleteIcon from "@material-ui/icons/Delete";
-import CircularProgress from "@material-ui/core/CircularProgress";
+/*import CircularProgress from "@material-ui/core/CircularProgress";
+import Backdrop from "@material-ui/core/Backdrop";*/
 import AlertDialog from "../../components/Tools/AlertDialog/AlertDialog";
 import InputSearch from "../../components/Tools/InputSearch/InputSearch";
 import ModalForm from "../../components/Tools/ModalForm";
@@ -26,7 +27,7 @@ export default function Lote() {
         message: ''
     });
 
-    const [loadData, setLoadData] = useState(true);
+    //const [loadData, setLoadData] = useState(true);
     const [lotes, setLotes] = useState(null);
     const [page, setPage] = useState(1);
     const [reload, setReload] = useState(true);
@@ -63,7 +64,7 @@ export default function Lote() {
                     setLotes(null);
                     setNotificacion({open: true, message: response.message});
                 }
-                setLoadData(false);
+                //setLoadData(false);
                 progessbarStatus(false);
             })();
             setReload(false);
@@ -133,13 +134,13 @@ export default function Lote() {
         setDataLote(data);
     };
 
-    if (!lotes && loadData) {
+    /*if (!lotes && loadData) {
         return (
             <Backdrop open={true}>
                 <CircularProgress color="inherit"/>
             </Backdrop>
         );
-    }
+    }*/
 
     return (
         <Container fluid className="mb-5">

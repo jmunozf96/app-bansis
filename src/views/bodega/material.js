@@ -3,7 +3,7 @@ import TableForm from "../../components/Tools/Table";
 import {API_LINK} from "../../constants/helpers";
 import {Link} from "react-router-dom";
 import {Badge, Button, ButtonGroup, Col, Container, Row} from "react-bootstrap";
-import {Breadcrumbs, Typography, Backdrop, CircularProgress} from "@material-ui/core";
+import {Breadcrumbs, Typography} from "@material-ui/core";
 import {
     AddCircle as AddCircleIcon, Update as UpdateIcon, Sync as SyncIcon, CloudOff as CloudOffIcon
 } from "@material-ui/icons";
@@ -20,7 +20,7 @@ import AlertDialog from "../../components/Tools/AlertDialog/AlertDialog";
 import qs from "qs";
 
 export default function Material() {
-    const [materialsList, setMaterialsList] = useState([]);
+    const [materialsList, setMaterialsList] = useState(null);
     const [load, setLoad] = useState(true);
     const [page, setPage] = useState(1);
 
@@ -48,18 +48,17 @@ export default function Material() {
             (async () => {
                 try {
                     const progressbarStatus = (state) => dispatch(progressActions(state));
-                    const materials = await axios.get(url_api)
+                    await axios.get(url_api)
                         .then(
-                            (response) => response.data,
+                            (response) => setMaterialsList(response.data),
                             (error) => error.response.data)
                         .catch((error) => console.log(error));
-                    await setMaterialsList(materials);
                     progressbarStatus(false);
                 } catch (e) {
                     console.error(e);
                 }
-                await setLoad(false);
             })();
+            setLoad(false);
         }
     }, [load, url_api, dispatch]);
 
@@ -73,14 +72,14 @@ export default function Material() {
         history.push(`${history.location.pathname}/formulario`);
     };
 
-    if (materialsList.length === 0) {
+    /*if (materialsList.length === 0) {
         progressbarStatus(false);
         return (
             <Backdrop open={true}>
                 <CircularProgress color="inherit"/>
             </Backdrop>
         );
-    }
+    }*/
 
     const updateStockMaterial = (codigo, bodega, hacienda) => {
         (async () => {
@@ -195,6 +194,7 @@ export default function Material() {
                 </Col>
             </Row>
             <hr/>
+            {materialsList &&
             <TableForm
                 dataAPI={materialsList}
                 columns={['#', 'Codigo', 'Descripcion', 'Stock', 'Bodega', 'Grupo', 'Ult. Act.', 'Estado', 'Accion']}
@@ -234,6 +234,7 @@ export default function Material() {
                     </tr>
                 }
             </TableForm>
+            }
         </Container>
     )
 }
