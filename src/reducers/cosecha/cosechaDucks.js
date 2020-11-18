@@ -7,6 +7,9 @@ import {API_LINK} from "../../constants/helpers";
 import Echo from "laravel-echo";
 import {clearDataChart, updateDataChart} from "./cosechaChartDucks";
 
+
+window.Pusher = require('pusher-js');
+
 const dataInicial = {
     hacienda: null,
     canal: null,
@@ -187,7 +190,6 @@ export const listenChanel = () => (dispatch, getState) => {
     const canal = getState().cosecha.canal;
     if (canal) {
         if (canal.nombre !== '' && canal.evento !== '') {
-            window.Pusher = require('pusher-js');
             window.Echo = new Echo({
                 broadcaster: 'pusher',
                 key: 'ASDASD123',
@@ -197,10 +199,10 @@ export const listenChanel = () => (dispatch, getState) => {
                 disableStats: true,
                 enabledTransports: ['ws', 'wss'],
             });
-
             window.Echo.channel(canal.nombre)
                 .listen(canal.evento, (e) => {
                     if (e.cosecha) {
+                        const listen = getState().cosecha.listen;
                         const cintas = getState().cosecha.cintas;
                         const cinta_select = getState().cosecha.cinta_select;
                         if (cinta_select !== e.cosecha['cs_color']) {
@@ -208,22 +210,25 @@ export const listenChanel = () => (dispatch, getState) => {
                             if (existe.length > 0) {
                                 dispatch(cintaSelect(e.cosecha['cs_color']));
                             } else {
-                                alert(`Error al capturar registro, la cinta con codigo:  ${e.cosecha['cs_color']}, no se encuentra seleccionada`);
+                                console.error(`Error al capturar registro, la cinta con codigo:  ${e.cosecha['cs_color']}, no se encuentra seleccionada`);
                                 return;
                             }
                         }
-                        const data_cosecha = {
-                            cs_id: parseInt(e.cosecha['cs_id']),
-                            cs_fecha: e.cosecha['cs_fecha'],
-                            cs_haciend: e.cosecha['cs_haciend'],
-                            cs_seccion: e.cosecha['cs_seccion'],
-                            cs_cortados: 1,
-                            cs_peso: parseFloat(e.cosecha['cs_peso']).toFixed(2),
-                            cs_color: e.cosecha['cs_color'],
-                            ultima_actualizacion: e.cosecha['fechacre'],
-                            pesando: true
-                        };
-                        dispatch(addCosechaLoteCinta(data_cosecha));
+
+                        if (listen) {
+                            const data_cosecha = {
+                                cs_id: parseInt(e.cosecha['cs_id']),
+                                cs_fecha: e.cosecha['cs_fecha'],
+                                cs_haciend: e.cosecha['cs_haciend'],
+                                cs_seccion: e.cosecha['cs_seccion'],
+                                cs_cortados: 1,
+                                cs_peso: parseFloat(e.cosecha['cs_peso']).toFixed(2),
+                                cs_color: e.cosecha['cs_color'],
+                                ultima_actualizacion: e.cosecha['fechacre'],
+                                pesando: true
+                            };
+                            dispatch(addCosechaLoteCinta(data_cosecha));
+                        }
                     }
                 });
         }
@@ -232,9 +237,12 @@ export const listenChanel = () => (dispatch, getState) => {
 
 export const closeChanel = () => (dispatch, getState) => {
     const canal = getState().cosecha.canal;
+    if (window.Echo !== undefined) {
+        window.Echo.disconnect();
+        window.Echo = undefined;
+    }
     if (canal) {
         if (canal.nombre !== '' && canal.evento !== '') {
-            window.Echo.disconnect();
             //Limpiamos los estados
             dispatch({type: SET_ADD_COSECHA, payload: []});
             dispatch({type: SET_CINTAS, payload: []});
@@ -284,9 +292,6 @@ export const searchaDataByCintasSemana = () => async (dispatch, getState) => {
                     onDownloadProgress: function () {
                         dispatch(loadingData(false));
                         dispatch(searchData(false));
-
-                        //Empieza a escuchar el canal
-                        dispatch(listenChanel());
                     },
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -325,6 +330,8 @@ export const searchaDataByCintasSemana = () => async (dispatch, getState) => {
                     //Construir aplicación
                     await dispatch(buildApp(true));
                     await dispatch(listenChannelBalanza(true));
+                    //Empieza a escuchar el canal
+                    await dispatch(listenChanel());
                     //await dispatch(prepareData(false));
                 } else {
                     console.error(respuesta.data.code, respuesta.data.error);
