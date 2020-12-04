@@ -9,6 +9,7 @@ import {
 import {useDispatch, useSelector} from "react-redux";
 
 import InputSearch from "../../Tools/InputSearch/InputSearch";
+import moment from "moment";
 
 export default function FormMaterial() {
     const dispatch = useDispatch();
@@ -63,6 +64,7 @@ export default function FormMaterial() {
 
     const addDespacho = () => {
         if (+stockMaterial() >= despacho.cantidad && despacho.cantidad > 0) {
+            despacho.fecha = moment().format("DD/MM/YYYY"); //Agregar la fecha actual
             dispatch(setAddDespacho(despacho));
             dispatch(setDataCantidad(""));
             dispatch(changeStatusBtnsave(false));

@@ -6,11 +6,12 @@ import {
     closeChanel,
     listenChannelBalanza,
     prepareData,
-    searchData,
+    searchData, setDataFecha,
     setDataHacienda, setDefaultCintas
 } from "../../reducers/cosecha/cosechaDucks";
 import CosechaRecobro from "./CosechaRecobro";
 import OptionsHaciendas from "../../components/Global/OptionsHaciendas";
+import moment from "moment";
 
 export default function CosechaBalanza() {
     const dispatch = useDispatch();
@@ -21,6 +22,7 @@ export default function CosechaBalanza() {
     //const credential = useSelector(state => state.login.credential);
 
     const conectarse = () => {
+        dispatch(setDataFecha(moment().format("DD/MM/YYYY")));
         dispatch(prepareData(true));
         dispatch(searchData(true));
     };

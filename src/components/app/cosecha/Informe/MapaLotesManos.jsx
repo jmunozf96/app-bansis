@@ -4,7 +4,7 @@ import {CircleMarker} from "react-leaflet/es";
 import {calcularIntensidadMapa} from "./HelpersInforme";
 
 export default function MapaLotesManos({lotes}) {
-    const [zoom, setZoom] = useState(16);
+    const [zoom, setZoom] = useState(16.3);
     const [latitud, setLatitud] = useState(-2.2590146590619145);
     const [longitud, setLongitud] = useState(-79.49522495269775);
 
@@ -26,7 +26,7 @@ export default function MapaLotesManos({lotes}) {
             center={[latitud, longitud]}
             zoom={zoom}
             className="id-mapa-hacienda"
-            style={{height: 650}}
+            style={{height: 365}}
             onClick={(e) => onClickCoordenadas(e)}
             onZoom={(e) => onChangeZoom(e)}
         >

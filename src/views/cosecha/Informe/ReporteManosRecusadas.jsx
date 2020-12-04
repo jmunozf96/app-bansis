@@ -210,7 +210,7 @@ export default function () {
         <React.Fragment>
             <div className="container-fluid mb-3" style={{marginTop: "4rem"}}>
                 <div className="row">
-                    <div className="col-md-4">
+                    <div className={`col-md-4`}>
                         <div className="card">
                             <div className="card-body">
                                 <div className="row">
@@ -222,12 +222,15 @@ export default function () {
                                         />
                                     </div>
                                     {hacienda &&
-                                    <div className="col-12 mt-3">
-                                        <DateRangePicker
-                                            start={setStartDate}
-                                            end={setEndDate}
-                                        />
-                                    </div>}
+                                    <React.Fragment>
+                                        <div className={`col-12 mt-3`}>
+                                            <DateRangePicker
+                                                start={setStartDate}
+                                                end={setEndDate}
+                                            />
+                                        </div>
+                                    </React.Fragment>
+                                    }
                                 </div>
                                 <hr/>
                                 {hacienda &&
@@ -251,73 +254,71 @@ export default function () {
                             </div>
                         </div>
                     </div>
-                    <div className="col-md-8">
+                    <div className={`col-md-8`}>
                         <div className="row">
                             {data.length > 0 ?
-                                <div className="col-12">
-                                    <div className="card">
-                                        <div className="card-body pl-0 pr-0">
-                                            <div className="col-12 mb-2">
-                                                <div className="btn-group">
-                                                    <button className={`btn btn-primary ${viewMap ? 'active' : ''}`}
-                                                            onClick={() => selectMapa()}
-                                                    >
-                                                        <i className="fas fa-map-marked-alt"/> Mapa Geografico
-                                                    </button>
-                                                    <button
-                                                        className={`btn btn-primary ${viewChartLotes ? 'active' : ''}`}
-                                                        onClick={() => selectChartLotes()}
-                                                    >
-                                                        <i className="fas fa-chart-bar"/> Lotes
-                                                    </button>
-                                                    <button
-                                                        className={`btn btn-danger ${viewChartDanos ? 'active' : ''}`}
-                                                        onClick={() => selectChartDanos()}
-                                                    >
-                                                        <i className="fas fa-exclamation-circle"/> Danos
-                                                    </button>
+                                <React.Fragment>
+                                    <div className="col-12">
+                                        <div className="card">
+                                            <div className="card-body pl-0 pr-0">
+                                                <div className="col-12 mb-2">
+                                                    <div className="btn-group">
+                                                        <button className={`btn btn-primary ${viewMap ? 'active' : ''}`}
+                                                                onClick={() => selectMapa()}
+                                                        >
+                                                            <i className="fas fa-map-marked-alt"/> Mapa Geografico
+                                                        </button>
+                                                        <button
+                                                            className={`btn btn-primary ${viewChartLotes ? 'active' : ''}`}
+                                                            onClick={() => selectChartLotes()}
+                                                        >
+                                                            <i className="fas fa-chart-bar"/> Lotes
+                                                        </button>
+                                                        <button
+                                                            className={`btn btn-danger ${viewChartDanos ? 'active' : ''}`}
+                                                            onClick={() => selectChartDanos()}
+                                                        >
+                                                            <i className="fas fa-exclamation-circle"/> Danos
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="col-12">
-                                                {view}
-                                                {/*Modal para mostrar daños*/}
-                                                {dataModal.show &&
-                                                <ModalBase
-                                                    iconTitle="fas fa-chart-line"
-                                                    title="Daños"
-                                                    size={"xl"}
-                                                    dataModal={dataModal}
-                                                    setDataModal={setDataModal}
-                                                />
-                                                }
+                                                <div className="col-12">
+                                                    {view}
+                                                    {/*Modal para mostrar daños*/}
+                                                    {dataModal.show &&
+                                                    <ModalBase
+                                                        iconTitle="fas fa-chart-line"
+                                                        title="Daños"
+                                                        size={"xl"}
+                                                        dataModal={dataModal}
+                                                        setDataModal={setDataModal}
+                                                    />
+                                                    }
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                    <div className="col-12 mt-2">
+                                        <ListadoLotes
+                                            data={data}
+                                            danosSelect={danos.filter(item => item.selected)}
+                                        />
+                                    </div>
+                                </React.Fragment>
                                 :
                                 <div className="col-12 mt-5">
-                                    <p className="text-center mt-5">
-                                        <img src={emptyData} alt="not-found" width={700}/>
+                                    <p className="text-center">
+                                        <img src={emptyData} alt="not-found" width={450}/>
+                                    </p>
+                                    <hr/>
+                                    <p className="text-center">
+                                        <em><b>No se han encontrado datos.</b></em>
                                     </p>
                                 </div>
                             }
                         </div>
                     </div>
-
                 </div>
-                {data.length > 0 &&
-                <React.Fragment>
-                    <hr/>
-                    <div className="row">
-                        <div className="col-12">
-                            <ListadoLotes
-                                data={data}
-                                danosSelect={danos.filter(item => item.selected)}
-                            />
-                        </div>
-                    </div>
-                </React.Fragment>
-                }
             </div>
         </React.Fragment>
     )

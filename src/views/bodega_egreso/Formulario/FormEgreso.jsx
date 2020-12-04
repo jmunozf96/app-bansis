@@ -1,10 +1,11 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import ComponentFormularioBase from "../../../components/Tools/ComponentFormularioBase";
 import {useParams} from "react-router-dom";
 import CabeceraEgreso from "../../../components/app/bodega_egreso/CabeceraEgreso";
 import DetallesEgreso from "../../../components/app/bodega_egreso/DetallesEgreso";
 import {useDispatch, useSelector} from "react-redux";
 import {
+    clearDespacho,
     //clearDespacho,
     clearFormulario,
     clearNotificacion, existEgreso,
@@ -24,25 +25,28 @@ export default function FormEgreso() {
     const saveTransaction = useSelector(state => state.egresoBodega.save);
     const state_notificacion = useSelector(state => state.egresoBodega.notificacion);
 
-    const [loadFormulario, setLoadFormulario] = useState(true);
+    const clearInit = useCallback(() => {
+        dispatch(setDataCabeceraHacienda(null));
+        dispatch(setDataCabeceraBodega(null));
+        dispatch(setDataCabeceraGrupo(null));
+        dispatch(clearFormulario());
+
+        if (id !== undefined) {
+            dispatch(existEgreso(null, null, id));
+        }
+
+        if (credential.idhacienda) {
+            dispatch(setDataCabeceraHacienda({...credential.idhacienda, ruc: null}));
+        }
+        dispatch(clearDespacho());
+    }, [dispatch, credential, id]);
 
     useEffect(() => {
-        if (loadFormulario) {
-            dispatch(setDataCabeceraHacienda(null));
-            dispatch(setDataCabeceraBodega(null));
-            dispatch(setDataCabeceraGrupo(null));
-            dispatch(clearFormulario());
-            setLoadFormulario(false);
-
-            if (id !== undefined) {
-                dispatch(existEgreso(null, null, id));
-            }
-
-            if (credential.idhacienda) {
-                dispatch(setDataCabeceraHacienda({...credential.idhacienda, ruc: null}));
-            }
+        clearInit();
+        return () => {
+            clearInit()
         }
-    }, [loadFormulario, setLoadFormulario, dispatch, credential, id]);
+    }, [clearInit]);
 
     const nuevo = () => {
         dispatch(clearFormulario());

@@ -3,10 +3,11 @@ import CosechaBalanza from "./CosechaBalanza";
 import {
     buildApp,
     closeChanel,
-    listenChannelBalanza,
+    listenChannelBalanza, setDataFecha,
     setDataHacienda, setDefaultCintas
 } from "../../reducers/cosecha/cosechaDucks";
 import {useDispatch} from "react-redux";
+import moment from "moment";
 
 export default function () {
     const dispatch = useDispatch();
@@ -28,7 +29,7 @@ export default function () {
 
     useEffect(() => {
         clear();
-
+        dispatch(setDataFecha(moment().format("DD/MM/YYYY")));
         return () => {
             clear();
         }

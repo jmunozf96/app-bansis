@@ -37,6 +37,7 @@ const dataInicial = {
     }
 };
 
+const SET_FECHA = 'SET_FECHA';
 const SET_HACIENDA = 'SET_HACIENDA';
 const SET_CANAL = 'SET_CANAL';
 const LISTEN_CHANNEL = 'LISTEN_CHANNEL';
@@ -55,6 +56,8 @@ const SET_ERRORS = 'SET_ERRORS';
 
 export default function reducer(state = dataInicial, action) {
     switch (action.type) {
+        case SET_FECHA:
+            return {...state, fecha: action.payload};
         case SET_HACIENDA:
             return {...state, hacienda: action.payload};
         case SET_CANAL:
@@ -85,6 +88,13 @@ export default function reducer(state = dataInicial, action) {
             return state;
     }
 }
+
+export const setDataFecha = (value) => (dispatch) => {
+    dispatch({
+        type: SET_FECHA,
+        payload: value
+    });
+};
 
 export const setDataHacienda = (value) => (dispatch) => {
     dispatch({

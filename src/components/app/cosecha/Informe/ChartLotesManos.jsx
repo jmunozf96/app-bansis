@@ -10,7 +10,7 @@ export default function ChartLotesManos({data}) {
         return (<ApexChart
             data={dataChart}
             type="bar"
-            height={635}
+            height={350}
         />)
     }, [dataChart]);
 

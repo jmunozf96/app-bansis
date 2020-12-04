@@ -86,7 +86,7 @@ export default function DanosHacienda({danos, setDanos, dataFilter, load}) {
     return (
         <div className="col-12">
             <div className="row">
-                <div className="col-6">
+                <div className="col-md-6 col-6">
                     <FormControlLabel
                         control={
                             <Checkbox
@@ -100,7 +100,7 @@ export default function DanosHacienda({danos, setDanos, dataFilter, load}) {
                     />
                 </div>
                 {danos.length > 0 && danos.map((data, i) =>
-                    <div className="col-6" key={i}>
+                    <div className="col-md-6 col-6" key={i}>
                         <FormControlLabel
                             control={
                                 <Checkbox

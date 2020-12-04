@@ -11,7 +11,7 @@ export default function ChartDanos({danos, danosLotes}) {
         return (<ApexChart
             data={data}
             type="bar"
-            height={635}
+            height={350}
         />)
     }, [data]);
 
