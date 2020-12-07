@@ -26,7 +26,11 @@ const style = {
 
 export default function EnfundeLoteroList() {
     const {idmodulo} = useParams();
-    const [page, setPage] = useState(1);
+
+    const history = useHistory();
+    const dispatch = useDispatch();
+
+    const [page, setPage] = useState(history.location.state ? history.location.state.page : 1);
     const [loadCalendar, setLoadCalendar] = useState(true);
     const [changeSemana, setChangeSemana] = useState({
         status: false,
@@ -43,19 +47,17 @@ export default function EnfundeLoteroList() {
     });
 
     const credential = useSelector((state) => state.login.credential);
-    const [loadLoteros, setLoadLoteros] = useState(!!credential.idhacienda);
+    const [loadLoteros, setLoadLoteros] = useState(!!(!!credential.idhacienda || (history.location.state && history.location.state.hacienda)));
     const [loterosSemanal, setLoterosSemanal] = useState(null);
     const [loterosSemanaPendiente, setLoterosSemanaPendiente] = useState([]);
 
     const [changeURL, setChangeURL] = useState(false);
     const api_buscador = `${API_LINK}/bansis-app/index.php/haciendas-select`;
-    const [hacienda, setHacienda] = useState(credential.idhacienda ? credential.idhacienda : null);
+    const [hacienda, setHacienda] = useState(credential.idhacienda ? credential.idhacienda : history.location.state ? history.location.state.hacienda : null);
     const [searchEmpleado, setSearchEmpleado] = useState('');
     const [apiEmpleado, setApiEmpleado] = useState(`${API_LINK}/bansis-app/index.php/search/empleados${(credential && credential.idhacienda) ? "?hacienda=" + credential.idhacienda.id : ''}`);
     const [empleado, setEmpleado] = useState(null);
 
-    const history = useHistory();
-    const dispatch = useDispatch();
     //const progessbarStatus = (state) => dispatch(progressActions(state));
 
     useEffect(() => {
@@ -124,6 +126,12 @@ export default function EnfundeLoteroList() {
     const onChangePage = (page) => {
         setPage(page);
         setLoadLoteros(true);
+
+        if (history.location.state){
+            const state = {...history.location.state};
+            delete state.page;
+            history.replace({...history.location, state})
+        }
     };
 
     const irSemanaAnterior = () => {
@@ -234,7 +242,7 @@ export default function EnfundeLoteroList() {
                             <tr>
                                 <th width="35%">Hacienda</th>
                                 <th>Nombre</th>
-                                <th width="8%">Despachos</th>
+                                <th width="8%">Saldo</th>
                                 <th width="8%">Enfunde</th>
                                 <th width="5%">Pre.</th>
                                 <th width="5%">Fut.</th>
@@ -246,7 +254,7 @@ export default function EnfundeLoteroList() {
                             Object.keys(loterosSemanal.data).map((item) => (
                                 <tr key={loterosSemanal.data[item].id} className={`table-sm text-center`}>
                                     <td style={style.table.textCenter}>
-                                        {loterosSemanal.data[item].hacienda.descripcion}
+                                        {loterosSemanal.data[item].hacienda}
                                     </td>
                                     <td style={style.table.textCenter}>
                                         {loterosSemanal.data[item].nombre1} {loterosSemanal.data[item].apellido1} {loterosSemanal.data[item].apellido2}
@@ -275,11 +283,15 @@ export default function EnfundeLoteroList() {
                                                 onClick={() => history.push({
                                                     pathname: `/hacienda/avances/labor/enfunde/${idmodulo}/empleado/formulario`,
                                                     state: {
-                                                        hacienda: loterosSemanal.data[item].hacienda,
+                                                        hacienda: {
+                                                            id: loterosSemanal.data[item].idhacienda,
+                                                            descripcion: loterosSemanal.data[item].hacienda
+                                                        },
                                                         empleado: {
                                                             id: loterosSemanal.data[item].id,
                                                             descripcion: loterosSemanal.data[item].nombres
                                                         },
+                                                        page: page,
                                                         calendario: cabeceraSemana
                                                     }
                                                 })}

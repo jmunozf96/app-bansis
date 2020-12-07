@@ -32,8 +32,13 @@ export default function FormEnfunde() {
     //console.log(history.location.state !== null);
 
     //-----------------------------------------------------------------------
-
-    const Regresar = `/hacienda/avances/labor/enfunde/${idmodulo}/empleado`;
+    const Regresar = {
+        pathname: `/hacienda/avances/labor/enfunde/${idmodulo}/empleado`,
+        state: {
+            hacienda: history.location.state ? history.location.state.hacienda : null,
+            page: history.location.state.page ? history.location.state.page : null,
+        }
+    };
     const [disabledElements, setDisabledElements] = useState({
         hacienda: false,
         loteSeccion: true,
