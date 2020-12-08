@@ -28,6 +28,7 @@ export default function CosechaBalanza() {
     };
 
     const desconectarse = () => {
+        dispatch(setDataFecha(moment().format("DD/MM/YYYY")));
         dispatch(closeChanel());//Cerramos canal
         dispatch(listenChannelBalanza(false));//Apagamos el listening en redux
         dispatch(setDataHacienda(null));

@@ -21,7 +21,7 @@ export default function CosechaCintaRecobro() {
                                name={`${cinta.color}-CALENDARIO`}
                                disabled/>
                     </div>
-                    <div className="col-2">
+                    <div className="col-1">
                         <label>Enfunde</label>
                         <input
                             className="form-control text-center bg-white"
@@ -46,6 +46,14 @@ export default function CosechaCintaRecobro() {
                         />
                     </div>
                     <div className="col-2">
+                        <label><b>Saldo Ini.</b></label>
+                        <input
+                            className="form-control text-center bg-white"
+                            value={+cinta.enfunde - (+cinta.caidas + +cinta.cortados)}
+                            disabled
+                        />
+                    </div>
+                    <div className="col-2">
                         <label><b style={{color: "red"}}>Cort. Hoy</b></label>
                         <input
                             className="form-control text-center bg-white"
@@ -54,15 +62,15 @@ export default function CosechaCintaRecobro() {
                         />
                     </div>
                     <div className="col-2">
-                        <label><b>Saldo</b></label>
+                        <label><b>Saldo Fin.</b></label>
                         <input
                             className="form-control text-center bg-white"
                             value={+cinta.enfunde - (+cinta.cortados + +cinta.caidas + getTotalCosechaCinta())}
                             disabled
                         />
                     </div>
-                    <div className="col-2">
-                        <label>% por Recobrar</label>
+                    <div className="col-1">
+                        <label>% a Recob.</label>
                         <input
                             className="form-control text-center bg-white"
                             value={(((1 - ((+cinta.cortados + +cinta.caidas + getTotalCosechaCinta()) / +cinta.enfunde)) * 100).toFixed(2).toString() + ' %')}
