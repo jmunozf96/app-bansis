@@ -2,10 +2,10 @@ import axios from "axios";
 
 export const APP_TITLE = 'Bansis - Web';
 //Prueba
-//export const API_LINK = 'http://192.168.191.1:8085/api';
+export const API_LINK = 'http://192.168.191.1:8085/api';
 //Produccion
 //export const API_LINK = 'http://192.168.191.1:8084/api';
-export const API_LINK = 'http://192.168.191.94:8084/api';
+//export const API_LINK = 'http://192.168.191.94:8084/api';
 
 export const API_XASS_PRIMO = `${API_LINK}/bansis-app/XassInventario.php/primo`;
 export const API_XASS_SOFCA = `${API_LINK}/bansis-app/XassInventario.php/sofca`;

@@ -85,9 +85,9 @@ export default function ReporteEnfunde() {
                     const link = document.createElement('a');
                     link.href = url;
 
-                    let value = `Enfunde_Loteros_Semana ${semana}.pdf`;
+                    let value = `Enfunde_Loteros_Semana ${semana}.${extension}`;
                     if (informe !== 'lotes') {
-                        value = `Saldos_Finales_Semana-${semana}.pdf`;
+                        value = `Saldos_Finales_Semana-${semana}.${extension}`;
                     }
 
                     link.setAttribute('download', `${value}`);
@@ -143,6 +143,9 @@ export default function ReporteEnfunde() {
                                     <Dropdown.Menu style={{margin: 0}}>
                                         <Dropdown.Item onClick={() => downloadPDF(body.id, body.semana)}>
                                             <i className="fas fa-file-pdf"/> Enfunde_Lotero_Semana-{body.semana}.pdf
+                                        </Dropdown.Item>
+                                        <Dropdown.Item onClick={() => downloadPDF(body.id, body.semana, 'lotes', 'xls')}>
+                                            <i className="fas fa-file-excel"/> Enfunde_Lotero_Semana-{body.semana}.xls
                                         </Dropdown.Item>
                                         <Dropdown.Item onClick={() => downloadPDF(body.id, body.semana, 'saldos')}>
                                             <i className="fas fa-file-pdf"/> Saldos_Finales_Semana-{body.semana}.pdf
