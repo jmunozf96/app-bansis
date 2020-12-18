@@ -5,7 +5,6 @@ import {API_LINK} from "../../../constants/helpers";
 export default function EnfundePeriodo() {
     const [enfunde, setEnfunde] = useState(null);
     const [loadData, setLoadData] = useState(true);
-
     useEffect(() => {
         if (loadData) {
             (async () => {

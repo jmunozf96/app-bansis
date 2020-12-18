@@ -29,8 +29,10 @@ export default function () {
 
     useEffect(() => {
         clear();
+        console.log('salio');
         dispatch(setDataFecha(moment().format("DD/MM/YYYY")));
         return () => {
+            console.log('salio aaaa');
             clear();
         }
     }, [clear, dispatch]);

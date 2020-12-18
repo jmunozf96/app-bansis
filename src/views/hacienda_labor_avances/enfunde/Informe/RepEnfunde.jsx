@@ -1,19 +1,25 @@
 import React, {useEffect, useState} from "react";
 import InformeComponent from "../../../../components/Tools/InformesComponent";
-import InformeEnfundeSemanal from "../../../../components/app/hacienda_labor_avances/enfunde/Informes/InformeEnfundeSemanal";
+import InformeEnfundeSemanal
+    from "../../../../components/app/hacienda_labor_avances/enfunde/Informes/InformeEnfundeSemanal";
 import {API_LINK} from "../../../../constants/helpers";
 import PaginationForm from "../../../../components/Tools/Pagination/Pagination";
 import ModalForm from "../../../../components/Tools/ModalForm";
 import useFetch from "../../../../hooks/useFetch";
 import Spinner1 from "../../../../components/Tools/Loadings/Spinner1";
-import {Col, Row} from "react-bootstrap";
+import {Col, DropdownButton, Dropdown, ButtonGroup, Button, Row} from "react-bootstrap";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
 import {useHistory} from "react-router-dom";
+import {useDispatch, useSelector} from "react-redux";
+import axios from "axios";
+import {progressActions} from "../../../../actions/progressActions";
 
 export default function ReporteEnfunde() {
     const history = useHistory();
+    const dispatch = useDispatch();
+
     const [enfunde, setEnfunde] = useState(null);
     const [loadData, setLoadData] = useState(enfunde === null);
     const [page, setPage] = useState(1);
@@ -22,6 +28,9 @@ export default function ReporteEnfunde() {
     const [configModal, setConfigModal] = useState(configuracionModal);
     const [showMaterial, setShowMaterial] = useState(false);
     const [showEmpleados, setShowEmpleados] = useState(false);
+
+    const credential = useSelector((state) => state.login.credential);
+    const [hacienda, setHacienda] = useState(credential.idhacienda ? credential.idhacienda : null);
 
     const onChangePage = (page) => {
         setPage(page);
@@ -59,6 +68,38 @@ export default function ReporteEnfunde() {
         setConfigModal(configuracionModal);
     };
 
+    const downloadPDF = (id, semana, informe = 'lotes', extension = 'pdf') => {
+        let url = `${API_LINK}/bansis-app/index.php/informe/enfunde-pdf/semanal-empleados/${id}?extension=${extension}&${informe}=true`;
+        (async () => {
+            try {
+                dispatch(progressActions(true));
+                axios({
+                    url: `${url}`,
+                    method: 'GET',
+                    responseType: 'blob', // important
+                    onDownloadProgress: () => {
+                        dispatch(progressActions(false));
+                    }
+                }).then((response) => {
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+
+                    let value = `Enfunde_Loteros_Semana ${semana}.pdf`;
+                    if (informe !== 'lotes') {
+                        value = `Saldos_Finales_Semana-${semana}.pdf`;
+                    }
+
+                    link.setAttribute('download', `${value}`);
+                    document.body.appendChild(link);
+                    link.click();
+                });
+            } catch (e) {
+                console.error(e)
+            }
+        })();
+    };
+
     return (
         <InformeComponent>
             <Row>
@@ -88,11 +129,28 @@ export default function ReporteEnfunde() {
                 setData={setEnfunde}
                 loadData={loadData}
                 setLoadData={setLoadData}
-                api={`${API_LINK}/bansis-app/index.php/informe/enfunde/semanal?page=${page}`}
-                cabeceraTabla={['Hacienda', 'Calend.', 'Sem.', 'Per.', 'Materiales', 'Empleados', 'Cinta_Pre', 'Cant_Pre', 'Cinta_Fut', 'Cant_fut', 'Accion']}
+                api={`${API_LINK}/bansis-app/index.php/informe/enfunde/semanal?page=${page}${hacienda !== null ? `&hacienda=${hacienda.id}` : ''}`}
+                cabeceraTabla={['...', 'Hacienda', 'Calend.', 'Sem.', 'Per.', 'Materiales', 'Empleados', 'C_Pre', 'Cant_Pre', 'C_Fut', 'Cant_fut', 'Total']}
             >
                 {enfunde && enfunde.data.length > 0 && enfunde.data.map((body, i) => (
                     <tr key={i} className="text-center table-sm">
+                        <td width="5%">
+                            <div className="btn-group">
+                                <Dropdown size="sm" drop="right">
+                                    <Dropdown.Toggle variant="success" id="dropdown-basic" style={{margin: 0}}>
+                                        <i className="far fa-file-alt"/>
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu style={{margin: 0}}>
+                                        <Dropdown.Item onClick={() => downloadPDF(body.id, body.semana)}>
+                                            <i className="fas fa-file-pdf"/> Enfunde_Lotero_Semana-{body.semana}.pdf
+                                        </Dropdown.Item>
+                                        <Dropdown.Item onClick={() => downloadPDF(body.id, body.semana, 'saldos')}>
+                                            <i className="fas fa-file-pdf"/> Saldos_Finales_Semana-{body.semana}.pdf
+                                        </Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
+                            </div>
+                        </td>
                         <td style={style.table.textCenter}>{body.hacienda.detalle}</td>
                         <td style={style.table.textCenter} width="5%">{body.idcalendar}</td>
                         <td style={style.table.textCenter} width="5%">{body.semana}</td>
@@ -107,7 +165,7 @@ export default function ReporteEnfunde() {
                                 <i className="fas fa-bars"/>
                             </button>
                         </td>
-                        <td width="5%">
+                        <td width="2%">
                             <div className="input-group">
                                 <input className="form-control" name={`${body.colPresente}-CALENDARIO`}
                                        type="text"
@@ -115,7 +173,7 @@ export default function ReporteEnfunde() {
                             </div>
                         </td>
                         <td style={style.table.textCenter}>{body.presente}</td>
-                        <td width="5%">
+                        <td width="2%">
                             <div className="input-group">
                                 <input className="form-control" name={`${body.colFuturo}-CALENDARIO`}
                                        type="text"
@@ -123,7 +181,9 @@ export default function ReporteEnfunde() {
                             </div>
                         </td>
                         <td style={style.table.textCenter}>{body.futuro}</td>
-                        <td/>
+                        <td style={style.table.textCenter}>
+                            <b>{parseInt(body.presente) + parseInt(body.futuro)}</b>
+                        </td>
                     </tr>
                 ))}
             </InformeEnfundeSemanal>

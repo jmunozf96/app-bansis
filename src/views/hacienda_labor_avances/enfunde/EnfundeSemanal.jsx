@@ -5,7 +5,7 @@ import {API_LINK} from "../../../constants/helpers";
 import CircularProgress from "@material-ui/core/CircularProgress";*/
 import PaginationForm from "../../../components/Tools/Pagination/Pagination";
 import {useHistory} from "react-router-dom";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {Col, Row} from "react-bootstrap";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import Link from "@material-ui/core/Link";
@@ -14,6 +14,8 @@ import Typography from "@material-ui/core/Typography";
 import ModalForm from "../../../components/Tools/ModalForm";
 import Spinner1 from "../../../components/Tools/Loadings/Spinner1/Spinner1";
 import ConfirmDialog from "../../../components/Tools/ConfirmDialog";
+import {progressActions} from "../../../actions/progressActions";
+import axios from "axios";
 //import EnfundePeriodo from "./EnfundePeriodo";
 
 const style = {
@@ -29,6 +31,7 @@ export default function EnfundeSemanal() {
     const [enfundes, setEnfundes] = useState(null);
     const [page, setPage] = useState(1);
     const history = useHistory();
+    const dispatch = useDispatch();
     //const dispatch = useDispatch();
     //const progessbarStatus = (state) => dispatch(progressActions(state));
     const authentication = useSelector((state) => state.login.token);
@@ -48,20 +51,25 @@ export default function EnfundeSemanal() {
 
     useEffect(() => {
         if (reload) {
+            dispatch(progressActions(true));
             (async () => {
                 let url = `${API_LINK}/bansis-app/index.php/getEnfunde/semanal?page=${page}`;
 
                 if (credential && credential.idhacienda) {
                     url = `${API_LINK}/bansis-app/index.php/getEnfunde/semanal?page=${page}&hacienda=${credential.idhacienda.id}`;
                 }
-                const request = await fetch(url);
-                const response = await request.json();
+                const request = await axios.get(url, {
+                    onDownloadProgress: () => {
+                        dispatch(progressActions(false));
+                    }
+                });
+                const response = await request.data;
 
                 setEnfundes(response);
             })();
             setReload(false);
         }
-    }, [reload, page, credential]);
+    }, [reload, page, credential, dispatch]);
 
     const onChangePage = (page) => {
         setPage(page);
@@ -158,6 +166,7 @@ export default function EnfundeSemanal() {
                         centered={true}
                         scrollable={true}
                         dialogSize={'90'}
+                        save={onHideModal}
                         cancel={onHideModal}
                     >
                         <div className="container-fluid">
@@ -235,6 +244,18 @@ export default function EnfundeSemanal() {
                         actionConfirm={onCerrarEnfunde}
                     />
                     }
+                    <div className="col-12">
+                        <div className="alert alert-info pl-0">
+                            <ul className="m-0">
+                                <li><i className="fas fa-lock-open"/> Enfunde Abierto.
+                                </li>
+                                <li><i className="fas fa-lock"/> Enfunde Cerrado (Tener en cuenta cerrar enfunde
+                                    Presente y Futuro).
+                                </li>
+                                <li><i className="fas fa-chart-bar"/> Estadisticas enfunde lote semanal.</li>
+                            </ul>
+                        </div>
+                    </div>
                     <div className="col-12 table-responsive">
                         <table className="table table-bordered table-hover">
                             <thead>
@@ -300,7 +321,7 @@ export default function EnfundeSemanal() {
                                                 className="btn btn-primary btn-lg"
                                                 onClick={() => history.push(`${history.location.pathname}/semana/detalle/${item.id}`)}
                                             >
-                                                <i className="fas fa-map-marked-alt"/>
+                                                <i className="fas fa-chart-bar"/>
                                             </button>
                                         </div>
                                     </td>

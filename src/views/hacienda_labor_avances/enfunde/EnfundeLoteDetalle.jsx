@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {useHistory, useParams} from "react-router-dom";
 import {API_LINK} from "../../../constants/helpers";
 import ApexChart from "../../../components/Tools/ApexChart/ApexChart";
@@ -21,13 +21,26 @@ const style = {
 export function EnfundeLoteDetalle() {
     const {id, idmodulo} = useParams();
     const [loadData, setLoadData] = useState(true);
-    const [secciones, setSecciones] = useState([]);
+    const [secciones, setSecciones] = useState(undefined);
     const [cabeceraEnfunde, setCabeceraEnfunde] = useState(null);
     const history = useHistory();
 
     const [openModal, setOpenModal] = useState(false);
-    const [dataSeccionEnfunde, setDataSeccionEnfunde] = useState(null);
+    const [dataSeccionEnfunde, setDataSeccionEnfunde] = useState(undefined);
     const [loadDataLote, setLoadDataLote] = useState(false);
+
+    const openModalDetalle = useCallback((data, dataSemana) => {
+        setOpenModal(true);
+        setDataSeccionEnfunde({
+            seccion: data,
+            enfunde: dataSemana,
+        });
+        setLoadDataLote(true);
+    }, []);
+
+    const detalleEnfundeLote = useCallback((data, dataSemana) => {
+        openModalDetalle(data, dataSemana)
+    }, [openModalDetalle]);
 
     useEffect(() => {
         if (loadData) {
@@ -38,52 +51,44 @@ export function EnfundeLoteDetalle() {
                 const {code} = response;
                 if (code === 200) {
                     if (response.dataArray.length > 0) {
-                        const {totalSemana, dataSemana, dataArray} = response;
+                        const {dataSemana, dataArray} = response;
                         setCabeceraEnfunde(dataSemana);
-                        const datos = [];
-                        dataArray.map((item) => {
-                            const {cant_pre, cant_fut, alias} = item;
-                            const seccion = {
-                                series: [+(((+cant_pre + +cant_fut) / +totalSemana) * 100).toFixed(2)],
-                                options: {
-                                    chart: {
-                                        height: 150,
-                                        type: 'radialBar',
-                                    },
-                                    plotOptions: {
-                                        radialBar: {
-                                            hollow: {
-                                                size: '60%',
+
+                        setSecciones({
+                            series: [{
+                                name: 'Enfunde',
+                                data: [...dataArray.map(item => parseInt(item['cant_pre']) + parseInt(item['cant_fut']))]
+                            }],
+                            options: {
+                                chart: {
+                                    height: 200,
+                                    type: 'line',
+                                    events: {
+                                        dataPointSelection: (event, chartContext, config) => {
+                                            //config.w.config.data[config.dataPointIndex];
+                                            if (config.selectedDataPoints[0].length > 0) {
+                                                const data = config.w.config.data[config.dataPointIndex];
+                                                detalleEnfundeLote(data, dataSemana);
                                             }
-                                        },
-                                    },
-                                    labels: [`${alias}`],
-                                }
-                            };
-                            const data = {
-                                seccion,
-                                item
-                            };
-                            datos.push(data);
-                            return true;
+                                        }
+                                    }
+                                },
+                                xaxis: {
+                                    categories: [...dataArray.map(item => item.alias)],
+                                },
+                                dataLabels: {
+                                    enabled: false
+                                },
+                                data: dataArray
+                            },
                         });
-                        setSecciones(datos);
                     }
                 }
 
             })();
             setLoadData(false);
         }
-    }, [loadData, id]);
-
-    const openModalDetalle = (data) => {
-        setOpenModal(true);
-        setDataSeccionEnfunde({
-            enfunde: cabeceraEnfunde,
-            seccion: data
-        });
-        setLoadDataLote(true);
-    };
+    }, [loadData, id, detalleEnfundeLote]);
 
     const cancelar = () => {
         setOpenModal(false);
@@ -145,7 +150,7 @@ export function EnfundeLoteDetalle() {
                                value={cabeceraEnfunde.hacienda.detalle}/>
                     </div>
                     <div className="offset-2 col-md-1">
-                        <label>... </label>
+                        <label>Estado </label>
                         <input
                             className={`form-control ${cabeceraEnfunde.cerrado !== "0" ? 'bg-danger' : 'bg-success'}`}
                             disabled={true}
@@ -156,30 +161,27 @@ export function EnfundeLoteDetalle() {
                 <div className="row p-0 m-0">
                     <div className="col-12">
                         <div className="row">
-                            {secciones.length > 0 &&
-                            secciones.map((data, index) => (
-                                <div className="col-md-2 col-6" key={index}>
-                                    <div className="row">
-                                        <div className="col-12">
-                                            <ApexChart
-                                                data={data.seccion}
-                                                type="radialBar"
-                                                height={200}
-                                            />
-                                        </div>
-                                        <div className="col-12 text-center">
-                                            <button className="btn btn-primary mt-n4"
-                                                    onClick={() => openModalDetalle(data)}>
-                                                <i className="fas fa-list"/> Detalles {data.item.alias}
-                                            </button>
-                                        </div>
+                            {secciones &&
+                            <React.Fragment>
+                                <div className="col-md-12">
+                                    <div className="alert alert-info">
+                                        <i className="fas fa-mouse-pointer"/> Al hacer click en la <b>barra de enfunde</b> se
+                                        mostrara el detalle del mismo <em>(Lote, Loteros, Total Enfunde)</em>.
                                     </div>
                                 </div>
-                            ))
+                                <div className="col-md-12 col-12">
+                                    <ApexChart
+                                        data={secciones}
+                                        type="bar"
+                                        height={500}
+                                    />
+                                </div>
+                            </React.Fragment>
                             }
                         </div>
                     </div>
                 </div>
+                <hr/>
             </div>
             }
         </>
@@ -200,7 +202,7 @@ function ModalDetalleEnfundeSeccionSemana(props) {
     useEffect(() => {
         if (loadDataLote) {
             (async () => {
-                const url = `${API_LINK}/bansis-app/index.php/getEnfundeSeccion?calendario=${data.enfunde.codigo}&seccion=${data.seccion.item.idlote_sec}&idenfunde=${idenfunde}`;
+                const url = `${API_LINK}/bansis-app/index.php/getEnfundeSeccion?calendario=${data.enfunde.codigo}&seccion=${data.seccion.idlote_sec}&idenfunde=${idenfunde}`;
                 const request = await fetch(url);
                 const response = await request.json();
                 const {code} = response;
@@ -211,10 +213,6 @@ function ModalDetalleEnfundeSeccionSemana(props) {
             setLoadDataLote(false);
         }
     }, [loadDataLote, data, setEnfunde, setLoadDataLote, idenfunde]);
-
-    const sumHas = () => {
-        return (enfunde.detalleSemana.reduce((total, item) => +total + +item.seccion.has, 0)).toFixed(2)
-    };
 
     const sumPresente = () => {
         return enfunde.detalleSemana.reduce((total, item) => +total + +item.cant_pre, 0)
@@ -231,7 +229,7 @@ function ModalDetalleEnfundeSeccionSemana(props) {
                 show={open}
                 animation={true}
                 icon="fas fa-map-pin"
-                title={`Detalles de Enfunde en lote: ${data.seccion.item.alias} - Semana: ${data.enfunde.semana}`}
+                title={`Detalles de Enfunde en lote: ${data.seccion.alias} - Semana: ${data.enfunde.semana}`}
                 backdrop="static"
                 size="xl"
                 centered={true}
@@ -249,14 +247,14 @@ function ModalDetalleEnfundeSeccionSemana(props) {
                                             <label>Presente</label>
                                             <div className="input-group">
                                                 <input type="text" className="form-control bg-white" disabled={true}
-                                                       defaultValue={data.seccion.item.cant_pre}/>
+                                                       defaultValue={data.seccion.cant_pre}/>
                                             </div>
                                         </div>
                                         <div className="col-6">
                                             <label>Futuro</label>
                                             <div className="input-group">
                                                 <input type="text" className="form-control bg-white" disabled={true}
-                                                       defaultValue={data.seccion.item.cant_fut}/>
+                                                       defaultValue={data.seccion.cant_fut}/>
                                             </div>
                                         </div>
                                     </div>
@@ -302,17 +300,16 @@ function ModalDetalleEnfundeSeccionSemana(props) {
                                         <tr>
                                             <th>Empleado</th>
                                             <th>Reelevo</th>
-                                            <th width="5%">Has</th>
                                             <th width="10%">Presente</th>
                                             <th width="10%">Futuro</th>
                                             <th width="10%">Total</th>
-                                            <th width="5%">...</th>
                                         </tr>
                                         </thead>
                                         <tbody>
                                         {enfunde && enfunde.detalleSemana.length > 0 &&
                                         enfunde.detalleSemana.map((item, i) => (
-                                            <tr key={i} className="table-sm text-center"  style={item.reelevo && {backgroundColor: 'rgba(67,255,179,0.35)'}}>
+                                            <tr key={i} className="text-center"
+                                                style={item.reelevo && {backgroundColor: 'rgba(67,255,179,0.35)'}}>
                                                 <td style={style.table.textCenter}>{item.seccion['cab_seccion_labor'].empleado.nombre1
                                                     .concat(' ')
                                                     .concat(item.seccion['cab_seccion_labor'].empleado.nombre2)
@@ -323,27 +320,17 @@ function ModalDetalleEnfundeSeccionSemana(props) {
                                                         .concat(' ')
                                                         .concat(item.seccion['cab_seccion_labor'].empleado.apellido1)}
                                                 </td>
-                                                <td style={style.table.textCenter}>
-                                                    {!item.reelevo ? (+item.seccion.has).toFixed(2) : '-'}
-                                                </td>
                                                 <td style={style.table.textCenter}>{+item.cant_pre}</td>
                                                 <td style={style.table.textCenter}>{+item.cant_fut}</td>
                                                 <td style={style.table.textCenter}>{+item.cant_pre + +item.cant_fut}</td>
-                                                <td>
-                                                    <button className="btn btn-info">
-                                                        <i className="fas fa-route"/>
-                                                    </button>
-                                                </td>
                                             </tr>
                                         ))
                                         }
                                         <tr className="text-center" style={{backgroundColor: '#E6ECF5'}}>
                                             <td colSpan={2}><b>TOTAL SEMANA</b></td>
-                                            <td><b>{sumHas()}</b></td>
                                             <td><b>{sumPresente()}</b></td>
                                             <td><b>{sumFuturo()}</b></td>
                                             <td><b>{sumPresente() + sumFuturo()}</b></td>
-                                            <td/>
                                         </tr>
                                         </tbody>
                                     </table>

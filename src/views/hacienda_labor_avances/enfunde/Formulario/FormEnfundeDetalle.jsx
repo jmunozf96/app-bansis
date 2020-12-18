@@ -19,7 +19,7 @@ const style = {
 
 export default function FormEnfundeDetalle(props) {
     const {
-        cabecera, hacienda, empleado, distribucion,
+        statusEnfunde, cabecera, hacienda, empleado, distribucion,
         detalles, save, itemsToDelete, setItemsToDelete,
         searchReelevo, setSearchReelevo, empleadoReelevo, setEmpleadoReelevo,
         materialesInventarioReelevo, setMaterialesInventarioReelevo
@@ -87,13 +87,13 @@ export default function FormEnfundeDetalle(props) {
             const arrayFilterPresente = detalles.filter((item) => item.hasOwnProperty('presente'));
             if (arrayFilterPresente.length > 0) {
                 arrayFilterPresente.map((item) => [].push.apply(array, item.presente));
-                setDetallesEnfundePresente(array);
+                setDetallesEnfundePresente(array.map((item) => ({...item, cerrado: statusEnfunde.status_presente})));
             }
             array = [];
             const arrayFilterFuturo = detalles.filter((item) => item.hasOwnProperty('futuro'));
             if (arrayFilterFuturo.length > 0) {
                 arrayFilterFuturo.map((item) => [].push.apply(array, item.futuro));
-                setDetallesEnfundeFuturo(array);
+                setDetallesEnfundeFuturo(array.map((item) => ({...item, cerrado: statusEnfunde.status_futuro})));
             }
             setLoadDataDetalle(true);
             setLoadDataEnfunde(false);
@@ -238,7 +238,6 @@ export default function FormEnfundeDetalle(props) {
         } else {
             arraydata = detallesEnfundeFuturo;
         }
-
         return arraydata;
     };
 
@@ -368,15 +367,7 @@ export default function FormEnfundeDetalle(props) {
             aumentaSaldo = itemsEliminadosCantidad(item.detalle.material, item.reelevo);
         }
 
-        /*console.log("----------------------------------------");
-        console.log("Cantidad anterior: " + cant_anterior.toString());
-        console.log("Nueva cantidad: " + nw_cantidad.toString());
-        console.log("Saldo a aumentar: " + aumentaSaldo.toString());
-        console.log("Saldo final: " + saldo_final.toString());
-        console.log("Saldo cambiado en edicion: " + canChangeValue.toString());*/
         canChangeValue = ((saldo_final + aumentaSaldo) - (canChangeValue - cant_anterior));
-        /*console.log("Puede cambiar valor: " + canChangeValue.toString());
-        console.log("----------------------------------------");*/
 
         if (canChangeValue >= nw_cantidad) {
             if (item.hasOwnProperty('contabilizar')) {
@@ -511,7 +502,7 @@ export default function FormEnfundeDetalle(props) {
                                 </div>
                                 <button
                                     className={`btn btn-primary btn-block btn-lg`}
-                                    onClick={() => saveEnfunde()}
+                                    onClick={(statusEnfunde && statusEnfunde.status_presente && statusEnfunde.status_futuro) ? null : () => saveEnfunde()}
                                 >
                                     <i className="fas fa-check-circle"/> Confirmar
                                 </button>
@@ -839,6 +830,7 @@ function DetalleEnfunde({semana, distribucion, detalles, loadDataDetalle, setLoa
     };
 
     const saveEdit = (item) => {
+        console.log(item);
         if (edition(item, itemEdit)) {
             setItemEdit(null);
             setEdit(false);
@@ -862,7 +854,7 @@ function DetalleEnfunde({semana, distribucion, detalles, loadDataDetalle, setLoa
             <tbody>
             {listData.length > 0 &&
             listData.map((item) => item.distribucion.id === distribucion.id && (
-                <tr key={item.id} className="table-sm text-center">
+                <tr key={item.id} className="text-center">
                     <td className="text-left" style={style.table.textCenter}>
                         <span className="badge badge-light">{item.detalle.material.descripcion}</span>
                     </td>
@@ -905,20 +897,26 @@ function DetalleEnfunde({semana, distribucion, detalles, loadDataDetalle, setLoa
                         </span>
                     </td>
                     <td>
-                        <div className="btn-group">
-                            {edit && itemEdit.id === item.id ?
-                                <button className="btn btn-success" onClick={() => saveEdit(item)}>
-                                    <i className="fas fa-save"/>
+                        {!item.cerrado ?
+                            <div className="btn-group">
+                                {edit && itemEdit.id === item.id ?
+                                    <button className="btn btn-success" onClick={() => saveEdit(item)}>
+                                        <i className="fas fa-save"/>
+                                    </button>
+                                    :
+                                    <button className="btn btn-primary" onClick={() => changeEdit(item)}>
+                                        <i className="fas fa-edit"/>
+                                    </button>
+                                }
+                                <button className="btn btn-danger" onClick={() => destroy(item)}>
+                                    <i className="fas fa-trash-alt"/>
                                 </button>
-                                :
-                                <button className="btn btn-primary" onClick={() => changeEdit(item)}>
-                                    <i className="fas fa-edit"/>
-                                </button>
-                            }
-                            <button className="btn btn-danger" onClick={() => destroy(item)}>
-                                <i className="fas fa-trash-alt"/>
-                            </button>
-                        </div>
+                            </div>
+                            :
+                            <span className="badge badge-danger">
+                                <i className="fas fa-lock"/> Cerrado
+                            </span>
+                        }
                     </td>
                 </tr>
             ))}

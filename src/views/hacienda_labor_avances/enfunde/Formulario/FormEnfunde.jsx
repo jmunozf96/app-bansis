@@ -4,7 +4,7 @@ import Buscador from "../../../../components/Tools/Buscador";
 import InputSearch from "../../../../components/Tools/InputSearch/InputSearch";
 import ComponentFormularioBase from "../../../../components/Tools/ComponentFormularioBase";
 import {API_LINK, idGrupoMaterialEnfunde} from "../../../../constants/helpers";
-import {FormHelperText} from "@material-ui/core";
+import {Checkbox, FormControlLabel, FormHelperText} from "@material-ui/core";
 import {progressActions} from "../../../../actions/progressActions";
 import {useDispatch, useSelector} from "react-redux";
 import FullScreen from "../../../../components/Tools/FullScreen/FullScreen";
@@ -16,6 +16,7 @@ import 'moment/locale/es';
 import qs from "qs";
 import CabeceraSemana from "../../../hacienda/CabeceraSemana";
 import Page404 from "../../../../components/Errors/404 Page/Page404";
+import {setDataCabeceraParcial} from "../../../../reducers/bodega/egresoBodegaDucks";
 
 const style = {
     table: {
@@ -51,6 +52,7 @@ export default function FormEnfunde() {
         btnNuevo: false
     });
 
+    const [statusEnfunde, setStatusEnfunde] = useState(null);
     const [cabeceraEnfunde, setCabeceraEnfunde] = useState({
         fecha: history.location.state ? history.location.state.calendario.fecha : moment().format("DD/MM/YYYY"),
         hacienda: history.location.state ? history.location.state.hacienda : null,
@@ -167,6 +169,7 @@ export default function FormEnfunde() {
                                 const response = await request.json();
                                 const detallesDB = [];
                                 if (response.code === 200) {
+                                    setStatusEnfunde(response.dataEnfunde);
                                     setSaldoEmpleado(+response.saldoEmpleado.saldo);
                                     detalle_seccion_labor.map(seccion => {
                                         const distribucion = {
@@ -468,6 +471,36 @@ export default function FormEnfunde() {
             <div className="row">
                 <div className="col-md-6 mb-3">
                     <div className="row">
+                        <div className="col-md-12">
+                            {statusEnfunde &&
+                            <React.Fragment>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={statusEnfunde.status_presente}
+                                            name="checkedB"
+                                            color="secondary"
+                                            disabled={true}
+                                            readOnly={true}
+                                        />
+                                    }
+                                    label={"CINTA PRESENTE"}
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={statusEnfunde.status_futuro}
+                                            name="checkedB"
+                                            color="secondary"
+                                            disabled={true}
+                                            readOnly={true}
+                                        />
+                                    }
+                                    label={"CINTA FUTURO"}
+                                />
+                            </React.Fragment>
+                            }
+                        </div>
                         <div className="col-12">
                             <div className="alert alert-info">
                                 <b>Saldo de {empleado.descripcion}: </b> {saldoEmpleado}
@@ -537,6 +570,7 @@ export default function FormEnfunde() {
                                 setOpen={setOpenFullScreen}
                             >
                                 <FormEnfundeDetalle
+                                    statusEnfunde={statusEnfunde}
                                     cabecera={cabeceraEnfunde}
                                     hacienda={hacienda}
                                     empleado={empleado}
