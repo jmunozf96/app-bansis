@@ -98,7 +98,7 @@ export default function FormEnfundeDetalle(props) {
             setLoadDataDetalle(true);
             setLoadDataEnfunde(false);
         }
-    }, [loadDataEnfunde, distribucion, detalles]);
+    }, [loadDataEnfunde, distribucion, detalles, statusEnfunde]);
 
     useEffect(() => {
         if (loadMaterialesInventario && !loadDataEnfunde) {

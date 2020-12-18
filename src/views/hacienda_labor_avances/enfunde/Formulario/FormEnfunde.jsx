@@ -16,7 +16,7 @@ import 'moment/locale/es';
 import qs from "qs";
 import CabeceraSemana from "../../../hacienda/CabeceraSemana";
 import Page404 from "../../../../components/Errors/404 Page/Page404";
-import {setDataCabeceraParcial} from "../../../../reducers/bodega/egresoBodegaDucks";
+//import {setDataCabeceraParcial} from "../../../../reducers/bodega/egresoBodegaDucks";
 
 const style = {
     table: {
