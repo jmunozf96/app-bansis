@@ -52,7 +52,10 @@ export default function FormEnfunde() {
         btnNuevo: false
     });
 
-    const [statusEnfunde, setStatusEnfunde] = useState(null);
+    const [statusEnfunde, setStatusEnfunde] = useState({
+        status_presente: false,
+        status_futuro: false
+    });
     const [cabeceraEnfunde, setCabeceraEnfunde] = useState({
         fecha: history.location.state ? history.location.state.calendario.fecha : moment().format("DD/MM/YYYY"),
         hacienda: history.location.state ? history.location.state.hacienda : null,
@@ -159,6 +162,7 @@ export default function FormEnfunde() {
                 const response = await request.json();
                 await progessbarStatus(false);
                 const {secciones} = response;
+
                 if (secciones && Object.entries(secciones).length > 0) {
                     const {secciones: {detalle_seccion_labor}} = response;
                     if (detalle_seccion_labor.length > 0) {
@@ -169,7 +173,12 @@ export default function FormEnfunde() {
                                 const response = await request.json();
                                 const detallesDB = [];
                                 if (response.code === 200) {
-                                    setStatusEnfunde(response.dataEnfunde);
+                                    if(Object.entries(response.dataEnfunde).length > 0){
+                                        const {status_presente, status_futuro} = response.dataEnfunde;
+                                        setStatusEnfunde({
+                                            status_presente, status_futuro
+                                        });
+                                    }
                                     setSaldoEmpleado(+response.saldoEmpleado.saldo);
                                     detalle_seccion_labor.map(seccion => {
                                         const distribucion = {
@@ -477,7 +486,7 @@ export default function FormEnfunde() {
                                 <FormControlLabel
                                     control={
                                         <Checkbox
-                                            checked={statusEnfunde.status_presente}
+                                            checked={statusEnfunde ? statusEnfunde.status_presente : false}
                                             name="checkedB"
                                             color="secondary"
                                             disabled={true}
@@ -489,7 +498,7 @@ export default function FormEnfunde() {
                                 <FormControlLabel
                                     control={
                                         <Checkbox
-                                            checked={statusEnfunde.status_futuro}
+                                            checked={statusEnfunde ? statusEnfunde.status_futuro : false}
                                             name="checkedB"
                                             color="secondary"
                                             disabled={true}
