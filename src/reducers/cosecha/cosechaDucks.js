@@ -24,6 +24,7 @@ const dataInicial = {
     cintas_data: [],
     cinta_select: '',
     cintas_select: [
+        {label: '14 SEMANAS', status: false, value: 14},
         {label: '13 SEMANAS', status: false, value: 13},
         {label: '12 SEMANAS', status: false, value: 12},
         {label: '11 SEMANAS', status: false, value: 11},
